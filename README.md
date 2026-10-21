@@ -6,7 +6,7 @@ Notlarını yaz, ara ve düzenle. Her değişiklik bilgisayarına otomatik kayde
 
 ## İndir ve kur
 
-1. [En güncel sürümün indirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). Özel depo olduğu için GitHub hesabınla giriş yapmalısın.
+1. [İndirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). Özel depo olduğu için GitHub hesabınla giriş yapmalısın.
 2. Sayfanın altındaki **Assets** (dosyalar) bölümünde **Notes.exe** dosyasına tıkla.
 3. İndirilen kurulum dosyasını aç ve Türkçe kurulum adımlarını tamamla.
 4. Uygulamayı Başlat menüsünden veya masaüstü kısayolundan aç.
