@@ -25,7 +25,9 @@ Kayıtlar sırayla işlenir. Geçici dosya diske yazılıp eşitlendikten sonra 
 
 ## Dağıtım
 
-`main` dalına gönderim, değişiklik isteği veya elle başlatma, Windows sunucusunda denetim ve kurulum üretimini çalıştırır. Kurulum dosyası özel depoda çıktı olarak saklanır; herkese açık dağıtım yapılmaz. İşlem yalnızca depo okuma iznine sahiptir ve ayrı bir erişim anahtarı gerektirmez.
+`main` dalına gönderim, değişiklik isteği veya elle başlatma, Windows sunucusunda denetim ve kurulum üretimini çalıştırır. Kurulum dosyası özel depoda çıktı olarak saklanır; herkese açık dağıtım yapılmaz. Derleme işlemi yalnızca depo okuma iznine sahiptir. Ana daldaki başarılı derlemenin ardından ayrı bir yayın işi, denetlenmiş `.exe` dosyasını GitHub Sürümler bölümüne ekler. Yalnızca bu iş depo içeriğine yazma izni alır ve GitHub'ın işleme özel erişim anahtarını kullanır; uygulamaya herhangi bir erişim anahtarı eklenmez.
+
+Yeni sürüm yayımlamak için `package.json` ve `package-lock.json` içindeki sürüm numaralarını birlikte artır. Yayın adımı bu numaradan bir sürüm etiketi oluşturur ve kaynak kaydını bu etikete bağlar. Var olan sürüm dosyalarının üzerine yazılmaz. Değişiklik isteklerinden sürüm yayımlanmaz. `belgeler/YAYIN_NOTU.md` dosyasını sürüme uygun tut. Kullanıcılar `.exe` dosyasını doğrudan indirir; GitHub Actions çıktılarındaki ZIP arşivi indirmeleri gerekmez.
 
 Kurulum Türkçedir, yönetici yetkisi gerektirmeyen kullanıcı kurulumunu kullanır ve kaldırma sırasında not verilerini silmez. Uygulama kimliği ve veri klasörünün adı yeni sürümlerde değiştirilmemelidir. Otomatik güncelleme ve bulut eşitleme bu sürümde yoktur.
 

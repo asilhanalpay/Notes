@@ -42,3 +42,40 @@ jobs:
           path: kurulum/*.exe
           if-no-files-found: error
           retention-days: 30
+
+  yayinla:
+    name: Doğrudan kurulum indirmesini yayımla
+    needs: kurulum
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Sürüm bilgisini al
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Denetlenmiş kurulum dosyasını al
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: Windows Masaüstü Uygulaması
+          path: kurulum
+      - name: Kurulum dosyasını Sürümler bölümüne ekle
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPO: ${{ github.repository }}
+          KAYNAK: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          SURUM="v$(node -p "require('./package.json').version")"
+          if gh release view "$SURUM" --repo "$DEPO" >/dev/null 2>&1; then
+            echo "Bu sürüm daha önce yayımlanmış; mevcut dosya korunuyor."
+            exit 0
+          fi
+          gh release create "$SURUM" \
+            "kurulum/Windows Masaüstü Uygulaması.exe" \
+            --repo "$DEPO" \
+            --target "$KAYNAK" \
+            --title "Not Defterim $SURUM" \
+            --notes-file belgeler/YAYIN_NOTU.md \
+            --latest

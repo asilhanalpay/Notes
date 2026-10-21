@@ -1,5 +1,11 @@
 # Sürüm notları
 
+## 0.2.2 — 21 Ekim 2026
+
+- Windows kurulum dosyası GitHub Sürümler bölümünden doğrudan indirilebilir hale getirildi.
+- ZIP çıkartmayı gerektiren indirme adımları sadeleştirildi.
+- Başarılı Windows derlemesinden sonra sürüm yayımlayan ayrı bir işlem eklendi.
+
 ## 0.2.1 — 21 Ekim 2026
 
 - Kurulum dosyasının adı “Windows Masaüstü Uygulaması.exe” olarak kısaltıldı.
