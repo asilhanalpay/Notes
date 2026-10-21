@@ -1,0 +1,57 @@
+{
+  "name": "not-defterim",
+  "version": "0.2.0",
+  "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
+  "author": "asilhanalpay",
+  "private": true,
+  "main": "masaustu/ana.cjs",
+  "scripts": {
+    "baslat": "electron .",
+    "denetle": "node --check masaustu/ana.cjs && node --check masaustu/kopru.cjs && node --check masaustu/depolama.cjs && node --check arayuz/app.js && node --test denetimler/*.test.cjs",
+    "paketle:windows": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "jsdom": "30.1.3"
+  },
+  "build": {
+    "appId": "com.asilhanalpay.notdefterim",
+    "productName": "Not Defterim",
+    "asar": true,
+    "directories": {
+      "output": "kurulum"
+    },
+    "files": [
+      "masaustu/**/*",
+      "arayuz/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Not-Defterim-${version}-Windows-${arch}-Kurulum.${ext}",
+      "icon": "varliklar/simge.ico",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Not Defterim",
+      "language": "1055",
+      "installerLanguages": [
+        "tr_TR"
+      ],
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

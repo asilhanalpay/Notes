@@ -1,0 +1,6 @@
+node_modules/
+kurulum/
+*.log
+.DS_Store
+Thumbs.db
+.openai/
