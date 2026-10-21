@@ -2,19 +2,25 @@
 
 **Windows bilgisayarına kurulan, Türkçe ve çevrimdışı çalışan sade bir not defteri.**
 
-Notlarını yaz, ara ve düzenle. Her değişiklik bilgisayarına otomatik kaydedilir. Hesap açman veya kodlama bilmen gerekmez.
+Notlarını yaz, ara ve düzenle. Her değişiklik bilgisayarına otomatik kaydedilir.
 
 ## İndir ve kur
 
 1. [Windows kurulumu sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/actions/workflows/windows-kurulum.yml).
 2. En üstteki başarılı çalıştırmayı aç. Yeşil onay işareti, dosyanın hazır olduğunu gösterir.
-3. Sayfanın altındaki **Artifacts** (çıktılar) bölümünden **Not-Defterim-Windows-Kurulumu** dosyasını indir. Özel depo olduğu için GitHub hesabınla giriş yapmalısın.
-4. İndirilen ZIP dosyasını çıkart ve içindeki **Not-Defterim-…-Windows-x64-Kurulum.exe** dosyasını aç.
+3. Sayfanın altındaki **Artifacts** (çıktılar) bölümünden **Windows Masaüstü Uygulaması** dosyasını indir. Özel depo olduğu için GitHub hesabınla giriş yapmalısın.
+4. İndirilen ZIP dosyasını çıkart ve içindeki **Windows Masaüstü Uygulaması.exe** dosyasını aç.
 5. Türkçe kurulum adımlarını tamamla. Uygulamayı Başlat menüsünden veya masaüstü kısayolundan aç.
 
 Windows 10 ve 11'in 64 bit sürümleri hedeflenir. Kurulum çıktısı yalnızca başarılı derlemeden sonra görünür ve 30 gün saklanır. Henüz başarılı bir çalıştırma yoksa indirilebilir kurulum dosyası hazır değildir.
 
 Bu ilk sürüm henüz bir kod imzalama sertifikasıyla imzalanmıyor; Windows yayıncıyı doğrulayamayabilir. Güvenlik ayarlarını kapatma. Kişisel kullanım dışı dağıtımdan önce sertifika ve gerçek Windows bilgisayarında kurulum denemesi gerekir.
+
+## Nasıl güncellenir?
+
+Yeni sürüm çıktığında aynı indirme sayfasından en son başarılı çalıştırmanın kurulum dosyasını indir. Uygulamayı kapatıp yeni kurulum dosyasını çalıştır; önceki sürümü kaldırman gerekmez. Notların ayrı bir klasörde tutulur ve güncellemede korunur. Yine de güncellemeden önce **Yedek al** ile bir kopya saklaman iyi olur.
+
+Bu sürümde uygulama içinden güncelleme denetimi ve otomatik güncelleme henüz yoktur. Yeni bir kurulum dosyasının hazırlanması, bilgisayarındaki uygulamayı kendiliğinden değiştirmez.
 
 ## Neler yapabilirsin?
 

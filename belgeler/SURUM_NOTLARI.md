@@ -1,5 +1,11 @@
 # Sürüm notları
 
+## 0.2.1 — 21 Ekim 2026
+
+- Kurulum dosyasının adı “Windows Masaüstü Uygulaması.exe” olarak kısaltıldı.
+- GitHub indirme çıktısının adı kurulum adıyla eşleştirildi.
+- Depo açıklaması sadeleştirildi ve mevcut sürümü güncelleme adımları eklendi.
+
 ## 0.2.0 — 21 Ekim 2026
 
 - Tarayıcı sayfası yerine Windows'a kurulabilen masaüstü uygulaması hazırlandı.

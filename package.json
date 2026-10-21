@@ -1,6 +1,6 @@
 {
   "name": "not-defterim",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
   "author": "asilhanalpay",
   "private": true,
@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "artifactName": "Not-Defterim-${version}-Windows-${arch}-Kurulum.${ext}",
+      "artifactName": "Windows Masaüstü Uygulaması.${ext}",
       "icon": "varliklar/simge.ico",
       "signAndEditExecutable": true
     },
