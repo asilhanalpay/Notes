@@ -1,6 +1,6 @@
-# Notes
+# Notes — Beni Oku
 
-Notes, Windows için sade bir not defteridir. Notlarını yazabilir, düzenleyebilir, arayabilir ve silebilirsin. Yazdıkların otomatik kaydedilir.
+Notes (Notlar), Türkçe menüleri olan sade bir Windows not defteridir. Notlarını yazabilir, düzenleyebilir, arayabilir ve silebilirsin. Yazdıkların otomatik kaydedilir.
 
 **Windows 10 ve 11’in 64 bit sürümlerinde çalışır.**
 
@@ -17,7 +17,7 @@ Kurulum dosyasının adı her sürümde **Notes.exe** olarak kalır. Diğer sık
 - **+** düğmesiyle yeni not oluştur.
 - Arama kutusuyla notlarını bul.
 - Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** düğmesiyle kurtar.
-- **Yedek al** ile notlarının bir kopyasını sakla. **Yedekten ekle** ile bu kopyadaki notları geri getir.
+- **Yedek al** ile notlarının bir kopyasını sakla. **Yedekten ekle** ile bu kopyadaki notları uygulamaya ekle.
 
 Notların bilgisayarında saklanır; internete gönderilmez. Yazmak için internet gerekmez. Kayıt yerini **Not klasörünü aç** düğmesinden görebilirsin.
 
@@ -25,12 +25,12 @@ Notların bilgisayarında saklanır; internete gönderilmez. Yazmak için intern
 
 Yeni **Notes.exe** dosyasını indir. Önce notlarının yedeğini al, uygulamayı kapat ve kurulum dosyasını çalıştır. Eski sürümü kaldırman gerekmez; notların korunur.
 
-İstersen **Yeni sürümler** bölümündeki adımlarla özel GitHub bağlantısını kurabilirsin. Bağlantı kurulduğunda uygulama açılışta ve açık kaldığı sürece altı saatte bir denetler. Yeni sürüm varsa uygulamanın içinde haber verir.
+Yeni sürümlerden haber almak için uygulamadaki **Yeni sürümler** bölümünü aç ve GitHub bağlantısı kurma adımlarını izle. Bağlantı kurulduğunda uygulama açılışta ve açık kaldığı sürece altı saatte bir yeni sürüm olup olmadığına bakar. Yeni sürüm varsa uygulamanın içinde haber verir.
 
 Uygulama e-posta göndermez ve güncellemeyi kendiliğinden kurmaz.
 
 ---
 
-**Not:** Kurulum dosyası henüz dijital imzalı olmadığı için Windows yayıncı uyarısı gösterebilir.
+**Kurulum uyarısı:** Dosyada henüz yayıncı imzası bulunmuyor. Bu yüzden Windows, kurulum sırasında dosyanın yayıncısını doğrulayamadığını belirten bir uyarı gösterebilir.
 
 [Ayrıntılı proje bilgileri](belgeler/GELISTIRME.md) · [Sürüm notları](belgeler/SURUM_NOTLARI.md)
