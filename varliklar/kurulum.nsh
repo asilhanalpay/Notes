@@ -79,6 +79,9 @@
     ; Uygulamanın kapalı olduğu yukarıda tam yol üzerinden doğrulanmıştır.
     ReadRegStr $R0 SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" DisplayVersion
     ${if} $R0 == "0.2.4"
+      ${if} $NotesEskiDizin == ""
+        Abort "Önceki kurulumun konumu bulunamadı. Notların korunarak işlem durduruldu."
+      ${endif}
       ReadRegStr $R0 SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" UninstallString
       !insertmacro GetInQuotes $R1 "$R0"
       ${if} $R1 == ""

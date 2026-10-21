@@ -3,6 +3,7 @@
 - **Tema** bölümünden **Açık** veya **Karanlık** görünümü seçebilirsin. Seçimin sonraki açılışta hatırlanır.
 - Sürüm numaraları **0.0.1** ile yeniden başladı. Önceki sürümler korunur.
 - Uygulamanın adı **Notes**, kurulum dosyasının adı **Notes.exe** olarak kalır.
+- Önceki sürümün üzerine kurulum iyileştirildi. Kurulumdan önce Notes'u kapatmalısın.
 
 ## İndir ve kur
 
