@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { EventEmitter } = require('node:events');
 const { SurumBildirimi, ErisimKasasi, githubOku, yayiniDogrula, depoyuDogrula,
-  dahaYeniMi, ARALIK } = require('../masaustu/surum-bildirimi.cjs');
+  dahaYeniMi, ARALIK, ErisimHatasi } = require('../masaustu/surum-bildirimi.cjs');
 const ANAHTAR = 'github_pat_' + 'a'.repeat(30);
 const DEPO = { id: 1427086629, full_name: 'asilhanalpay/-lk-Projem', private: true };
 function yayin(surum = '0.2.4') {
@@ -121,4 +121,21 @@ test('GitHub isteği yalnızca sabit HTTPS kaynağını kullanır; yönlendirme 
   await assert.rejects(() => githubOku('/repos/asilhanalpay/-lk-Projem', ANAHTAR, undefined, istemci));
   assert.equal(ayarlar.hostname, 'api.github.com'); assert.equal(ayarlar.port, 443);
   await assert.rejects(() => githubOku('/users/asilhanalpay', ANAHTAR, undefined, istemci));
+});
+
+test('Süresi dolan bağlantı yeniden kurulabilir veya kaldırılabilir; indirme adresi verilmez', async () => {
+  const { yonetici } = kur({ oku: async () => { throw new ErisimHatasi('Yetki yok'); } });
+  yonetici.baslat(); const sonuc = await yonetici.denetle();
+  assert.equal(sonuc.durum, 'baglanti-gerekli'); assert.equal(sonuc.bagli, true);
+  assert.throws(() => yonetici.indirmeAdresi());
+  assert.equal(yonetici.ayir().bagli, false);
+});
+test('Zaman aşımı isteği kesin olarak sonlandırır; ham ağ hatası döndürülmez', async () => {
+  const istemci = { get() {
+    const istek = new EventEmitter();
+    istek.setTimeout = (_sure, islem) => { queueMicrotask(islem); };
+    istek.destroy = hata => { istek.emit('error', hata); };
+    return istek;
+  } };
+  await assert.rejects(() => githubOku('/repos/asilhanalpay/-lk-Projem', ANAHTAR, undefined, istemci), /güvenli bağlantı/);
 });

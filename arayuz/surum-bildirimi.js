@@ -13,7 +13,7 @@
     oge('surumBildirimMetni').textContent = `Yeni sürüm hazır: ${yeni.yeniSurum ?? ''}`;
     oge('surumIndir').hidden = yeni.durum !== 'yeni-surum';
     oge('erisimFormu').hidden = yeni.durum !== 'baglanti-gerekli';
-    oge('surumAyir').hidden = ['baglanti-gerekli', 'kullanilamiyor'].includes(yeni.durum);
+    oge('surumAyir').hidden = !yeni.bagli;
     const mesgul = istekSuruyor || yeni.durum === 'denetleniyor';
     for (const dugme of oge('surumPenceresi').querySelectorAll('button[data-surum]')) dugme.disabled = mesgul;
     oge('surumAyir').disabled = false;

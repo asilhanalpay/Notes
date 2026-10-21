@@ -40,3 +40,9 @@ test('Erişim anahtarı gönderildikten sonra alandan silinir ve metin olarak g�
   assert.equal(oge('erisimAnahtari').value, '');
   assert.equal(dom.window.document.body.textContent.includes(anahtar), false);
 });
+
+test('Bağlantı süresi dolsa bile yerel erişim kaydını kaldırma seçeneği görünür', async t => {
+  const { oge } = await ac(t, { durum: 'baglanti-gerekli', aciklama: 'Bağlantıyı yenile', surum: '0.2.3', bagli: true });
+  assert.equal(oge('surumAyir').hidden, false);
+  assert.equal(oge('erisimFormu').hidden, false);
+});

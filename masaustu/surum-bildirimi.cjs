@@ -89,7 +89,7 @@ function githubOku(yol, anahtar, signal, istemci = https) {
       });
       yanit.on('error', () => reject(new Error('GitHub bağlantısı tamamlanamadı.')));
     });
-    istek.setTimeout(20000, () => istek.destroy());
+    istek.setTimeout(20000, () => istek.destroy(new Error('Zaman aşımı.')));
     // Ham ağ hataları kimlik doğrulama ayrıntıları içerebilir; dışarı aktarılmaz.
     istek.on('error', () => reject(new Error('GitHub’a güvenli bağlantı kurulamadı.')));
   });
@@ -124,7 +124,7 @@ class SurumBildirimi extends EventEmitter {
     this.sonDeneme = -Infinity;
     this.bilgi = { durum: 'baglanti-gerekli', aciklama: 'Özel sürüm bildirimleri için GitHub bağlantısı kur.', surum };
   }
-  gorunum() { return { ...this.bilgi }; }
+  gorunum() { return { ...this.bilgi, bagli: Boolean(this.anahtar) }; }
   bildir(durum, aciklama, ek = {}) {
     this.bilgi = { durum, aciklama, surum: this.surum, ...ek };
     this.emit('durum', this.gorunum());
