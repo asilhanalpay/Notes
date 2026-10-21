@@ -41,6 +41,7 @@
       "signAndEditExecutable": true
     },
     "nsis": {
+      "include": "varliklar/kurulum.nsh",
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,

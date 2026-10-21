@@ -63,6 +63,26 @@ try {
     if ((Get-FileHash $notDosyasi -Algorithm SHA256).Hash -ne $oncekiOzet) {
         throw 'Yeni kurulum not dosyasını değiştirdi.'
     }
+    # Aynı adlı yeni kaldırıcıyla sonraki kurulumlar da çakışmamalı.
+    Kur $yeni.FullName
+    if ((SurumuOku) -ne $beklenen -or (Get-FileHash $notDosyasi -Algorithm SHA256).Hash -ne $oncekiOzet) {
+        throw 'Yeniden kurulum sürümü veya notları değiştirdi.'
+    }
+    # Açık uygulama zorla kapatılmamalı; kullanıcıya kapatma uyarısı verilmeli.
+    $uygulama = Start-Process -FilePath $exe -PassThru
+    for ($i = 0; $i -lt 30; $i++) {
+        Start-Sleep -Milliseconds 500
+        $uygulama.Refresh()
+        if ($uygulama.HasExited) { throw 'Kurulu uygulama açılamadı.' }
+        if ($uygulama.MainWindowHandle -ne 0) { break }
+    }
+    if ($uygulama.MainWindowHandle -eq 0) { throw 'Uygulama penceresi açılmadı.' }
+    $engellenen = Start-Process -FilePath $yeni.FullName -ArgumentList @('/S', "/D=$hedef") -PassThru
+    if (-not $engellenen.WaitForExit(30000)) { $engellenen.Kill(); throw 'Açık uygulama denetimi tamamlanmadı.' }
+    $uygulama.Refresh()
+    if ($engellenen.ExitCode -eq 0 -or $uygulama.HasExited) { throw 'Açık uygulama korunarak kurulum engellenmedi.' }
+    if ((Get-FileHash $notDosyasi -Algorithm SHA256).Hash -ne $oncekiOzet) { throw 'Açık uygulama denetiminde not değişti.' }
+    Write-Host 'Yeniden kurulum başarılı; açık uygulama zorla kapatılmadan kurulum engellendi.'
     Write-Host "Windows üzerinde $eskiSurum sürümünden $kurulu sürümüne geçiş başarılı; Türkçe not dosyası aynen korundu."
 } finally {
     UygulamayiDurdur

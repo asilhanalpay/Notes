@@ -5,6 +5,7 @@
 - Açık ve karanlık tema seçimi eklendi. Seçilen tema sonraki açılışta hatırlanır.
 - Sürüm numarası kullanıcının tercihiyle 0.0.1 olarak yeniden başlatıldı. Eski sürümler arşivde korunur.
 - 0.2.4 üzerinden elle kurulumda notların korunması Windows üzerinde denetlenir.
+- Notes.exe kurulum adıyla eski kaldırıcı arasındaki işlem adı çakışması giderildi. Açık uygulama zorla kapatılmaz.
 - Eski sürümden bu sürüme geçmek için Notes.exe bir kez elle kurulmalıdır. 0.0.1 sonrasında daha yüksek sürümler için mevcut uygulama içi bildirimler çalışır; GitHub bağlantısı gerekir.
 
 ## 0.2.4 — 21 Ekim 2026
