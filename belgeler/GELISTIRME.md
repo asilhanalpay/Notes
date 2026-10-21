@@ -29,7 +29,7 @@ Kayıtlar sırayla işlenir. Geçici dosya diske yazılıp eşitlendikten sonra 
 
 Yeni sürüm yayımlamak için `package.json` ve `package-lock.json` içindeki sürüm numaralarını birlikte artır. Yayın adımı bu numaradan bir sürüm etiketi oluşturur ve kaynak kaydını bu etikete bağlar. Var olan sürüm dosyalarının üzerine yazılmaz. Değişiklik isteklerinden sürüm yayımlanmaz. `belgeler/YAYIN_NOTU.md` dosyasını sürüme uygun tut. Kullanıcılar `.exe` dosyasını doğrudan indirir; GitHub Actions çıktılarındaki ZIP arşivi indirmeleri gerekmez.
 
-Kurulum Türkçedir, yönetici yetkisi gerektirmeyen kullanıcı kurulumunu kullanır ve kaldırma sırasında not verilerini silmez. Uygulama kimliği ve veri klasörünün adı yeni sürümlerde değiştirilmemelidir. Otomatik güncelleme ve bulut eşitleme bu sürümde yoktur.
+Kurulum Türkçedir, yönetici yetkisi gerektirmeyen kullanıcı kurulumunu kullanır ve kaldırma sırasında not verilerini silmez. Görünen ürün adı ve kısayol `Notes`, kurulum dosyası her sürümde `Notes.exe` olarak sabittir. Kurulum kimliği `com.asilhanalpay.notdefterim` olarak korunur. `app.setPath` ile kullanıcı verileri önceki `Not Defterim` klasörüne yönlendirilir; notlar ve şifreli sürüm bağlantısı bu sayede korunur. Bu kimlik ve veri yolu yeni sürümlerde değiştirilmemelidir. Otomatik güncelleme ve bulut eşitleme bu sürümde yoktur.
 
 Genel kullanıma sunmadan önce Windows üzerinde ilk kurulum, güncelleme, kaldırma/yeniden kurma, yüksek ekran ölçeği, klavye kullanımı ve veri kurtarma elle doğrulanmalı; kod imzalama eklenmelidir.
 
@@ -41,4 +41,4 @@ Kullanıcı kendi ayrıntılı, yalnızca seçili depoya `Contents: read` izni o
 
 Bağlantı kullanıcı tarafından kurulmadan ağ isteği yapılmaz. İki dakikalık denetim sınırı ve işlem kilidi vardır. Bağlantı kaldırıldığında devam eden istek iptal edilir; gecikmiş yanıt bağlantıyı yeniden açamaz. Uygulama içindeki bildirimler GitHub Watch/e-posta aboneliklerinden bağımsızdır ve bu hesap ayarlarını değiştirmez.
 
-Windows iş akışı önce yayımlanmış 0.2.2 sürümünü geçici denetim makinesine kurar, Türkçe bir not dosyası oluşturur ve eski sürümü kaldırmadan yeni kurulumu çalıştırır. Gerçek kurulu dosyanın sürümü ile not dosyasının değişmeden kaldığı doğrulanmadan yeni sürüm yayımlanmaz. `denetimler/windows-kurulum.ps1` kişisel bilgisayarlarda çalıştırılmayı reddeder.
+Windows iş akışı önce yayımlanmış 0.2.2 sürümünü geçici denetim makinesine kurar, Türkçe bir not dosyası oluşturur ve eski sürümü kaldırmadan yeni kurulumu çalıştırır. Gerçek kurulu paketin sürümü, Notes.exe dosyası, yeni Notes kısayolu ve not dosyasının değişmeden kaldığı doğrulanmadan yeni sürüm yayımlanmaz. `denetimler/windows-kurulum.ps1` kişisel bilgisayarlarda çalıştırılmayı reddeder.

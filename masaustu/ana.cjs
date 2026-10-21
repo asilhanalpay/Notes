@@ -1,11 +1,19 @@
 'use strict';
 const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, powerMonitor } = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
 const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./surum-bildirimi.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
 
-app.setName('Not Defterim');
+app.setName('Notes');
+// Görünen ad değişse de önceki notlar ve şifreli sürüm bağlantısı aynı yerde kalır.
+let baslangicHatasi = false;
+try {
+  const oncekiVeriYolu = path.join(app.getPath('appData'), 'Not Defterim');
+  fs.mkdirSync(oncekiVeriYolu, { recursive: true });
+  app.setPath('userData', oncekiVeriYolu);
+} catch { baslangicHatasi = true; }
 let pencere;
 let depo;
 let kapanabilir = false;
@@ -33,7 +41,7 @@ function islemTanimla(kanal, islem) {
 function pencereOlustur() {
   kapanabilir = false;
   pencere = new BrowserWindow({
-    title: 'Not Defterim', width: 1160, height: 800, minWidth: 800, minHeight: 600,
+    title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
     backgroundColor: '#f7f6f2', show: false,
     icon: path.join(__dirname, '..', 'arayuz', 'simge.png'),
     webPreferences: {
@@ -46,7 +54,7 @@ function pencereOlustur() {
   pencere.webContents.on('will-attach-webview', olay => olay.preventDefault());
   pencere.webContents.on('render-process-gone', () => {
     kapanabilir = true;
-    dialog.showErrorBox('Not Defterim kapandı', 'Yazı alanı beklenmedik şekilde kapandı. Son kaydedilen notların korunuyor. Uygulamayı yeniden aç.');
+    dialog.showErrorBox('Notes kapandı', 'Yazı alanı beklenmedik şekilde kapandı. Son kaydedilen notların korunuyor. Uygulamayı yeniden aç.');
     pencere.close();
   });
   pencere.once('ready-to-show', () => pencere.show());
@@ -58,13 +66,18 @@ function pencereOlustur() {
   });
   pencere.on('closed', () => { pencere = null; });
   pencere.loadFile(arayuz).catch(() => {
-    dialog.showErrorBox('Uygulama açılamadı', 'Uygulama dosyaları eksik. Not Defterim uygulamasını yeniden kur.');
+    dialog.showErrorBox('Uygulama açılamadı', 'Uygulama dosyaları eksik. Notes uygulamasını yeniden kur.');
     kapanabilir = true;
     app.quit();
   });
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (baslangicHatasi) {
+  app.whenReady().then(() => {
+    dialog.showErrorBox('Notes açılamadı', 'Not klasörüne erişilemiyor. Verilerin korunması için uygulama açılmadı.');
+    app.quit();
+  });
+} else if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => {
     if (pencere) { if (pencere.isMinimized()) pencere.restore(); pencere.focus(); }
@@ -98,8 +111,8 @@ else {
         { label: 'Gerçek boyut', role: 'resetZoom' }, { label: 'Tam ekran', role: 'togglefullscreen' }
       ] },
       { label: 'Yardım', submenu: [
-        { label: 'Not Defterim Hakkında', click: () => dialog.showMessageBox(pencere, {
-          type: 'info', title: 'Not Defterim', message: 'Not Defterim',
+        { label: 'Notes Hakkında', click: () => dialog.showMessageBox(pencere, {
+          type: 'info', title: 'Notes', message: 'Notes',
           detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.`, buttons: ['Tamam']
         }) }
       ] }
@@ -115,8 +128,8 @@ else {
     islemTanimla('notlar:yedekle', async () => {
       const sonuc = await dialog.showSaveDialog(pencere, {
         title: 'Notlarını yedekle', buttonLabel: 'Yedeği kaydet',
-        defaultPath: `Not-Defterim-Yedek-${new Date().toISOString().slice(0, 10)}.json`,
-        filters: [{ name: 'Not Defterim yedeği', extensions: ['json'] }]
+        defaultPath: `Notes-Yedek-${new Date().toISOString().slice(0, 10)}.json`,
+        filters: [{ name: 'Notes yedeği', extensions: ['json'] }]
       });
       if (sonuc.canceled || !sonuc.filePath) return { iptal: true };
       const { notlar } = depo.oku();
@@ -126,7 +139,7 @@ else {
     islemTanimla('notlar:ice-aktar', async () => {
       const sonuc = await dialog.showOpenDialog(pencere, {
         title: 'Yedekten not ekle', buttonLabel: 'Yedeği aç', properties: ['openFile'],
-        filters: [{ name: 'Not Defterim yedeği', extensions: ['json'] }]
+        filters: [{ name: 'Notes yedeği', extensions: ['json'] }]
       });
       if (sonuc.canceled || !sonuc.filePaths[0]) return { iptal: true };
       return { iptal: false, notlar: coz(dosyaOku(sonuc.filePaths[0])) };
@@ -142,7 +155,7 @@ else {
     app.on('will-quit', () => surumBildirimleri.durdur());
     app.on('activate', () => { if (!pencere) pencereOlustur(); });
   }).catch(hata => {
-    dialog.showErrorBox('Not Defterim açılamadı', hata.message);
+    dialog.showErrorBox('Notes açılamadı', hata.message);
     app.quit();
   });
 }

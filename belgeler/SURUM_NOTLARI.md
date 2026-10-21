@@ -1,5 +1,13 @@
 # Sürüm notları
 
+## 0.2.4 — 21 Ekim 2026
+
+- Uygulama adı, pencere başlığı ve kısayol Notes olarak değiştirildi.
+- Kurulum dosyasının adı sürüm numarası eklenmeden Notes.exe olarak sabitlendi.
+- Önceki kurulum kimliği ve kullanıcı verisi konumu korunarak ad değişikliğinde veri kaybı önlendi.
+- Sürüm denetimi Notes.exe dosyasını ve geçmiş sürümlerin eski kurulum adını okuyabilir hale getirildi.
+- Windows üzerine kurulum denetimi Notes dosyasını ve kısayolunu da doğrulayacak şekilde güncellendi.
+
 ## 0.2.3 — 21 Ekim 2026
 
 - İsteğe bağlı, yalnızca uygulama içinde görünen yeni sürüm bildirimleri eklendi.

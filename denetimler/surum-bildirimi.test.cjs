@@ -11,8 +11,8 @@ const ANAHTAR = 'github_pat_' + 'a'.repeat(30);
 const DEPO = { id: 1427086629, full_name: 'asilhanalpay/-lk-Projem', private: true };
 function yayin(surum = '0.2.4') {
   return { tag_name: `v${surum}`, draft: false, prerelease: false, assets: [{
-    name: 'Windows.Masaustu.Uygulamasi.exe', state: 'uploaded', size: 100,
-    browser_download_url: `https://github.com/asilhanalpay/-lk-Projem/releases/download/v${surum}/Windows.Masaustu.Uygulamasi.exe`
+    name: 'Notes.exe', state: 'uploaded', size: 100,
+    browser_download_url: `https://github.com/asilhanalpay/-lk-Projem/releases/download/v${surum}/Notes.exe`
   }] };
 }
 function kur(secenekler = {}) {
@@ -138,4 +138,13 @@ test('Zaman aşımı isteği kesin olarak sonlandırır; ham ağ hatası döndü
     return istek;
   } };
   await assert.rejects(() => githubOku('/repos/asilhanalpay/-lk-Projem', ANAHTAR, undefined, istemci), /güvenli bağlantı/);
+});
+
+test('Geçmiş sürümün eski kurulum adı desteklenir; yeni ad tercih edilir', () => {
+  const eski = yayin();
+  eski.assets[0].name = 'Windows.Masaustu.Uygulamasi.exe';
+  eski.assets[0].browser_download_url = eski.assets[0].browser_download_url.replace('Notes.exe', eski.assets[0].name);
+  assert.equal(yayiniDogrula(eski).adres, eski.assets[0].browser_download_url);
+  eski.assets.push(yayin().assets[0]);
+  assert.equal(yayiniDogrula(eski).adres, yayin().assets[0].browser_download_url);
 });

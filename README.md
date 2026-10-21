@@ -1,4 +1,4 @@
-# Not Defterim
+# Notes
 
 **Windows bilgisayarına kurulan, Türkçe ve çevrimdışı çalışan sade bir not defteri.**
 
@@ -7,9 +7,11 @@ Notlarını yaz, ara ve düzenle. Her değişiklik bilgisayarına otomatik kayde
 ## İndir ve kur
 
 1. [En güncel sürümün indirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). Özel depo olduğu için GitHub hesabınla giriş yapmalısın.
-2. Sayfanın altındaki **Assets** (dosyalar) bölümünde **.exe ile biten Windows Masaüstü Uygulaması kurulum dosyasına** tıkla.
+2. Sayfanın altındaki **Assets** (dosyalar) bölümünde **Notes.exe** dosyasına tıkla.
 3. İndirilen kurulum dosyasını aç ve Türkçe kurulum adımlarını tamamla.
 4. Uygulamayı Başlat menüsünden veya masaüstü kısayolundan aç.
+
+**Kurulum dosyasının adı her sürümde `Notes.exe` olarak kalır.** [Notes.exe dosyasını doğrudan indir](https://github.com/asilhanalpay/-lk-Projem/releases/latest/download/Notes.exe).
 
 **ZIP dosyası indirmen veya çıkartman gerekmiyor.** GitHub'ın otomatik gösterdiği kaynak kodu arşivleri kurulum için gerekli değildir.
 
@@ -34,7 +36,7 @@ Bağlantı kurulduktan sonra uygulama açılışta, uyku dönüşünde ve açık
 
 Uygulama e-posta göndermez, otomatik dosya indirmez ve kurulum başlatmaz. Uygulama kapalıyken arka planda çalışmaz. GitHub’da daha önce ayrıca açtığın e-posta bildirimleri varsa bunları deponun **Watch** ayarlarından kapatabilirsin; uygulama bu hesap ayarını değiştirmez.
 
-Kurulu sürümü **Yardım → Not Defterim Hakkında** menüsünden görebilirsin.
+Kurulu sürümü **Yardım → Notes Hakkında** menüsünden görebilirsin.
 
 ## Neler yapabilirsin?
 
@@ -49,7 +51,7 @@ Kısayollar: **Ctrl+N** yeni not, **Ctrl+F** arama, **Ctrl+S** yeniden kaydetme.
 
 ## Notların nerede?
 
-Notlar, Windows kullanıcı hesabının uygulama verileri klasöründeki `Not Defterim/notlar.json` dosyasında tutulur. **Not klasörünü aç** düğmesi doğru konumu gösterir. Tarayıcı verilerini temizlemek bu notları etkilemez. Notlar GitHub'a veya bir sunucuya gönderilmez. İsteğe bağlı sürüm bağlantısı yalnızca depo ve sürüm bilgilerini okur; notlarına dokunmaz.
+Önceki sürümlerden kalan notları korumak için kayıt klasörünün eski adı değişmez. Notlar, Windows kullanıcı hesabının uygulama verileri klasöründeki `Not Defterim/notlar.json` dosyasında tutulur. **Not klasörünü aç** düğmesi doğru konumu gösterir. Tarayıcı verilerini temizlemek bu notları etkilemez. Notlar GitHub'a veya bir sunucuya gönderilmez. İsteğe bağlı sürüm bağlantısı yalnızca depo ve sürüm bilgilerini okur; notlarına dokunmaz.
 
 Her başarılı kayıtta bir önceki sağlam sürüm `notlar.yedek.json` dosyasında saklanır. Ana dosya bozulursa bu yedek denenir. Bu koruma disk arızasına karşı ayrı bir yedeğin yerini tutmaz; ara sıra **Yedek al** düğmesiyle başka bir konuma kopya kaydet. Dosyalar şifreli değildir; bilgisayar hesabını korumalısın.
 

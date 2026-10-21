@@ -208,7 +208,7 @@ async function baslat() {
   denetimleriAyarla();
   if (!masaustu) {
     oge('status').textContent = 'Masaüstü uygulaması gerekli';
-    hataGoster('Not Defterim bir Windows uygulamasıdır. Kurulum dosyasını kullanarak aç.');
+    hataGoster('Notes bir Windows uygulamasıdır. Kurulum dosyasını kullanarak aç.');
     oge('yenidenDene').hidden = true;
     return;
   }

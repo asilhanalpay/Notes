@@ -1,4 +1,4 @@
-name: Windows Masaüstü Uygulaması
+name: Notes
 
 on:
   push:
@@ -46,8 +46,8 @@ jobs:
       - name: Kurulum dosyasını sakla
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: Windows Masaüstü Uygulaması
-          path: kurulum/*.exe
+          name: Notes
+          path: kurulum/Notes.exe
           if-no-files-found: error
           retention-days: 30
 
@@ -65,7 +65,7 @@ jobs:
       - name: Denetlenmiş kurulum dosyasını al
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: Windows Masaüstü Uygulaması
+          name: Notes
           path: kurulum
       - name: Kurulum dosyasını Sürümler bölümüne ekle
         shell: bash
@@ -81,9 +81,9 @@ jobs:
             exit 0
           fi
           gh release create "$SURUM" \
-            "kurulum/Windows Masaüstü Uygulaması.exe" \
+            "kurulum/Notes.exe" \
             --repo "$DEPO" \
             --target "$KAYNAK" \
-            --title "Not Defterim $SURUM" \
+            --title "Notes $SURUM" \
             --notes-file belgeler/YAYIN_NOTU.md \
             --latest

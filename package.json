@@ -1,6 +1,6 @@
 {
   "name": "not-defterim",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
   "author": "asilhanalpay",
   "private": true,
@@ -17,7 +17,7 @@
   },
   "build": {
     "appId": "com.asilhanalpay.notdefterim",
-    "productName": "Not Defterim",
+    "productName": "Notes",
     "asar": true,
     "directories": {
       "output": "kurulum"
@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "artifactName": "Windows Masaüstü Uygulaması.${ext}",
+      "artifactName": "Notes.exe",
       "icon": "varliklar/simge.ico",
       "signAndEditExecutable": true
     },
@@ -46,7 +46,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Not Defterim",
+      "shortcutName": "Notes",
       "language": "1055",
       "installerLanguages": [
         "tr_TR"

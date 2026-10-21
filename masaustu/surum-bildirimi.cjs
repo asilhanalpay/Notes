@@ -8,7 +8,7 @@ const DEPO = 'asilhanalpay/-lk-Projem';
 const DEPO_KIMLIGI = '1427086629';
 const ARALIK = 6 * 60 * 60 * 1000;
 const BEKLEME = 2 * 60 * 1000;
-const IZIN_SAYFASI = 'https://github.com/settings/personal-access-tokens/new?name=Not%20Defterim%20Surum%20Bildirimi&target_name=asilhanalpay&contents=read&expires_in=90';
+const IZIN_SAYFASI = 'https://github.com/settings/personal-access-tokens/new?name=Notes%20Surum%20Bildirimi&target_name=asilhanalpay&contents=read&expires_in=90';
 
 class ErisimHatasi extends Error {}
 
@@ -63,7 +63,7 @@ function githubOku(yol, anahtar, signal, istemci = https) {
     const istek = istemci.get({
       hostname: 'api.github.com', port: 443, path: yol, signal,
       headers: { Authorization: `Bearer ${anahtar}`, Accept: 'application/vnd.github+json',
-        'User-Agent': 'Not-Defterim', 'X-GitHub-Api-Version': '2022-11-28' }
+        'User-Agent': 'Notes', 'X-GitHub-Api-Version': '2022-11-28' }
     }, yanit => {
       if (yanit.statusCode !== 200) {
         yanit.resume();
@@ -106,8 +106,10 @@ function yayiniDogrula(veri) {
   }
   const surum = veri.tag_name.slice(1);
   surumuCoz(surum);
-  const adres = `https://github.com/${DEPO}/releases/download/v${surum}/Windows.Masaustu.Uygulamasi.exe`;
-  const dosya = veri.assets?.find(a => a.name === 'Windows.Masaustu.Uygulamasi.exe');
+  // Yeni yayınlar Notes.exe kullanır; geçmiş yayınların sabit eski adı da okunabilir.
+  const dosya = veri.assets?.find(a => a.name === 'Notes.exe') ??
+    veri.assets?.find(a => a.name === 'Windows.Masaustu.Uygulamasi.exe');
+  const adres = `https://github.com/${DEPO}/releases/download/v${surum}/${dosya?.name}`;
   if (!dosya || dosya.state !== 'uploaded' || !Number.isSafeInteger(dosya.size) || dosya.size < 1 ||
       dosya.size > 500 * 1024 * 1024 || dosya.browser_download_url !== adres) {
     throw new Error('Yeni sürümün kurulum dosyası doğrulanamadı.');
