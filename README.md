@@ -1,4 +1,4 @@
-# Notes — Beni Oku
+# Beni Oku
 
 Notes (Notlar), Türkçe menüleri olan sade bir Windows not defteridir. Notlarını yazabilir, düzenleyebilir, arayabilir ve silebilirsin. Yazdıkların otomatik kaydedilir.
 
