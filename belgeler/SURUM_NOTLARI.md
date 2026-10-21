@@ -1,5 +1,13 @@
 # Sürüm notları
 
+## 0.2.3 — 21 Ekim 2026
+
+- İsteğe bağlı, yalnızca uygulama içinde görünen yeni sürüm bildirimleri eklendi.
+- Özel GitHub erişimi Windows'un şifreli depolamasıyla korundu; uygulamaya ortak anahtar eklenmedi.
+- Sürüm bildiriminden kurulum dosyasını tarayıcıda açma eklendi; otomatik kurulum yapılmaz.
+- Kurulu sürümü gösteren Türkçe Hakkında menüsü eklendi.
+- Önceki sürüm üzerine kurulum ve not dosyasının korunması için Windows denetimi eklendi.
+
 ## 0.2.2 — 21 Ekim 2026
 
 - Windows kurulum dosyası GitHub Sürümler bölümünden doğrudan indirilebilir hale getirildi.

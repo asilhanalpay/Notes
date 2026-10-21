@@ -1,0 +1,42 @@
+'use strict';
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { JSDOM } = require('jsdom');
+const bekle = async () => { for (let i = 0; i < 10; i++) await new Promise(resolve => setImmediate(resolve)); };
+async function ac(t, ilkDurum) {
+  const dom = new JSDOM(fs.readFileSync(path.join(__dirname, '../arayuz/index.html'), 'utf8'), { runScripts: 'outside-only', url: 'file:///uygulama/index.html' });
+  t.after(() => dom.window.close());
+  dom.window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  dom.window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); this.dispatchEvent(new dom.window.Event('close')); };
+  const durum = { indirmeler: 0, anahtar: null, dinle: null };
+  dom.window.notDefterim = {
+    surumDurumu: async () => ({ basarili: true, veri: ilkDurum }),
+    surumDinle: islem => { durum.dinle = islem; },
+    surumIndir: async () => { durum.indirmeler++; return { basarili: true }; },
+    surumBagla: async anahtar => { durum.anahtar = anahtar; return { basarili: true }; }
+  };
+  dom.window.eval(fs.readFileSync(path.join(__dirname, '../arayuz/surum-bildirimi.js'), 'utf8'));
+  await bekle();
+  return { dom, durum, oge: id => dom.window.document.getElementById(id) };
+}
+test('Yeni sürüm uygulama içinde gösterilir; kullanıcı basmadan indirme isteği yapılmaz', async t => {
+  const { oge, durum } = await ac(t, { durum: 'guncel', aciklama: 'Güncel', surum: '0.2.3' });
+  assert.equal(oge('surumBildirimi').hidden, true);
+  durum.dinle({ durum: 'yeni-surum', aciklama: 'Yeni sürüm', surum: '0.2.3', yeniSurum: '0.2.4' });
+  assert.equal(oge('surumBildirimi').hidden, false);
+  assert.equal(durum.indirmeler, 0);
+  oge('surumIndir').click(); await bekle();
+  assert.equal(durum.indirmeler, 1);
+});
+test('Erişim anahtarı gönderildikten sonra alandan silinir ve metin olarak gösterilmez', async t => {
+  const { dom, oge, durum } = await ac(t, { durum: 'baglanti-gerekli', aciklama: 'Bağlan', surum: '0.2.3' });
+  const anahtar = 'github_pat_'+'a'.repeat(30);
+  oge('erisimAnahtari').value = anahtar;
+  oge('erisimFormu').dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
+  await bekle();
+  assert.equal(durum.anahtar, anahtar);
+  assert.equal(oge('erisimAnahtari').value, '');
+  assert.equal(dom.window.document.body.textContent.includes(anahtar), false);
+});

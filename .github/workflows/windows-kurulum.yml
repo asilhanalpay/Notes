@@ -35,6 +35,14 @@ jobs:
         run: npm run paketle:windows
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Önceki yayımlanan sürümü indir
+        run: gh release download v0.2.2 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPO: ${{ github.repository }}
+      - name: Eski sürümün üzerine kurulumu ve notların korunmasını denetle
+        shell: pwsh
+        run: ./denetimler/windows-kurulum.ps1
       - name: Kurulum dosyasını sakla
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

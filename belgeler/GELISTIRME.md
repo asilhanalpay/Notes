@@ -17,7 +17,7 @@ Kurulum dosyası `kurulum/` klasörüne yazılır. Kaynak sürümleri `package-l
 
 ## Tasarım kararları
 
-Electron, sistemde ayrı bir tarayıcı veya Node.js kurulumuna gerek bırakmadan uygulamayı paketler. Masaüstü köprüsü yalnızca tanımlanmış not işlemlerini sunar. Arayüzün Node.js ve dosya sistemi erişimi yoktur. Bağlam yalıtımı ve işlem korumalı alanı açıktır; ağ istekleri, yeni pencereler ve sayfa gezintileri engellenir. Not metinleri HTML olarak yorumlanmaz.
+Electron, sistemde ayrı bir tarayıcı veya Node.js kurulumuna gerek bırakmadan uygulamayı paketler. Masaüstü köprüsü yalnızca tanımlanmış not işlemlerini sunar. Arayüzün Node.js ve dosya sistemi erişimi yoktur. Bağlam yalıtımı ve işlem korumalı alanı açıktır; arayüzün ağ istekleri, yeni pencereler ve sayfa gezintileri engellenir. İsteğe bağlı sürüm bildirimi ana işlemde yalnızca sabit GitHub depo ve son sürüm uçlarını HTTPS üzerinden okur. Not metinleri HTML olarak yorumlanmaz.
 
 Kayıtlar sırayla işlenir. Geçici dosya diske yazılıp eşitlendikten sonra ana dosyanın yerine geçirilir. Önceki sağlam içerik yedeklenir. Geçersiz dosyalar sessizce boş bir kayıtla değiştirilmez. Kapanış son kaydın onayını bekler; kayıt hatasında pencere açık kalır. İşletim sisteminin zorla kapatması veya güç kesintisi anındaki henüz tamamlanmamış değişikliklerin korunması garanti edilemez.
 
@@ -32,3 +32,13 @@ Yeni sürüm yayımlamak için `package.json` ve `package-lock.json` içindeki s
 Kurulum Türkçedir, yönetici yetkisi gerektirmeyen kullanıcı kurulumunu kullanır ve kaldırma sırasında not verilerini silmez. Uygulama kimliği ve veri klasörünün adı yeni sürümlerde değiştirilmemelidir. Otomatik güncelleme ve bulut eşitleme bu sürümde yoktur.
 
 Genel kullanıma sunmadan önce Windows üzerinde ilk kurulum, güncelleme, kaldırma/yeniden kurma, yüksek ekran ölçeği, klavye kullanımı ve veri kurtarma elle doğrulanmalı; kod imzalama eklenmelidir.
+
+## Özel sürüm bildirimleri
+
+Uygulama otomatik güncelleme yapmaz. `masaustu/surum-bildirimi.cjs` yalnızca sürüm bilgisi okur; çalıştırılabilir dosya indirmez veya başlatmaz. İndirme düğmesi, doğrulanan sabit depo/sürüm yolunu varsayılan tarayıcıda açar. GitHub erişim anahtarı bu adrese eklenmez; tarayıcının kendi GitHub oturumu kullanılır.
+
+Kullanıcı kendi ayrıntılı, yalnızca seçili depoya `Contents: read` izni olan anahtarını girer. Anahtar `safeStorage` ile Windows hesabına bağlı şifrelenir; şifreleme yoksa açık metinle devam edilmez. Depo kimliği ve gizlilik durumu doğrulanır. Anahtar arayüze geri verilmez ve ham ağ hataları günlüklere aktarılmaz. HTTP yönlendirmeleri izlenmez; anahtar yalnızca `api.github.com` üzerindeki iki sabit uç noktaya gönderilir. Windows hesabını ele geçiren bir süreç aynı kullanıcının şifreli verilerine erişebilir; bu koruma işletim sistemi hesabının güvenliğine dayanır.
+
+Bağlantı kullanıcı tarafından kurulmadan ağ isteği yapılmaz. İki dakikalık denetim sınırı ve işlem kilidi vardır. Bağlantı kaldırıldığında devam eden istek iptal edilir; gecikmiş yanıt bağlantıyı yeniden açamaz. Uygulama içindeki bildirimler GitHub Watch/e-posta aboneliklerinden bağımsızdır ve bu hesap ayarlarını değiştirmez.
+
+Windows iş akışı önce yayımlanmış 0.2.2 sürümünü geçici denetim makinesine kurar, Türkçe bir not dosyası oluşturur ve eski sürümü kaldırmadan yeni kurulumu çalıştırır. Gerçek kurulu dosyanın sürümü ile not dosyasının değişmeden kaldığı doğrulanmadan yeni sürüm yayımlanmaz. `denetimler/windows-kurulum.ps1` kişisel bilgisayarlarda çalıştırılmayı reddeder.

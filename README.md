@@ -20,7 +20,21 @@ Bu ilk sürüm henüz bir kod imzalama sertifikasıyla imzalanmıyor; Windows ya
 
 Yeni sürüm çıktığında aynı indirme sayfasından en güncel sürümün kurulum dosyasını indir. Uygulamayı kapatıp yeni kurulum dosyasını çalıştır; önceki sürümü kaldırman gerekmez. Notların ayrı bir klasörde tutulur ve güncellemede korunur. Yine de güncellemeden önce **Yedek al** ile bir kopya saklaman iyi olur.
 
-Bu sürümde uygulama içinden güncelleme denetimi ve otomatik güncelleme henüz yoktur. Yeni bir kurulum dosyasının hazırlanması, bilgisayarındaki uygulamayı kendiliğinden değiştirmez.
+### Uygulama içinden yeni sürüm bildirimi
+
+Uygulamadaki **Yeni sürümler** düğmesinden bu bilgisayarı özel GitHub deposuna bağlayabilirsin. Dosyalar özel olduğu için bu bağlantı gereklidir:
+
+1. **GitHub’da erişim izni oluştur** düğmesine bas.
+2. Açılan GitHub sayfasında yalnızca **-lk-Projem** deposunu seç. İzinlerden **Contents → Read-only** seçili olsun; başka izin açma.
+3. Oluşturduğun erişim anahtarını yalnızca uygulamanın **GitHub erişim anahtarı** alanına yapıştırıp **Bildirimleri etkinleştir** düğmesine bas. Anahtarı sohbete, kaynak koduna veya bir dosya paylaşımına ekleme.
+
+Bu izin bilgisayarda Windows tarafından şifrelenerek saklanır. Anahtarın süresi dolarsa bağlantıyı aynı yerden yenileyebilirsin. **Bağlantıyı kaldır** seçeneği bu bilgisayardaki kaydı siler ve denetimleri durdurur; anahtarı tamamen iptal etmek istersen GitHub ayarlarından da kaldırabilirsin.
+
+Bağlantı kurulduktan sonra uygulama açılışta, uyku dönüşünde ve açık kaldığı sürece altı saatte bir yeni sürüm denetler. **Yeni sürüm hazır** bildirimi yalnızca uygulamanın içinde görünür. **Kurulum dosyasını indir** düğmesi tarayıcıda özel `.exe` indirmesini açar. Sonrasında uygulamayı kapatıp kurulumu kendin çalıştırırsın. Dosya indirmek veya bildirim görmek tek başına güncelleme yapmaz.
+
+Uygulama e-posta göndermez, otomatik dosya indirmez ve kurulum başlatmaz. Uygulama kapalıyken arka planda çalışmaz. GitHub’da daha önce ayrıca açtığın e-posta bildirimleri varsa bunları deponun **Watch** ayarlarından kapatabilirsin; uygulama bu hesap ayarını değiştirmez.
+
+Kurulu sürümü **Yardım → Not Defterim Hakkında** menüsünden görebilirsin.
 
 ## Neler yapabilirsin?
 
@@ -35,7 +49,7 @@ Kısayollar: **Ctrl+N** yeni not, **Ctrl+F** arama, **Ctrl+S** yeniden kaydetme.
 
 ## Notların nerede?
 
-Notlar, Windows kullanıcı hesabının uygulama verileri klasöründeki `Not Defterim/notlar.json` dosyasında tutulur. **Not klasörünü aç** düğmesi doğru konumu gösterir. Tarayıcı verilerini temizlemek bu notları etkilemez. Notlar GitHub'a veya bir sunucuya gönderilmez.
+Notlar, Windows kullanıcı hesabının uygulama verileri klasöründeki `Not Defterim/notlar.json` dosyasında tutulur. **Not klasörünü aç** düğmesi doğru konumu gösterir. Tarayıcı verilerini temizlemek bu notları etkilemez. Notlar GitHub'a veya bir sunucuya gönderilmez. İsteğe bağlı sürüm bağlantısı yalnızca depo ve sürüm bilgilerini okur; notlarına dokunmaz.
 
 Her başarılı kayıtta bir önceki sağlam sürüm `notlar.yedek.json` dosyasında saklanır. Ana dosya bozulursa bu yedek denenir. Bu koruma disk arızasına karşı ayrı bir yedeğin yerini tutmaz; ara sıra **Yedek al** düğmesiyle başka bir konuma kopya kaydet. Dosyalar şifreli değildir; bilgisayar hesabını korumalısın.
 

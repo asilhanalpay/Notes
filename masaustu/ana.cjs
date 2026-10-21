@@ -1,13 +1,15 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, powerMonitor } = require('electron');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
+const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./surum-bildirimi.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
 
 app.setName('Not Defterim');
 let pencere;
 let depo;
 let kapanabilir = false;
+let surumBildirimleri;
 const arayuz = path.join(__dirname, '..', 'arayuz', 'index.html');
 const arayuzAdresi = pathToFileURL(arayuz).href;
 
@@ -70,7 +72,13 @@ else {
   app.whenReady().then(() => {
     app.setAppUserModelId('com.asilhanalpay.notdefterim');
     depo = new NotDeposu(app.getPath('userData'));
-    // Yalnızca paket içindeki dosyalar; ağ bağlantıları kapalıdır.
+    surumBildirimleri = new SurumBildirimi({
+      surum: app.getVersion(), paketli: app.isPackaged, platform: process.platform,
+      kasa: new ErisimKasasi(path.join(app.getPath('userData'), 'surum-erisim.bin'), safeStorage)
+    });
+    surumBildirimleri.on('durum', bilgi => pencere?.webContents.send('surum:durum', bilgi));
+    // Yazı alanının ağ erişimi kapalı kalır. Yalnızca ana işlem,
+    // izin verilmiş özel depodan sürüm bilgisi okuyabilir.
     session.defaultSession.webRequest.onBeforeRequest((ayrinti, yanit) => {
       yanit({ cancel: !ayrinti.url.startsWith('file://') });
     });
@@ -88,8 +96,20 @@ else {
       { label: 'Görünüm', submenu: [
         { label: 'Yakınlaştır', role: 'zoomIn' }, { label: 'Uzaklaştır', role: 'zoomOut' },
         { label: 'Gerçek boyut', role: 'resetZoom' }, { label: 'Tam ekran', role: 'togglefullscreen' }
+      ] },
+      { label: 'Yardım', submenu: [
+        { label: 'Not Defterim Hakkında', click: () => dialog.showMessageBox(pencere, {
+          type: 'info', title: 'Not Defterim', message: 'Not Defterim',
+          detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.`, buttons: ['Tamam']
+        }) }
       ] }
     ]));
+    islemTanimla('surum:durum', () => surumBildirimleri.gorunum());
+    islemTanimla('surum:denetle', () => surumBildirimleri.denetle());
+    islemTanimla('surum:bagla', anahtar => surumBildirimleri.bagla(anahtar));
+    islemTanimla('surum:ayir', () => surumBildirimleri.ayir());
+    islemTanimla('surum:indir', () => shell.openExternal(surumBildirimleri.indirmeAdresi()));
+    islemTanimla('surum:izin', () => shell.openExternal(IZIN_SAYFASI));
     islemTanimla('notlar:oku', () => depo.oku());
     islemTanimla('notlar:kaydet', notlar => depo.kaydet(notlar));
     islemTanimla('notlar:yedekle', async () => {
@@ -117,6 +137,9 @@ else {
     });
     islemTanimla('uygulama:kapat', () => { kapanabilir = true; pencere.close(); });
     pencereOlustur();
+    surumBildirimleri.baslat();
+    powerMonitor.on('resume', () => { void surumBildirimleri.denetle(); });
+    app.on('will-quit', () => surumBildirimleri.durdur());
     app.on('activate', () => { if (!pencere) pencereOlustur(); });
   }).catch(hata => {
     dialog.showErrorBox('Not Defterim açılamadı', hata.message);
