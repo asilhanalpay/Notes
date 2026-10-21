@@ -1,15 +1,15 @@
 ## Bu sürümde
 
-- Uygulamanın adı **Notes** oldu. Pencere, menüler ve masaüstü kısayolu bu adı kullanır.
-- Kurulum dosyasının adı **Notes.exe** olarak sabitlendi. Sonraki sürümlerde de aynı ad kullanılacak.
-- Önceki sürümlerin notları ve özel sürüm bağlantısı aynı kayıt konumunda korunur.
+- **Tema** bölümünden **Açık** veya **Karanlık** görünümü seçebilirsin. Seçimin sonraki açılışta hatırlanır.
+- Sürüm numaraları **0.0.1** ile yeniden başladı. Önceki sürümler korunur.
+- Uygulamanın adı **Notes**, kurulum dosyasının adı **Notes.exe** olarak kalır.
 
 ## İndir ve kur
 
-Aşağıdaki **Notes.exe** dosyasını indir ve aç. ZIP arşivlerini indirmen gerekmez.
+Aşağıdaki **Notes.exe** dosyasını indir. Önce **Yedek al** ile notlarını koru, uygulamayı kapat ve dosyayı aç. Önceki sürümü kaldırman gerekmez.
 
-Önceki sürüm kuruluysa **Yedek al** ile bir kopya sakla, uygulamayı kapatıp yeni kurulum dosyasını çalıştır. Önceki sürümü kaldırman gerekmez.
+**Bu sürümü bir kez elle kurmalısın:** Önceki 0.2.x sürümleri, numarası daha küçük olan 0.0.1 için bildirim göstermez. 0.0.1 kurulduktan sonra, GitHub bağlantın etkinse 0.0.2 gibi daha yüksek sürümler uygulama içinde bildirilir. Güncellemeyi yine kendin indirip kurarsın.
 
-Ad değişikliğini almak için bu sürümü bağlantıdan bir kez indirip kur. Sonraki sürümler Notes.exe adıyla yayımlanacak. Özel sürüm bildirimleri için **Yeni sürümler** bölümünden bu depoyu okuma izni olan GitHub bağlantısını etkinleştirebilirsin. Uygulama e-posta göndermez ve otomatik kurulum yapmaz.
+ZIP arşivlerini indirmene gerek yok. Uygulama e-posta göndermez ve otomatik kurulum yapmaz.
 
 Windows 10/11, 64 bit. Kurulum dosyası henüz dijital imzalı değildir.

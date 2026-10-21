@@ -1,13 +1,13 @@
 {
   "name": "not-defterim",
-  "version": "0.2.4",
+  "version": "0.0.1",
   "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
   "author": "asilhanalpay",
   "private": true,
   "main": "masaustu/ana.cjs",
   "scripts": {
     "baslat": "electron .",
-    "denetle": "node --check masaustu/ana.cjs && node --check masaustu/kopru.cjs && node --check masaustu/depolama.cjs && node --check masaustu/surum-bildirimi.cjs && node --check arayuz/app.js && node --check arayuz/surum-bildirimi.js && node --test denetimler/*.test.cjs",
+    "denetle": "node --check masaustu/ana.cjs && node --check masaustu/kopru.cjs && node --check masaustu/depolama.cjs && node --check masaustu/surum-bildirimi.cjs && node --check arayuz/tema.js && node --check arayuz/app.js && node --check arayuz/surum-bildirimi.js && node --test denetimler/*.test.cjs",
     "paketle:windows": "electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {

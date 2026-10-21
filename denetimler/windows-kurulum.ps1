@@ -5,7 +5,7 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows') {
 }
 $proje = Split-Path $PSScriptRoot -Parent
 $hedef = Join-Path $env:RUNNER_TEMP 'not-defterim-kurulum-denetimi'
-$eskiExe = Join-Path $hedef 'Not Defterim.exe'
+$eskiExe = Join-Path $hedef 'Notes.exe'
 $exe = Join-Path $hedef 'Notes.exe'
 $veriKlasoru = Join-Path $env:APPDATA 'Not Defterim'
 $notDosyasi = Join-Path $veriKlasoru 'notlar.json'
@@ -37,7 +37,7 @@ try {
     if (-not (Test-Path $eskiExe)) { throw 'Önceki uygulama kurulamadı.' }
     $eskiSurum = SurumuOku
     $eskiExeOzeti = (Get-FileHash $eskiExe -Algorithm SHA256).Hash
-    if ($eskiSurum -ne '0.2.2') { throw "Başlangıç sürümü beklenen sürüm değil: $eskiSurum" }
+    if ($eskiSurum -ne '0.2.4') { throw "Başlangıç sürümü beklenen sürüm değil: $eskiSurum" }
     New-Item -ItemType Directory -Path $veriKlasoru -Force | Out-Null
     $veri = '{"surum":1,"notlar":[{"id":"korunacak-not","title":"Güncelleme denetimi","body":"İğdır ve İstanbul: bu not korunmalı.","updated":1000}]}'
     [IO.File]::WriteAllText($notDosyasi, $veri, [Text.UTF8Encoding]::new($false))
@@ -51,7 +51,6 @@ try {
     if ((Get-FileHash $exe -Algorithm SHA256).Hash -eq $eskiExeOzeti) {
         throw 'Kurulum eski çalıştırılabilir dosyayı yenilemedi.'
     }
-    if (Test-Path $eskiExe) { throw 'Eski adlı uygulama dosyası kaldırılmadı.' }
     $kisayol = Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'Notes.lnk'
     if (-not (Test-Path $kisayol)) { throw 'Notes masaüstü kısayolu oluşturulmadı.' }
     $kabuk = New-Object -ComObject WScript.Shell

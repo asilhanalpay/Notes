@@ -14,6 +14,7 @@ Kurulum dosyasının adı her sürümde **Notes.exe** olarak kalır. Diğer sık
 
 ## Notlarını kullan ve koru
 
+- **Tema** bölümünden **Açık** veya **Karanlık** görünümü seç. Seçimin hatırlanır.
 - **+** düğmesiyle yeni not oluştur.
 - Arama kutusuyla notlarını bul.
 - Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** düğmesiyle kurtar.

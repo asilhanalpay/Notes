@@ -52,6 +52,17 @@ test('Eski ve eşit sürümler için güncelleme bildirimi gösterilmez', async 
   }
   assert.equal(dahaYeniMi('0.10.0', '0.2.3'), true);
 });
+test('0.0.1 başlangıcından sonraki sürüm bildirilir; eski 0.2.4 kurulumu için sıfırlama bildirilmez', async () => {
+  const yeni = kur({ surum: '0.0.1', oku: async yol => yol.endsWith('/latest') ? yayin('0.0.2') : DEPO });
+  yeni.yonetici.baslat();
+  const sonuc = await yeni.yonetici.denetle();
+  assert.equal(sonuc.durum, 'yeni-surum');
+  assert.equal(sonuc.yeniSurum, '0.0.2');
+  const eski = kur({ surum: '0.2.4', oku: async yol => yol.endsWith('/latest') ? yayin('0.0.1') : DEPO });
+  eski.yonetici.baslat();
+  assert.equal((await eski.yonetici.denetle()).durum, 'guncel');
+  assert.throws(() => eski.yonetici.indirmeAdresi());
+});
 test('Eşzamanlı ve sık denetimler çoğaltılmaz', async () => {
   const { yonetici, durum } = kur(); yonetici.baslat();
   await Promise.all([yonetici.denetle(), yonetici.denetle(), yonetici.denetle()]);
