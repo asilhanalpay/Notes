@@ -20,9 +20,14 @@ function UygulamayiDurdur {
         Stop-Process -Force -ErrorAction SilentlyContinue
 }
 function Kur([string]$dosya) {
+    Write-Host "Kurulum başlıyor: $dosya"
     $surec = Start-Process -FilePath $dosya -ArgumentList @('/S', "/D=$hedef") -PassThru
     if (-not $surec.WaitForExit(120000)) { $surec.Kill(); throw 'Kurulum zamanında tamamlanmadı.' }
-    if ($surec.ExitCode -notin @(0, 3010)) { throw "Kurulum başarısız: $($surec.ExitCode)" }
+    if ($surec.ExitCode -notin @(0, 3010)) {
+        Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'Notes|uninstall' } |
+            Select-Object Name, ProcessId, ParentProcessId, ExecutablePath | Format-Table | Out-Host
+        throw "Kurulum başarısız: $dosya; çıkış kodu: $($surec.ExitCode)"
+    }
     Start-Sleep -Seconds 2
     UygulamayiDurdur
 }
