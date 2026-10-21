@@ -25,11 +25,18 @@ function Kur([string]$dosya) {
     Start-Sleep -Seconds 2
     UygulamayiDurdur
 }
+function SurumuOku {
+    $paket = Join-Path $hedef 'resources/app.asar'
+    $surum = & node -e "const a=require('@electron/asar'); process.stdout.write(JSON.parse(a.extractFile(process.argv[1], 'package.json').toString()).version)" $paket
+    if ($LASTEXITCODE -ne 0) { throw 'Kurulu uygulamanın paket sürümü okunamadı.' }
+    return $surum.Trim()
+}
 try {
     Kur $onceki.FullName
     if (-not (Test-Path $exe)) { throw 'Önceki uygulama kurulamadı.' }
-    $eskiSurum = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
-    if ($eskiSurum -ne '0.2.2') { throw 'Başlangıç sürümü beklenen sürüm değil.' }
+    $eskiSurum = SurumuOku
+    $eskiExeOzeti = (Get-FileHash $exe -Algorithm SHA256).Hash
+    if ($eskiSurum -ne '0.2.2') { throw "Başlangıç sürümü beklenen sürüm değil: $eskiSurum" }
     New-Item -ItemType Directory -Path $veriKlasoru -Force | Out-Null
     $veri = '{"surum":1,"notlar":[{"id":"korunacak-not","title":"Güncelleme denetimi","body":"İğdır ve İstanbul: bu not korunmalı.","updated":1000}]}'
     [IO.File]::WriteAllText($notDosyasi, $veri, [Text.UTF8Encoding]::new($false))
@@ -38,8 +45,11 @@ try {
     # Eski sürümü kaldırmadan aynı konuma yeni kurulum yapılır.
     Kur $yeni.FullName
     $beklenen = (Get-Content (Join-Path $proje 'package.json') -Raw | ConvertFrom-Json).version
-    $kurulu = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
-    if ($kurulu -ne $beklenen) { throw 'Kurulu uygulamanın sürümü yenilenmedi.' }
+    $kurulu = SurumuOku
+    if ($kurulu -ne $beklenen) { throw "Kurulu uygulamanın sürümü yenilenmedi: $kurulu" }
+    if ((Get-FileHash $exe -Algorithm SHA256).Hash -eq $eskiExeOzeti) {
+        throw 'Kurulum eski çalıştırılabilir dosyayı yenilemedi.'
+    }
     if ((Get-FileHash $notDosyasi -Algorithm SHA256).Hash -ne $oncekiOzet) {
         throw 'Yeni kurulum not dosyasını değiştirdi.'
     }
