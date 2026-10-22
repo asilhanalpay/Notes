@@ -1,37 +1,24 @@
 # Beni Oku
 
-Notes (Notlar), Türkçe menüleri olan sade bir Windows not defteridir. Notlarını yazabilir, düzenleyebilir, arayabilir ve silebilirsin. Yazdıkların otomatik kaydedilir.
-
-**Windows 10 ve 11’in 64 bit sürümlerinde çalışır.**
+Notes, Türkçe bir Windows not defteridir. İnternet olmadan çalışır; notlarını bilgisayarına otomatik kaydeder.
 
 ## İndir ve kur
 
-1. [İndirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). GitHub hesabınla giriş yapman gerekebilir.
+1. [İndirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). Gerekirse GitHub hesabınla giriş yap.
 2. **Notes.exe** dosyasını indir ve aç.
-3. Kurulum adımlarını tamamla. Uygulamayı masaüstündeki **Notes** simgesinden aç.
+3. Kurulumu tamamla, masaüstündeki **Notes** simgesine bas.
 
-Kurulum dosyasının adı her sürümde **Notes.exe** olarak kalır. Diğer sıkıştırılmış dosyaları indirmene gerek yok.
+Windows 10 ve 11’in 64 bit sürümlerinde çalışır. Sıkıştırılmış dosyaları indirmene gerek yok. Dosyada henüz yayıncı imzası olmadığı için Windows uyarı gösterebilir.
 
-## Notlarını kullan ve koru
+## Kullan
 
-- **Tema** bölümünden **Açık** veya **Karanlık** görünümü seç. Seçimin hatırlanır.
-- **+** düğmesiyle yeni not oluştur.
-- Arama kutusuyla notlarını bul.
-- Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** düğmesiyle kurtar.
-- **Yedek al** ile notlarının bir kopyasını sakla. **Yedekten ekle** ile bu kopyadaki notları uygulamaya ekle.
+- **+** ile not oluştur, arama kutusuyla bul. Yazdıkların kendiliğinden kaydedilir.
+- **Tema** bölümünden açık veya karanlık görünümü seç.
+- **Yedek al** ile notlarının bir kopyasını sakla; **Yedekten ekle** ile geri ekle.
+- Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** ile kurtar.
 
-Notların bilgisayarında saklanır; internete gönderilmez. Yazmak için internet gerekmez. Kayıt yerini **Not klasörünü aç** düğmesinden görebilirsin.
+## Güncelle
 
-## Yeni sürüme geç
+Bildirim almak için **Yeni sürümler** bölümündeki bağlantı adımlarını izle. Güncellemek için yedek al, Notes’u kapat ve yeni **Notes.exe** dosyasını indirip kur. Eski sürümü kaldırman gerekmez. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
 
-Yeni **Notes.exe** dosyasını indir. Önce notlarının yedeğini al, uygulamayı kapat ve kurulum dosyasını çalıştır. Eski sürümü kaldırman gerekmez; notların korunur.
-
-Yeni sürümlerden haber almak için uygulamadaki **Yeni sürümler** bölümünü aç ve GitHub bağlantısı kurma adımlarını izle. Bağlantı kurulduğunda uygulama açılışta ve açık kaldığı sürece altı saatte bir yeni sürüm olup olmadığına bakar. Yeni sürüm varsa uygulamanın içinde haber verir.
-
-Uygulama e-posta göndermez ve güncellemeyi kendiliğinden kurmaz.
-
----
-
-**Kurulum uyarısı:** Dosyada henüz yayıncı imzası bulunmuyor. Bu yüzden Windows, kurulum sırasında dosyanın yayıncısını doğrulayamadığını belirten bir uyarı gösterebilir.
-
-[Ayrıntılı proje bilgileri](belgeler/GELISTIRME.md) · [Sürüm notları](belgeler/SURUM_NOTLARI.md)
+[Dosyalar ne işe yarar?](belgeler/dosyalar.md) · [Sürüm notları](belgeler/sürüm-notları.md) · [Geliştirme bilgileri](belgeler/geliştirme.md)

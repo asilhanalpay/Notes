@@ -6,7 +6,7 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const bekle = async () => { for (let i = 0; i < 10; i++) await new Promise(resolve => setImmediate(resolve)); };
 async function ac(t, ilkDurum) {
-  const dom = new JSDOM(fs.readFileSync(path.join(__dirname, '../arayuz/index.html'), 'utf8'), { runScripts: 'outside-only', url: 'file:///uygulama/index.html' });
+  const dom = new JSDOM(fs.readFileSync(path.join(__dirname, '../arayüz/pencere.html'), 'utf8'), { runScripts: 'outside-only', url: 'file:///uygulama/pencere.html' });
   t.after(() => dom.window.close());
   dom.window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   dom.window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); this.dispatchEvent(new dom.window.Event('close')); };
@@ -17,7 +17,7 @@ async function ac(t, ilkDurum) {
     surumIndir: async () => { durum.indirmeler++; return { basarili: true }; },
     surumBagla: async anahtar => { durum.anahtar = anahtar; return { basarili: true }; }
   };
-  dom.window.eval(fs.readFileSync(path.join(__dirname, '../arayuz/surum-bildirimi.js'), 'utf8'));
+  dom.window.eval(fs.readFileSync(path.join(__dirname, '../arayüz/sürüm-bildirimi.js'), 'utf8'));
   await bekle();
   return { dom, durum, oge: id => dom.window.document.getElementById(id) };
 }

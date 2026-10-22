@@ -85,5 +85,5 @@ jobs:
             --repo "$DEPO" \
             --target "$KAYNAK" \
             --title "Notes $SURUM" \
-            --notes-file belgeler/YAYIN_NOTU.md \
+            --notes-file belgeler/sürüm-açıklaması.md \
             --latest

@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { NotDeposu, kodla, coz, notlariDogrula, atomikYaz } = require('../masaustu/depolama.cjs');
+const { NotDeposu, kodla, coz, notlariDogrula, atomikYaz } = require('../masaüstü/depolama.cjs');
 const ornek = (metin = 'İlk düşüncem') => [{ id: 'bir', title: 'Türkçe başlık', body: metin, updated: 1000 }];
 function depoOlustur(t) {
   const klasor = fs.mkdtempSync(path.join(os.tmpdir(), 'not-defterim-'));

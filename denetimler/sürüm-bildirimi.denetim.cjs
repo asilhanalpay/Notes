@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { EventEmitter } = require('node:events');
 const { SurumBildirimi, ErisimKasasi, githubOku, yayiniDogrula, depoyuDogrula,
-  dahaYeniMi, ARALIK, ErisimHatasi } = require('../masaustu/surum-bildirimi.cjs');
+  dahaYeniMi, ARALIK, ErisimHatasi } = require('../masaüstü/sürüm-bildirimi.cjs');
 const ANAHTAR = 'github_pat_' + 'a'.repeat(30);
 const DEPO = { id: 1427086629, full_name: 'asilhanalpay/-lk-Projem', private: true };
 function yayin(surum = '0.2.4') {

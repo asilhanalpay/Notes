@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, 
 const path = require('node:path');
 const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
-const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./surum-bildirimi.cjs');
+const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./sürüm-bildirimi.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
 
 app.setName('Notes');
@@ -18,7 +18,7 @@ let pencere;
 let depo;
 let kapanabilir = false;
 let surumBildirimleri;
-const arayuz = path.join(__dirname, '..', 'arayuz', 'index.html');
+const arayuz = path.join(__dirname, '..', 'arayüz', 'pencere.html');
 const arayuzAdresi = pathToFileURL(arayuz).href;
 
 function yetkiliMi(olay) {
@@ -43,9 +43,9 @@ function pencereOlustur() {
   pencere = new BrowserWindow({
     title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
     backgroundColor: '#f7f6f2', show: false,
-    icon: path.join(__dirname, '..', 'arayuz', 'simge.png'),
+    icon: path.join(__dirname, '..', 'arayüz', 'simge.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'kopru.cjs'), contextIsolation: true,
+      preload: path.join(__dirname, 'köprü.cjs'), contextIsolation: true,
       nodeIntegration: false, sandbox: true, spellcheck: false
     }
   });

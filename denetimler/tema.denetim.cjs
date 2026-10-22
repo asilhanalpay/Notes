@@ -4,8 +4,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { JSDOM } = require('jsdom');
-const html = fs.readFileSync(path.join(__dirname, '../arayuz/index.html'), 'utf8');
-const kod = fs.readFileSync(path.join(__dirname, '../arayuz/tema.js'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '../arayüz/pencere.html'), 'utf8');
+const kod = fs.readFileSync(path.join(__dirname, '../arayüz/tema.js'), 'utf8');
 
 async function ac(t, kayit, hazirla = () => {}) {
   const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'https://notes.test/' });

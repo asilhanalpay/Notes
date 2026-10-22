@@ -4,14 +4,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { JSDOM } = require('jsdom');
-const html = fs.readFileSync(path.join(__dirname, '../arayuz/index.html'), 'utf8');
-const kod = fs.readFileSync(path.join(__dirname, '../arayuz/app.js'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '../arayüz/pencere.html'), 'utf8');
+const kod = fs.readFileSync(path.join(__dirname, '../arayüz/notlar.js'), 'utf8');
 const bekle = async () => { for (let i = 0; i < 12; i++) await new Promise(resolve => setImmediate(resolve)); };
 
 async function arayuzAc(t, ilkNotlar = []) {
   const kayitlar = [];
   const durum = { hata: false, kapandi: false, kapatmaIstegi: null };
-  const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'file:///uygulama/arayuz/index.html' });
+  const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'file:///uygulama/arayüz/pencere.html' });
   t.after(() => dom.window.close());
   dom.window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   dom.window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };

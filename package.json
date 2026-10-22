@@ -4,10 +4,10 @@
   "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
   "author": "asilhanalpay",
   "private": true,
-  "main": "masaustu/ana.cjs",
+  "main": "masaüstü/ana.cjs",
   "scripts": {
     "baslat": "electron .",
-    "denetle": "node --check masaustu/ana.cjs && node --check masaustu/kopru.cjs && node --check masaustu/depolama.cjs && node --check masaustu/surum-bildirimi.cjs && node --check arayuz/tema.js && node --check arayuz/app.js && node --check arayuz/surum-bildirimi.js && node --test denetimler/*.test.cjs",
+    "denetle": "node --check masaüstü/ana.cjs && node --check masaüstü/köprü.cjs && node --check masaüstü/depolama.cjs && node --check masaüstü/sürüm-bildirimi.cjs && node --check arayüz/tema.js && node --check arayüz/notlar.js && node --check arayüz/sürüm-bildirimi.js && node --test denetimler/*.denetim.cjs",
     "paketle:windows": "electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {
@@ -23,8 +23,8 @@
       "output": "kurulum"
     },
     "files": [
-      "masaustu/**/*",
-      "arayuz/**/*",
+      "masaüstü/**/*",
+      "arayüz/**/*",
       "package.json"
     ],
     "win": {
@@ -37,11 +37,11 @@
         }
       ],
       "artifactName": "Notes.exe",
-      "icon": "varliklar/simge.ico",
+      "icon": "kurulum-kaynakları/simge.ico",
       "signAndEditExecutable": true
     },
     "nsis": {
-      "include": "varliklar/kurulum.nsh",
+      "include": "kurulum-kaynakları/kurulum.nsh",
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
