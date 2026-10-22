@@ -4,7 +4,7 @@ Bu bölüm geliştiriciler içindir. Uygulamayı kullanmak için Node.js veya bi
 
 ## Gerekenler ve komutlar
 
-Node.js 24 ve Windows 10/11 x64 kullan. Depo klasöründe:
+Node.js 24 ve Windows 10/11’in 64 bit sürümünü kullan. Depo klasöründe:
 
 ```sh
 npm ci
@@ -13,7 +13,7 @@ npm run baslat
 npm run paketle:windows
 ```
 
-Kurulum dosyası `kurulum/` klasörüne yazılır. Kaynak sürümleri `package-lock.json` ile sabitlenir. Denetimler Node.js üzerinde çalışır; Electron penceresi açmayı gerektirmez. Arayüz denetimleri jsdom kullanır; gerçek bir Windows kurulum denemesinin yerini tutmaz.
+Kurulum dosyası `kurulum/` klasörüne yazılır. Yardımcı yazılımların sürümleri `package-lock.json` ile sabitlenir. Denetimler Node.js üzerinde çalışır; Electron penceresi açmayı gerektirmez. Arayüz denetimleri jsdom kullanır; gerçek bir Windows kurulum denemesinin yerini tutmaz.
 
 ## Tasarım kararları
 
@@ -39,7 +39,7 @@ Uygulama otomatik güncelleme yapmaz. `masaüstü/sürüm-bildirimi.cjs` yalnız
 
 Kullanıcı kendi ayrıntılı, yalnızca seçili depoya `Contents: read` izni olan anahtarını girer. Anahtar `safeStorage` ile Windows hesabına bağlı şifrelenir; şifreleme yoksa açık metinle devam edilmez. Depo kimliği ve gizlilik durumu doğrulanır. Anahtar arayüze geri verilmez ve ham ağ hataları günlüklere aktarılmaz. HTTP yönlendirmeleri izlenmez; anahtar yalnızca `api.github.com` üzerindeki iki sabit uç noktaya gönderilir. Windows hesabını ele geçiren bir süreç aynı kullanıcının şifreli verilerine erişebilir; bu koruma işletim sistemi hesabının güvenliğine dayanır.
 
-Bağlantı kullanıcı tarafından kurulmadan ağ isteği yapılmaz. İki dakikalık denetim sınırı ve işlem kilidi vardır. Bağlantı kaldırıldığında devam eden istek iptal edilir; gecikmiş yanıt bağlantıyı yeniden açamaz. Uygulama içindeki bildirimler GitHub Watch/e-posta aboneliklerinden bağımsızdır ve bu hesap ayarlarını değiştirmez.
+Bağlantı kullanıcı tarafından kurulmadan ağ isteği yapılmaz. İki dakikalık denetim sınırı ve işlem kilidi vardır. Bağlantı kaldırıldığında devam eden istek iptal edilir; gecikmiş yanıt bağlantıyı yeniden açamaz. Uygulama içindeki bildirimler GitHub’ın izleme ve e-posta aboneliklerinden bağımsızdır ve bu hesap ayarlarını değiştirmez.
 
 Windows iş akışı önce yayımlanmış 0.2.4 sürümünü geçici denetim makinesine kurar, Türkçe bir not dosyası oluşturur ve eski sürümü kaldırmadan yeni kurulumu çalıştırır. Kurulu sürüm, Notes.exe dosyası, masaüstü kısayolu ve not dosyasının korunduğu doğrulanır. Yeniden kurulum da sınanır; uygulama açıkken kurulumun uygulamayı zorla kapatmadan durduğu denetlenir. `denetimler/windows-kurulum.ps1` kişisel bilgisayarlarda çalıştırılmayı reddeder.
 
