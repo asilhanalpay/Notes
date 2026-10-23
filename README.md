@@ -4,11 +4,10 @@ Notes, Türkçe bir Windows not defteridir. İnternet olmadan çalışır; notla
 
 ## İndir ve kur
 
-1. [İndirme sayfasını aç](https://github.com/asilhanalpay/-lk-Projem/releases/latest). Gerekirse GitHub hesabınla giriş yap.
-2. **Notes.exe** dosyasını indir ve aç.
-3. Kurulumu tamamla, masaüstündeki **Notes** simgesine bas.
+1. [İndirme sayfasını aç](https://github.com/asilhanalpay/Notes/releases/latest) ve **Notes.exe** dosyasını indir.
+2. Dosyayı açıp kurulumu tamamla.
 
-Windows 10 ve 11’in 64 bit sürümlerinde çalışır. Sıkıştırılmış dosyaları indirmene gerek yok. Dosyada henüz yayıncı imzası olmadığı için Windows uyarı gösterebilir.
+Windows 10/11 (64 bit). Yayıncı imzası olmadığı için Windows uyarı gösterebilir.
 
 ## Kullan
 
