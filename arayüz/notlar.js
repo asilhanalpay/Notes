@@ -9,7 +9,21 @@ let bildirimSayaci;
 let yuklendi = false;
 let mesgul = false;
 let degisiklik = 0;
-let kayitSirasi = Promise.resolve();
+let kaydedilenDegisiklik = 0;
+let kayitIslemi = null;
+let kayitSayaci;
+const KAYIT_BEKLEMESI = 650;
+
+function degisti() {
+  degisiklik++;
+  oge('status').textContent = 'Kaydedilmeyi bekliyor…';
+  oge('status').dataset.durum = 'bekliyor';
+}
+
+function kaydiPlanla() {
+  clearTimeout(kayitSayaci);
+  kayitSayaci = setTimeout(() => { void kaydet(); }, KAYIT_BEKLEMESI);
+}
 
 const tarih = deger => new Date(deger).toLocaleDateString('tr-TR', {
   day: 'numeric', month: 'long', year: 'numeric'
@@ -77,30 +91,37 @@ function ekraniCiz() {
 }
 
 function kaydet() {
+  clearTimeout(kayitSayaci);
   if (!yuklendi) return Promise.resolve(false);
-  const anlikNotlar = notlar.map(not => ({ ...not }));
-  const sira = ++degisiklik;
-  oge('status').textContent = 'Kaydediliyor…';
-  oge('status').dataset.durum = 'bekliyor';
-  // Her istek kendi anlık kopyasını taşır ve önceki kaydın bitmesini bekler.
-  kayitSirasi = kayitSirasi.then(async () => {
+  if (kayitIslemi) return kayitIslemi;
+  if (kaydedilenDegisiklik === degisiklik) return Promise.resolve(true);
+  // Yalnızca gerçekten diske yazılırken kopyala. Devam eden kayıt sırasında
+  // yapılan değişiklikler tek bir son kopyada birleştirilir; eski metin sona kalmaz.
+  kayitIslemi = Promise.resolve().then(async () => {
     try {
-      const sonuc = await masaustu.kaydet(anlikNotlar);
-      if (!sonuc.basarili) throw new Error(sonuc.hata);
-      if (sira === degisiklik) {
-        oge('status').textContent = 'Bilgisayara kaydedildi';
-        oge('status').dataset.durum = 'tamam';
-        oge('hata').hidden = true;
+      while (kaydedilenDegisiklik !== degisiklik) {
+        const sira = degisiklik;
+        const anlikNotlar = notlar.map(not => ({ ...not }));
+        oge('status').textContent = 'Kaydediliyor…';
+        oge('status').dataset.durum = 'bekliyor';
+        const sonuc = await masaustu.kaydet(anlikNotlar);
+        if (!sonuc.basarili) throw new Error(sonuc.hata);
+        kaydedilenDegisiklik = sira;
       }
+      oge('status').textContent = 'Bilgisayara kaydedildi';
+      oge('status').dataset.durum = 'tamam';
+      oge('hata').hidden = true;
       return true;
     } catch {
       oge('status').textContent = 'Kaydedilemedi';
       oge('status').dataset.durum = 'hata';
       hataGoster('Son değişiklikler kaydedilemedi. Uygulamayı açık tut ve yeniden dene. Diskte boş alan olduğundan emin ol.');
       return false;
+    } finally {
+      kayitIslemi = null;
     }
   });
-  return kayitSirasi;
+  return kayitIslemi;
 }
 
 function notEkle() {
@@ -110,6 +131,7 @@ function notEkle() {
   seciliKimlik = not.id;
   oge('search').value = '';
   ekraniCiz();
+  degisti();
   void kaydet();
   oge('title').focus();
 }
@@ -123,7 +145,8 @@ function duzenle() {
   listeyiCiz();
   oge('date').textContent = tarih(not.updated);
   kelimeleriSay();
-  void kaydet();
+  degisti();
+  kaydiPlanla();
 }
 
 async function dosyaIslemi(islem) {
@@ -157,6 +180,7 @@ oge('confirmDelete').addEventListener('click', () => {
   seciliKimlik = notlar[Math.min(konum, notlar.length - 1)]?.id ?? null;
   oge('confirm').close();
   ekraniCiz();
+  degisti();
   void kaydet();
   oge('toast').hidden = false;
   clearTimeout(bildirimSayaci);
@@ -171,6 +195,7 @@ oge('undo').addEventListener('click', () => {
   oge('toast').hidden = true;
   oge('search').value = '';
   ekraniCiz();
+  degisti();
   void kaydet();
 });
 oge('yedekle').addEventListener('click', () => dosyaIslemi(async () => {
@@ -186,7 +211,8 @@ oge('iceAktar').addEventListener('click', () => dosyaIslemi(async () => {
   // İçe aktarılan notlar yeni kimliklerle eklenir; mevcut notlara dokunulmaz.
   const eklenen = sonuc.veri.notlar.map(not => ({ ...not, id: crypto.randomUUID() }));
   notlar = [...eklenen, ...notlar];
-  if (!(await kaydet())) { notlar = onceki; ekraniCiz(); return; }
+  degisti();
+  if (!(await kaydet())) { notlar = onceki; degisti(); ekraniCiz(); return; }
   seciliKimlik = eklenen[0]?.id ?? seciliKimlik;
   oge('search').value = '';
   ekraniCiz();

@@ -32,7 +32,7 @@ test('Tema seçimi kaydedilir, sonraki açılışta ilk çizimden önce uygulan�
   const tekrar = await ac(t, ilk.dom.window.localStorage.getItem('notes-tema'));
   assert.equal(tekrar.ilkTema, 'karanlik');
   assert.equal(tekrar.secici.value, 'karanlik');
-  assert.equal(tekrar.dom.window.document.querySelector('meta[name="theme-color"]').content, '#171c19');
+  assert.equal(tekrar.dom.window.document.querySelector('meta[name="theme-color"]').content, '#090909');
   tekrar.sec('acik');
   assert.equal(tekrar.dom.window.localStorage.getItem('notes-tema'), 'acik');
   assert.equal(tekrar.dom.window.document.documentElement.dataset.tema, 'acik');

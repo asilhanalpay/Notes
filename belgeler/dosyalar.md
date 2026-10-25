@@ -9,6 +9,7 @@ Bu depo, Notes’un kaynak kodlarını ve açıklamalarını içerir. Dosyalar, 
 | `kurulum-kaynakları/` | Windows kurulumunda kullanılan simge ve yardımcı dosyalar. |
 | `denetimler/` | Notların kaybolmadığını, düğmelerin çalıştığını ve kurulumun doğru yapıldığını sınayan dosyalar. |
 | `belgeler/` | Kullanım açıklamaları, geliştirme bilgileri ve sürüm notları. |
+| `.github/dependabot.yml` | Yardımcı yazılımlar ve iş akışları için güncelleme takibi. |
 | `.github/workflows/` | GitHub’ın denetimleri çalıştırmasını ve Windows kurulumunu hazırlamasını sağlayan yönergeler. |
 
 ## Önemli dosyalar

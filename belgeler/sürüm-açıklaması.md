@@ -1,16 +1,17 @@
 ## Bu sürümde
 
-- **Tema** bölümünden **Açık** veya **Karanlık** görünümü seçebilirsin. Seçimin sonraki açılışta hatırlanır.
-- Sürüm numaraları **0.0.1** ile yeniden başladı. Önceki sürümler korunur.
-- Uygulamanın adı **Notes**, kurulum dosyasının adı **Notes.exe** olarak kalır.
-- Önceki sürümün üzerine kurulum iyileştirildi. Kurulumdan önce Notes'u kapatmalısın.
+- Yazmaya kısa süre ara verdiğinde son değişiklikler kaydedilir. **Ctrl+S** ve kapanışta kayıt beklemeden tamamlanır.
+- Yeşil görünüm yerine siyah-beyaz açık ve koyu temalar geldi. Koyu temadaki ince krem kenarlıklar bölümleri ayırır.
+- Defter simgesi yenilendi.
+- Güncelleme bağlantısı yeni **Notes** depo adına uyarlandı.
+- Gerçek Windows/Electron denetimleri ve haftalık bileşen güvenliği takibi eklendi.
 
 ## İndir ve kur
 
-Aşağıdaki **Notes.exe** dosyasını indir. Önce **Yedek al** ile notlarını koru, uygulamayı kapat ve dosyayı aç. Önceki sürümü kaldırman gerekmez.
+**Notes.exe** dosyasını indir. Önce yedek al, Notes’u kapat ve kurulumu çalıştır. Eski sürümü kaldırman gerekmez.
 
-**Bu sürümü bir kez elle kurmalısın:** Önceki 0.2.x sürümleri, numarası daha küçük olan 0.0.1 için bildirim göstermez. 0.0.1 kurulduktan sonra, GitHub bağlantın etkinse 0.0.2 gibi daha yüksek sürümler uygulama içinde bildirilir. Güncellemeyi yine kendin indirip kurarsın.
+**0.0.1 kullanıyorsan bu sürümü bir kez elle indirip kurmalısın.** Depo adı değiştiği için eski sürüm yeni güncellemeyi bildiremez. Sonraki sürümlerde GitHub bağlantın etkinse uygulama içi bildirimler devam eder. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
 
-ZIP arşivlerini indirmene gerek yok. Uygulama e-posta göndermez ve otomatik kurulum yapmaz.
+**Gizlilik:** Notlar, kurtarma kopyaları ve yedekler şifrelenmez. Dosyalara erişen biri içeriklerini okuyabilir. GitHub erişim anahtarı Windows tarafından ayrıca şifrelenir.
 
 Windows 10/11, 64 bit. Kurulum dosyası henüz dijital imzalı değildir.

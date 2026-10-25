@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, powerMonitor } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, powerMonitor, nativeTheme } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
@@ -42,7 +42,7 @@ function pencereOlustur() {
   kapanabilir = false;
   pencere = new BrowserWindow({
     title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
-    backgroundColor: '#f7f6f2', show: false,
+    backgroundColor: '#ffffff', show: false,
     icon: path.join(__dirname, '..', 'arayüz', 'simge.png'),
     webPreferences: {
       preload: path.join(__dirname, 'köprü.cjs'), contextIsolation: true,
@@ -123,6 +123,11 @@ else {
     islemTanimla('surum:ayir', () => surumBildirimleri.ayir());
     islemTanimla('surum:indir', () => shell.openExternal(surumBildirimleri.indirmeAdresi()));
     islemTanimla('surum:izin', () => shell.openExternal(IZIN_SAYFASI));
+    islemTanimla('tema:sec', tema => {
+      if (!['acik', 'karanlik'].includes(tema)) throw new Error('Tema seçimi geçersiz.');
+      nativeTheme.themeSource = tema === 'karanlik' ? 'dark' : 'light';
+      pencere.setBackgroundColor(tema === 'karanlik' ? '#090909' : '#ffffff');
+    });
     islemTanimla('notlar:oku', () => depo.oku());
     islemTanimla('notlar:kaydet', notlar => depo.kaydet(notlar));
     islemTanimla('notlar:yedekle', async () => {

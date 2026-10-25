@@ -4,7 +4,7 @@ const https = require('node:https');
 const { EventEmitter } = require('node:events');
 const { atomikYaz } = require('./depolama.cjs');
 
-const DEPO = 'asilhanalpay/-lk-Projem';
+const DEPO = 'asilhanalpay/Notes';
 const DEPO_KIMLIGI = '1427086629';
 const ARALIK = 6 * 60 * 60 * 1000;
 const BEKLEME = 2 * 60 * 1000;

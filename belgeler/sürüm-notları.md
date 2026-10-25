@@ -1,5 +1,16 @@
 # Sürüm notları
 
+## 0.0.2 — 25 Ekim 2026
+
+- Yazı değişiklikleri kısa bir aradan sonra tek kayıtta birleştirilir. Ctrl+S ve kapanışta kayıt hemen tamamlanır.
+- Yeşil renkler kaldırıldı; saf açık ve koyu temalar, koyu temada hafif krem kenarlıklar eklendi.
+- Siyah-beyaz defter simgesi uygulama ve Windows kurulumu için yenilendi.
+- Güncelleme bağlantısı Notes depo adına uyarlandı.
+- Gerçek Windows/Electron güvenlik ve kayıt denetimleri eklendi.
+- Haftalık bileşen güvenliği taraması ve güncelleme takibi eklendi.
+- Notların, kurtarma kopyalarının ve yedeklerin şifrelenmediği açıklandı. Şifreleme ve dijital imza sonraki değerlendirmeye bırakıldı.
+
+
 ## 0.0.1 — 21 Ekim 2026
 
 - Açık ve karanlık tema seçimi eklendi. Seçilen tema sonraki açılışta hatırlanır.

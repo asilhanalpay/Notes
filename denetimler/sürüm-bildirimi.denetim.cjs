@@ -8,11 +8,11 @@ const { EventEmitter } = require('node:events');
 const { SurumBildirimi, ErisimKasasi, githubOku, yayiniDogrula, depoyuDogrula,
   dahaYeniMi, ARALIK, ErisimHatasi } = require('../masaüstü/sürüm-bildirimi.cjs');
 const ANAHTAR = 'github_pat_' + 'a'.repeat(30);
-const DEPO = { id: 1427086629, full_name: 'asilhanalpay/-lk-Projem', private: true };
+const DEPO = { id: 1427086629, full_name: 'asilhanalpay/Notes', private: true };
 function yayin(surum = '0.2.4') {
   return { tag_name: `v${surum}`, draft: false, prerelease: false, assets: [{
     name: 'Notes.exe', state: 'uploaded', size: 100,
-    browser_download_url: `https://github.com/asilhanalpay/-lk-Projem/releases/download/v${surum}/Notes.exe`
+    browser_download_url: `https://github.com/asilhanalpay/Notes/releases/download/v${surum}/Notes.exe`
   }] };
 }
 function kur(secenekler = {}) {
@@ -129,7 +129,7 @@ test('GitHub isteği yalnızca sabit HTTPS kaynağını kullanır; yönlendirme 
     queueMicrotask(() => { const yanit = new EventEmitter(); yanit.statusCode = 302; yanit.resume = () => {}; yanitla(yanit); });
     return istek;
   } };
-  await assert.rejects(() => githubOku('/repos/asilhanalpay/-lk-Projem', ANAHTAR, undefined, istemci));
+  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', ANAHTAR, undefined, istemci));
   assert.equal(ayarlar.hostname, 'api.github.com'); assert.equal(ayarlar.port, 443);
   await assert.rejects(() => githubOku('/users/asilhanalpay', ANAHTAR, undefined, istemci));
 });
@@ -148,7 +148,7 @@ test('Zaman aşımı isteği kesin olarak sonlandırır; ham ağ hatası döndü
     istek.destroy = hata => { istek.emit('error', hata); };
     return istek;
   } };
-  await assert.rejects(() => githubOku('/repos/asilhanalpay/-lk-Projem', ANAHTAR, undefined, istemci), /güvenli bağlantı/);
+  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', ANAHTAR, undefined, istemci), /güvenli bağlantı/);
 });
 
 test('Geçmiş sürümün eski kurulum adı desteklenir; yeni ad tercih edilir', () => {

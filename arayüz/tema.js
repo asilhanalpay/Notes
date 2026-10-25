@@ -12,7 +12,9 @@
 
   function uygula(secim) {
     document.documentElement.dataset.tema = secim;
-    document.querySelector('meta[name="theme-color"]').content = secim === 'karanlik' ? '#171c19' : '#f7f6f2';
+    document.querySelector('meta[name="theme-color"]').content = secim === 'karanlik' ? '#090909' : '#ffffff';
+    // Pencerenin Windows başlık çubuğu da seçilen temayı izler.
+    if (window.notDefterim?.temaSec) void window.notDefterim.temaSec(secim).catch(() => {});
   }
   uygula(tema);
 

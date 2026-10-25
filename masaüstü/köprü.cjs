@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // Arayüze dosya sistemi veya genel amaçlı iletişim yetkisi verilmez.
 contextBridge.exposeInMainWorld('notDefterim', Object.freeze({
+  temaSec: tema => ipcRenderer.invoke('tema:sec', tema),
   surumDurumu: () => ipcRenderer.invoke('surum:durum'),
   surumDenetle: () => ipcRenderer.invoke('surum:denetle'),
   surumBagla: anahtar => ipcRenderer.invoke('surum:bagla', anahtar),

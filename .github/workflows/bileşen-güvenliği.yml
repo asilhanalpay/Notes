@@ -1,0 +1,33 @@
+name: Bileşen güvenliği
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['package.json', 'package-lock.json', '.github/workflows/bileşen-güvenliği.yml']
+  pull_request:
+    branches: [main]
+    paths: ['package.json', 'package-lock.json', '.github/workflows/bileşen-güvenliği.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  denetle:
+    name: Bilinen bileşen açıklarını denetle
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Node.js hazırla
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Bileşenleri kurulum betiklerini çalıştırmadan al
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: npm güvenlik kayıtlarını denetle
+        run: npm audit --audit-level=moderate

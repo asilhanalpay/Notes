@@ -31,12 +31,24 @@ jobs:
         run: npm ci
       - name: Denetimleri çalıştır
         run: npm run denetle
+      - name: Bileşen güvenliğini denetle
+        run: npm audit --audit-level=moderate
+      - name: Gerçek Electron ile güvenlik ve kayıt denetimleri
+        run: npm run denetle:electron
+      - name: Tema görüntülerini sakla
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Tema-görüntüleri
+          path: denetim-çıktıları/*.png
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Kurulum dosyasını oluştur
         run: npm run paketle:windows
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - name: Önceki yayımlanan sürümü indir
-        run: gh release download v0.2.4 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
+        run: gh release download v0.0.1 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEPO: ${{ github.repository }}
