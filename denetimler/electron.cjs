@@ -93,11 +93,11 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(true);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(9, 9, 9)');
   assert.equal(await sayfa.locator('.sidebar').evaluate(e => getComputedStyle(e).borderRightColor), 'rgb(94, 89, 78)');
-  await sayfa.screenshot({ path: 'denetim-çıktıları/karanlık.png' });
+  await sayfa.screenshot({ path: 'denetim-çıktıları/karanlık.png', animations: 'disabled' });
   await sayfa.locator('#tema').selectOption('acik');
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(false);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
-  await sayfa.screenshot({ path: 'denetim-çıktıları/açık.png' });
+  await sayfa.screenshot({ path: 'denetim-çıktıları/açık.png', animations: 'disabled' });
   await sayfa.locator('#tema').selectOption('karanlik');
   await sayfa.locator('#body').fill('Ctrl+S ile kaydedilen metin');
   await sayfa.keyboard.press('Control+s');
