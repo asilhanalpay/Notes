@@ -88,10 +88,6 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   }, adres);
   assert.equal(anaIslemAgEngeli, true);
   assert.equal(istekSayisi, 0);
-  const asilAdres = sayfa.url();
-  await sayfa.evaluate(() => { const a = document.createElement('a'); a.href = 'file:///izin-verilmeyen.html'; document.body.append(a); a.click(); a.remove(); window.open('about:blank'); });
-  await expect(sayfa).toHaveURL(asilAdres);
-  assert.equal((await uygulama.windows()).length, 1);
 
   await sayfa.locator('#tema').selectOption('karanlik');
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(true);
@@ -115,4 +111,19 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   sayfa = await ac();
   await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
   await expect(sayfa.locator('#tema')).toHaveValue('karanlik');
+
+  // Engellenen gezinti Playwright'ın gezinme bekleyicisini açık bırakabilir.
+  // Gerçek Electron olayını ve kalan belgeyi doğrudan doğrula; zaman aşımına dayanma.
+  const gezinti = await uygulama.evaluate(async ({ BrowserWindow }) => {
+    const wc = BrowserWindow.getAllWindows()[0].webContents;
+    const oncekiAdres = wc.getURL();
+    const olay = new Promise(resolve => wc.once('will-navigate', () => resolve()));
+    await wc.executeJavaScript("const a=document.createElement('a');a.href='file:///izin-verilmeyen.html';document.body.append(a);a.click();a.remove();window.open('about:blank');");
+    await olay;
+    return { oncekiAdres, adres: wc.getURL(), metin: await wc.executeJavaScript("document.getElementById('body').value"), pencereSayisi: BrowserWindow.getAllWindows().length };
+  });
+  assert.equal(gezinti.adres, gezinti.oncekiAdres);
+  assert.equal(gezinti.metin, 'Kapanışta beklemeden saklanan son metin');
+  assert.equal(gezinti.pencereSayisi, 1);
+
 });
