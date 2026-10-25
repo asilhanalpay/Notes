@@ -1,5 +1,12 @@
 # Sürüm notları
 
+## 0.0.3 — 25 Ekim 2026
+
+- Yeni sürümü denetle düğmesi bekleme sınırını atlayarak GitHub’dan güncel bilgiyi hemen alır.
+- Altı saatlik aralık yalnızca otomatik denetim için korunur; aynı anda birden fazla istek başlatılmaz.
+- Yeni sürüm bulunduğunda bildirim ve indirme düğmesi hemen gösterilir. Kurulum yine kullanıcı tarafından yapılır.
+
+
 ## 0.0.2 — 25 Ekim 2026
 
 - Yazı değişiklikleri kısa bir aradan sonra tek kayıtta birleştirilir. Ctrl+S ve kapanışta kayıt hemen tamamlanır.

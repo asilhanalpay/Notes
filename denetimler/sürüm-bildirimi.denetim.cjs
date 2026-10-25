@@ -68,6 +68,41 @@ test('Eşzamanlı ve sık denetimler çoğaltılmaz', async () => {
   await Promise.all([yonetici.denetle(), yonetici.denetle(), yonetici.denetle()]);
   await yonetici.denetle(); assert.equal(durum.istekler.length, 2);
 });
+test('Elle denetim bekleme süresini atlar ve yeni yayımlanan sürümü hemen görür', async () => {
+  let sonSurum = '0.0.2';
+  let istekSayisi = 0;
+  const { yonetici } = kur({ surum: '0.0.2', simdi: () => 1000,
+    oku: async yol => { istekSayisi++; return yol.endsWith('/latest') ? yayin(sonSurum) : DEPO; } });
+  yonetici.baslat();
+  assert.equal((await yonetici.denetle()).durum, 'guncel');
+  sonSurum = '0.0.3';
+  await yonetici.denetle();
+  assert.equal(istekSayisi, 2);
+  const yeni = await yonetici.denetle({ elle: true });
+  assert.equal(istekSayisi, 4);
+  assert.equal(yeni.durum, 'yeni-surum');
+  assert.equal(yeni.yeniSurum, '0.0.3');
+  assert.equal(yonetici.indirmeAdresi(), yayin('0.0.3').assets[0].browser_download_url);
+  await yonetici.denetle({ elle: true });
+  assert.equal(istekSayisi, 6);
+});
+test('Elle denetim de eşzamanlı istekleri çoğaltmaz ve bağlantı gereksinimini atlayamaz', async () => {
+  let tamamla;
+  let istekSayisi = 0;
+  const { yonetici } = kur({ oku: async yol => {
+    istekSayisi++;
+    return yol.endsWith('/latest') ? yayin() : await new Promise(resolve => { tamamla = resolve; });
+  } });
+  yonetici.baslat();
+  const ilk = yonetici.denetle({ elle: true });
+  await yonetici.denetle({ elle: true });
+  assert.equal(istekSayisi, 1);
+  tamamla(DEPO); await ilk;
+  assert.equal(istekSayisi, 2);
+  yonetici.ayir();
+  assert.equal((await yonetici.denetle({ elle: true })).durum, 'baglanti-gerekli');
+  assert.equal(istekSayisi, 2);
+});
 test('Farklı veya herkese açık depoya geçiş reddedilir', () => {
   assert.throws(() => depoyuDogrula({ ...DEPO, id: 1 }));
   assert.throws(() => depoyuDogrula({ ...DEPO, private: false }));
@@ -131,6 +166,7 @@ test('GitHub isteği yalnızca sabit HTTPS kaynağını kullanır; yönlendirme 
   } };
   await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', ANAHTAR, undefined, istemci));
   assert.equal(ayarlar.hostname, 'api.github.com'); assert.equal(ayarlar.port, 443);
+  assert.equal(ayarlar.headers['Cache-Control'], 'no-cache');
   await assert.rejects(() => githubOku('/users/asilhanalpay', ANAHTAR, undefined, istemci));
 });
 

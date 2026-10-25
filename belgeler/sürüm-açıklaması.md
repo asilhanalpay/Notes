@@ -1,17 +1,13 @@
 ## Bu sürümde
 
-- Yazmaya kısa süre ara verdiğinde son değişiklikler kaydedilir. **Ctrl+S** ve kapanışta kayıt beklemeden tamamlanır.
-- Yeşil görünüm yerine siyah-beyaz açık ve koyu temalar geldi. Koyu temadaki ince krem kenarlıklar bölümleri ayırır.
-- Defter simgesi yenilendi.
-- Güncelleme bağlantısı yeni **Notes** depo adına uyarlandı.
-- Gerçek Windows/Electron denetimleri ve haftalık bileşen güvenliği takibi eklendi.
+**Yeni sürümler → Yeni sürümü denetle** düğmesi artık bekleme sınırını atlayarak hemen kontrol eder. Yeni sürüm varsa bildirim ve indirme düğmesi, GitHub yanıtı gelir gelmez görünür.
+
+Altı saatlik aralık yalnızca otomatik arka plan denetimi içindir. Aynı anda birden fazla denetim başlatılmaz. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
 
 ## İndir ve kur
 
 **Notes.exe** dosyasını indir. Önce yedek al, Notes’u kapat ve kurulumu çalıştır. Eski sürümü kaldırman gerekmez.
 
-**0.0.1 kullanıyorsan bu sürümü bir kez elle indirip kurmalısın.** Depo adı değiştiği için eski sürüm yeni güncellemeyi bildiremez. Sonraki sürümlerde GitHub bağlantın etkinse uygulama içi bildirimler devam eder. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
+0.0.1 kullanıyorsan depo adı değiştiği için bu sürümü indirme sayfasından elle indir. 0.0.2’deki denetim kısa süre önce yapılmışsa mevcut iki dakikalık sınır devreye girebilir; bu düzeltmeyi almak için dosyayı doğrudan da indirebilirsin.
 
-**Gizlilik:** Notlar, kurtarma kopyaları ve yedekler şifrelenmez. Dosyalara erişen biri içeriklerini okuyabilir. GitHub erişim anahtarı Windows tarafından ayrıca şifrelenir.
-
-Windows 10/11, 64 bit. Kurulum dosyası henüz dijital imzalı değildir.
+Notlar ve yedekler şifrelenmez. Windows 10/11, 64 bit. Kurulum dosyası henüz dijital imzalı değildir.

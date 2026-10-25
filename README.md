@@ -22,8 +22,8 @@ Notların, kurtarma kopyaları ve aldığın yedekler **şifrelenmez**. Bu dosya
 
 ## Güncelle
 
-**0.0.1’den geçiş:** Depo adı değiştiği için 0.0.2’yi bir kez indirme sayfasından elle indirip kur.
+**0.0.1’den geçiş:** Depo adı değiştiği için yeni sürümü bir kez indirme sayfasından elle indirip kur.
 
-Bildirim almak için **Yeni sürümler** bölümündeki bağlantı adımlarını izle. Güncellemek için yedek al, Notes’u kapat ve yeni **Notes.exe** dosyasını indirip kur. Eski sürümü kaldırman gerekmez. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
+Bildirim almak için **Yeni sürümler** bölümündeki bağlantı adımlarını izle. **Yeni sürümü denetle** düğmesi beklemeden kontrol eder; altı saatlik aralık yalnızca otomatik denetim içindir. Güncellemek için yedek al, Notes’u kapat ve yeni **Notes.exe** dosyasını indirip kur. Eski sürümü kaldırman gerekmez. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
 
 [Dosyalar ne işe yarar?](belgeler/dosyalar.md) · [Sürüm notları](belgeler/sürüm-notları.md) · [Geliştirme bilgileri](belgeler/geliştirme.md)

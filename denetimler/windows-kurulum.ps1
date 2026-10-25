@@ -42,7 +42,7 @@ try {
     if (-not (Test-Path $eskiExe)) { throw 'Önceki uygulama kurulamadı.' }
     $eskiSurum = SurumuOku
     $eskiExeOzeti = (Get-FileHash $eskiExe -Algorithm SHA256).Hash
-    if ($eskiSurum -ne '0.0.1') { throw "Başlangıç sürümü beklenen sürüm değil: $eskiSurum" }
+    if ($eskiSurum -ne '0.0.2') { throw "Başlangıç sürümü beklenen sürüm değil: $eskiSurum" }
     New-Item -ItemType Directory -Path $veriKlasoru -Force | Out-Null
     $veri = '{"surum":1,"notlar":[{"id":"korunacak-not","title":"Güncelleme denetimi","body":"İğdır ve İstanbul: bu not korunmalı.","updated":1000}]}'
     [IO.File]::WriteAllText($notDosyasi, $veri, [Text.UTF8Encoding]::new($false))

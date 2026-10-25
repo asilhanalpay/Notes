@@ -118,7 +118,7 @@ else {
       ] }
     ]));
     islemTanimla('surum:durum', () => surumBildirimleri.gorunum());
-    islemTanimla('surum:denetle', () => surumBildirimleri.denetle());
+    islemTanimla('surum:denetle', () => surumBildirimleri.denetle({ elle: true }));
     islemTanimla('surum:bagla', anahtar => surumBildirimleri.bagla(anahtar));
     islemTanimla('surum:ayir', () => surumBildirimleri.ayir());
     islemTanimla('surum:indir', () => shell.openExternal(surumBildirimleri.indirmeAdresi()));

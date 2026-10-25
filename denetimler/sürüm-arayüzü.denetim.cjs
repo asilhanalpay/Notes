@@ -10,11 +10,15 @@ async function ac(t, ilkDurum) {
   t.after(() => dom.window.close());
   dom.window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   dom.window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); this.dispatchEvent(new dom.window.Event('close')); };
-  const durum = { indirmeler: 0, anahtar: null, dinle: null };
+  const durum = { indirmeler: 0, denetimler: 0, anahtar: null, dinle: null };
   dom.window.notDefterim = {
     surumDurumu: async () => ({ basarili: true, veri: ilkDurum }),
     surumDinle: islem => { durum.dinle = islem; },
     surumIndir: async () => { durum.indirmeler++; return { basarili: true }; },
+    surumDenetle: async () => {
+      durum.denetimler++;
+      return { basarili: true, veri: { ...ilkDurum, durum: 'yeni-surum', aciklama: 'Yeni sürüm hazır', yeniSurum: '0.0.3' } };
+    },
     surumBagla: async anahtar => { durum.anahtar = anahtar; return { basarili: true }; }
   };
   dom.window.eval(fs.readFileSync(path.join(__dirname, '../arayüz/sürüm-bildirimi.js'), 'utf8'));
@@ -45,4 +49,15 @@ test('Bağlantı süresi dolsa bile yerel erişim kaydını kaldırma seçeneği
   const { oge } = await ac(t, { durum: 'baglanti-gerekli', aciklama: 'Bağlantıyı yenile', surum: '0.2.3', bagli: true });
   assert.equal(oge('surumAyir').hidden, false);
   assert.equal(oge('erisimFormu').hidden, false);
+});
+
+test('Elle denetim düğmesi hemen istek gönderir ve sonucu indirme düğmesiyle gösterir', async t => {
+  const { oge, durum } = await ac(t, { durum: 'guncel', aciklama: 'Güncel', surum: '0.0.2', bagli: true });
+  oge('surumDenetle').click();
+  assert.equal(durum.denetimler, 1);
+  await bekle();
+  assert.equal(oge('surumBildirimi').hidden, false);
+  assert.equal(oge('surumIndir').hidden, false);
+  assert.equal(oge('surumBildirimMetni').textContent, 'Yeni sürüm hazır: 0.0.3');
+  assert.equal(durum.indirmeler, 0);
 });

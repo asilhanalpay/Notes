@@ -63,7 +63,7 @@ function githubOku(yol, anahtar, signal, istemci = https) {
     const istek = istemci.get({
       hostname: 'api.github.com', port: 443, path: yol, signal,
       headers: { Authorization: `Bearer ${anahtar}`, Accept: 'application/vnd.github+json',
-        'User-Agent': 'Notes', 'X-GitHub-Api-Version': '2022-11-28' }
+        'User-Agent': 'Notes', 'X-GitHub-Api-Version': '2022-11-28', 'Cache-Control': 'no-cache' }
     }, yanit => {
       if (yanit.statusCode !== 200) {
         yanit.resume();
@@ -142,7 +142,7 @@ class SurumBildirimi extends EventEmitter {
     if (engel) return this.bildir('kullanilamiyor', engel);
     try { this.anahtar = this.kasa.oku(); }
     catch { this.bildir('baglanti-gerekli', 'GitHub bağlantısı okunamadı. Bağlantıyı yeniden kur.'); }
-    if (this.anahtar) this.bildir('bekliyor', 'Yeni sürümler uygulama açıldığında ve altı saatte bir denetlenecek.');
+    if (this.anahtar) this.bildir('bekliyor', 'Açılışta ve altı saatte bir otomatik denetlenir. Düğmeyle istediğin zaman hemen denetleyebilirsin.');
     this.ilkSayac = this.zamanlayici.setTimeout(() => { void this.denetle(); }, 10000);
     this.sayac = this.zamanlayici.setInterval(() => { void this.denetle(); }, ARALIK);
     this.ilkSayac?.unref?.(); this.sayac?.unref?.();
@@ -179,11 +179,13 @@ class SurumBildirimi extends EventEmitter {
     this.kasa.sil();
     return this.bildir('baglanti-gerekli', 'GitHub bağlantısı kaldırıldı. Otomatik sürüm bildirimleri durduruldu.');
   }
-  async denetle() {
+  async denetle({ elle = false } = {}) {
     const engel = this.engel();
     if (engel) return this.bildir('kullanilamiyor', engel);
     if (!this.anahtar) return this.bildir('baglanti-gerekli', 'Özel sürüm bildirimleri için GitHub bağlantısı kur.');
-    if (this.mesgul || this.simdi() - this.sonDeneme < BEKLEME) return this.gorunum();
+    // Kullanıcının düğmeye basması her zaman yeni bir istek başlatır.
+    // Arka plan denetimlerinin sınırı ve eşzamanlı istek kilidi korunur.
+    if (this.mesgul || (!elle && this.simdi() - this.sonDeneme < BEKLEME)) return this.gorunum();
     this.mesgul = true;
     this.sonDeneme = this.simdi();
     const kusak = this.kusak;
