@@ -7,7 +7,9 @@
 
 ## İndir ve kur
 
-**Notes.exe** dosyasını indir. Önce yedek al, Notes’u kapat ve kurulumu çalıştır. Eski sürümü kaldırman gerekmez.
+**Notes.exe** dosyasını indir. Önce yedek al, Notes’u kapat ve kurulumu çalıştır.
+
+**Notes zaten kuruluysa:** Kurulumda mevcut konumu değiştirmeden devam et. Yeni sürüm eskisinin üzerine kurulur; notların korunur. Eski sürümü kaldırman gerekmez.
 
 GitHub bağlantın etkinse **Yeni sürümler → Yeni sürümü denetle** düğmesiyle kontrol edebilirsin. 0.0.1 kullanıyorsan depo adı değiştiği için bu sürümü indirme sayfasından elle indir.
 
