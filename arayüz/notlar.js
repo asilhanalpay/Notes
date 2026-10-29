@@ -62,10 +62,7 @@ function listeyiCiz() {
     baslik.textContent = not.title.trim() || 'Başlıksız not';
     const onizleme = document.createElement('p');
     onizleme.textContent = not.body.trim() || 'Yazmaya başla…';
-    const zaman = document.createElement('time');
-    zaman.textContent = tarih(not.updated);
-    zaman.dateTime = new Date(not.updated).toISOString();
-    dugme.append(baslik, onizleme, zaman);
+    dugme.append(baslik, onizleme);
     dugme.addEventListener('click', () => { seciliKimlik = not.id; ekraniCiz(); });
     oge('list').append(dugme);
   }
@@ -149,8 +146,14 @@ function duzenle() {
   kaydiPlanla();
 }
 
+function dosyaMenusunuKapat() {
+  const menu = oge('dosyaMenusu');
+  if (menu.hidePopover && menu.matches(':popover-open')) menu.hidePopover();
+}
+
 async function dosyaIslemi(islem) {
   if (!yuklendi || mesgul) return;
+  dosyaMenusunuKapat();
   mesgul = true;
   denetimleriAyarla();
   try {
@@ -219,6 +222,7 @@ oge('iceAktar').addEventListener('click', () => dosyaIslemi(async () => {
   oge('status').textContent = `${eklenen.length} not yedekten eklendi`;
 }));
 oge('klasor').addEventListener('click', async () => {
+  dosyaMenusunuKapat();
   const sonuc = await masaustu.klasoruAc();
   if (!sonuc.basarili) hataGoster(sonuc.hata);
 });

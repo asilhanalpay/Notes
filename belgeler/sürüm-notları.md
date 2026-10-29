@@ -1,5 +1,13 @@
 # Sürüm notları
 
+## 0.0.4 — 29 Ekim 2026
+
+- Sol bölüm 305 yerine 230 piksel oldu; not yazma alanı genişledi.
+- Not listesinde başlık ve tek satırlık önizleme kaldı. Tarih yalnızca açık notta gösterilir.
+- Yedekleme, yedekten ekleme ve not klasörü işlemleri sol alttaki ⋯ menüsünde toplandı. Menü klavyeyle kullanılabilir; Esc ve dışarı tıklamayla kapanır.
+- Süs metinleri kaldırıldı. Kayıt durumu ve kelime sayısı korundu.
+
+
 ## 0.0.3 — 25 Ekim 2026
 
 - Yeni sürümü denetle düğmesi bekleme sınırını atlayarak GitHub’dan güncel bilgiyi hemen alır.

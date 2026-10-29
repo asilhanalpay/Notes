@@ -59,6 +59,28 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect.poll(() => fs.existsSync(notDosyasi) && JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0]?.body).toBe('Türkçe gerçek Electron notu');
   assert.equal(await sayfa.locator('.note img').count(), 0);
   await expect(sayfa.locator('.note strong')).toHaveText('<img src=x onerror=alert(1)>');
+  assert.equal((await sayfa.locator('.sidebar').boundingBox()).width, 230);
+  assert.equal(await sayfa.locator('.note time').count(), 0);
+  await expect(sayfa.locator('#date')).not.toBeEmpty();
+  await expect(sayfa.locator('#words')).toHaveText('4 kelime');
+  // Yerleşik açılır menü: klavyeyle açma, Tab, Esc ve dışarı tıklama.
+  await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
+  await sayfa.locator('#digerIslemler').focus();
+  await sayfa.keyboard.press('Space');
+  await expect(sayfa.locator('#dosyaMenusu')).toBeVisible();
+  const menuKonumu = await sayfa.locator('#dosyaMenusu').boundingBox();
+  const dugmeKonumu = await sayfa.locator('#digerIslemler').boundingBox();
+  assert.ok(Math.abs(menuKonumu.x - dugmeKonumu.x) <= 1);
+  assert.ok(menuKonumu.y >= 0 && menuKonumu.y + menuKonumu.height <= dugmeKonumu.y);
+  await sayfa.keyboard.press('Tab');
+  await expect(sayfa.locator('#yedekle')).toBeFocused();
+  await sayfa.keyboard.press('Escape');
+  await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
+  await expect(sayfa.locator('#digerIslemler')).toBeFocused();
+  await sayfa.locator('#digerIslemler').click();
+  await expect(sayfa.locator('#dosyaMenusu')).toBeVisible();
+  await sayfa.locator('#body').click();
+  await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
 
   // Farklı bir gerçek webContents, geçerli kanal adını bilse de kayıt yapamaz.
   const onceki = fs.readFileSync(notDosyasi, 'utf8');
@@ -98,6 +120,9 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(false);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
   await sayfa.screenshot({ path: 'denetim-çıktıları/açık.png', animations: 'disabled' });
+  await sayfa.locator('#digerIslemler').click();
+  await sayfa.screenshot({ path: 'denetim-çıktıları/menü.png', animations: 'disabled' });
+  await sayfa.keyboard.press('Escape');
   await sayfa.locator('#tema').selectOption('karanlik');
   await sayfa.locator('#body').fill('Ctrl+S ile kaydedilen metin');
   await sayfa.keyboard.press('Control+s');

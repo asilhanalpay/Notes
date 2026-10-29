@@ -13,7 +13,7 @@ Windows 10/11 (64 bit). Yayıncı imzası olmadığı için Windows uyarı göst
 
 - **+** ile not oluştur, arama kutusuyla bul. Yazmaya kısa süre ara verdiğinde kaydedilir. **Ctrl+S** ile beklemeden kaydedebilirsin.
 - **Tema** bölümünden açık veya karanlık görünümü seç.
-- **Yedek al** ile notlarının bir kopyasını sakla; **Yedekten ekle** ile geri ekle.
+- Sol alttaki **⋯** menüsünden **Yedek al**, **Yedekten ekle** ve **Not klasörünü aç** işlemlerine ulaş.
 - Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** ile kurtar.
 
 ## Gizlilik
