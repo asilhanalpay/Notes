@@ -9,13 +9,16 @@
     bilgi = yeni;
     oge('surumMetni').textContent = yeni.aciklama;
     oge('kuruluSurum').textContent = `Kurulu sürüm: ${yeni.surum}`;
-    oge('surumBildirimi').hidden = yeni.durum !== 'yeni-surum';
-    oge('surumBildirimMetni').textContent = `Yeni sürüm hazır: ${yeni.yeniSurum ?? ''}`;
+    oge('surumBildirimi').hidden = !['yeni-surum', 'indiriliyor', 'kuruluyor'].includes(yeni.durum);
+    oge('surumBildirimMetni').textContent = ['indiriliyor', 'kuruluyor'].includes(yeni.durum)
+      ? yeni.aciklama : `Yeni sürüm hazır: ${yeni.yeniSurum ?? ''}`;
     oge('surumIndir').hidden = yeni.durum !== 'yeni-surum';
+    oge('surumHizliGuncelle').hidden = yeni.durum !== 'yeni-surum';
     oge('erisimFormu').hidden = yeni.durum !== 'baglanti-gerekli';
     oge('surumAyir').hidden = !yeni.bagli;
-    const mesgul = istekSuruyor || yeni.durum === 'denetleniyor';
+    const mesgul = istekSuruyor || ['denetleniyor', 'indiriliyor', 'kuruluyor'].includes(yeni.durum);
     for (const dugme of oge('surumPenceresi').querySelectorAll('button[data-surum]')) dugme.disabled = mesgul;
+    oge('surumHizliGuncelle').disabled = mesgul;
     oge('surumAyir').disabled = false;
     oge('surumDenetle').disabled = mesgul || ['baglanti-gerekli', 'kullanilamiyor'].includes(yeni.durum);
   }
@@ -46,6 +49,7 @@
   oge('surumPenceresi').addEventListener('close', () => { oge('erisimAnahtari').value = ''; });
   oge('surumDenetle').addEventListener('click', () => istek(() => api.surumDenetle()));
   oge('surumIndir').addEventListener('click', () => istek(() => api.surumIndir()));
+  oge('surumHizliGuncelle').addEventListener('click', () => istek(() => api.surumIndir()));
   oge('surumAyir').addEventListener('click', async () => {
     try {
       const sonuc = await api.surumAyir();

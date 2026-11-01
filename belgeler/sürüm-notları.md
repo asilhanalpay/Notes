@@ -1,3 +1,10 @@
+# 0.0.5
+
+- Minimatch uyarısı 11.0.3 ve eski API uyumluluk katmanıyla giderildi; audit sıfır uyarı, 62 birim ve gerçek Windows denetimleri geçti.
+- Logo çevresindeki boşluk azaltıldı; görev çubuğu ve kurulum için 16–256 piksel ICO katmanları yenilendi.
+- Yeni kararlı sürümler yaklaşık dakikada bir denetlenir. Güncelle düğmesi doğrulanan kurulumu indirir, son notları kaydeder ve mevcut klasöre sessiz kurar.
+- Bu kayıt yayın yapıldığı anlamına gelmez. Önceki kurulum bir kez yeni sürümle yükseltilmelidir.
+
 # Sürüm notları
 
 ## 0.0.4 — 29 Ekim 2026

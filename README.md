@@ -20,10 +20,16 @@ Windows 10/11 (64 bit). Yayıncı imzası olmadığı için Windows uyarı göst
 
 Notların, kurtarma kopyaları ve aldığın yedekler **şifrelenmez**. Bu dosyalara erişen biri yazdıklarını okuyabilir. GitHub erişim anahtarın ise Windows tarafından şifrelenerek saklanır.
 
+Bir notu silmek, bütün kopyalarını silmez. Önceki içerik otomatik kurtarma kopyasında ve daha önce aldığın dış yedeklerde kalabilir. 10 saniyelik geri alma süresinin bitmesi bu kopyaların yok edildiği anlamına gelmez. Dosya silmek; SSD, Windows gölge kopyaları veya dış yedeklerde garantili güvenli imha sağlamaz.
+
 ## Güncelle
 
 **0.0.1’den geçiş:** Depo adı değiştiği için yeni sürümü bir kez indirme sayfasından elle indirip kur.
 
-Bildirim almak için **Yeni sürümler** bölümündeki bağlantı adımlarını izle. **Yeni sürümü denetle** düğmesi beklemeden kontrol eder; altı saatlik aralık yalnızca otomatik denetim içindir. Güncellemek için yedek al, Notes’u kapat ve yeni **Notes.exe** dosyasını indirip kur. Eski sürümü kaldırman gerekmez. Uygulama kendiliğinden kurulum yapmaz ve e-posta göndermez.
+Bildirim almak için **Yeni sürümler** bölümündeki bağlantı adımlarını izle. Uygulama açıkken yayımlanmış sürümler yaklaşık dakikada bir denetlenir; **Yeni sürümü denetle** düğmesi beklemeden kontrol eder. Bildirimdeki **Güncelle**, kurulumu arka planda indirip doğrular, notlarını kaydeder, Notes’u kapatır ve mevcut kurulum klasörüne sessizce kurar. Ardından Notes yeniden açılır; klasör seçmen veya eski sürümü kaldırman gerekmez. İndirme/doğrulama ya da kayıt başarısızsa kurulum başlamaz.
+
+Bu akış 0.0.5 ile gelir; önceki uygulama bir kez yeni kurulumla yükseltilmelidir. Depoya kod göndermek tek başına bildirim oluşturmaz: daha yüksek numaralı kararlı sürümün **Notes.exe** dosyasıyla yayımlanması gerekir. İnternet, geçerli özel depo bağlantısı ve yayının SHA-256 özeti gereklidir. Güçlü yayıncı imzası henüz yoktur; güncellemeler GitHub’daki doğrulanan özel yayına güvenir. Bulut eşitleme veya e-posta bildirimi yapılmaz.
+
+GitHub anahtarını oluştururken yalnızca Notes deposunu ve **Contents → Read-only** iznini seç. Uygulama anahtarın diğer yetkilerini denetlemez. **Bağlantıyı kaldır**, yalnızca bu bilgisayardaki kaydı siler; anahtarı GitHub üzerinde iptal etmez.
 
 [Dosyalar ne işe yarar?](belgeler/dosyalar.md) · [Sürüm notları](belgeler/sürüm-notları.md) · [Geliştirme bilgileri](belgeler/geliştirme.md)

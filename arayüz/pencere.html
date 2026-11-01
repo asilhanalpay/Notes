@@ -7,7 +7,7 @@
 <header class="topbar"><div class="brand"><img class="logo" src="simge.png" alt="" width="36" height="36"> Notes</div><div class="ust-islemler"><label class="tema-secimi" for="tema">Tema<select id="tema"><option value="acik">Açık</option><option value="karanlik">Karanlık</option></select></label><button id="surumler" class="surum-dugmesi">Yeni sürümler</button></div></header>
 <p id="temaUyarisi" class="tema-uyarisi" role="status" hidden>Tema değişti ama tercihin kaydedilemedi. Bir sonraki açılışta yeniden seçmen gerekebilir.</p>
 <div id="hata" class="hata" role="alert" hidden><span id="hataMetni"></span><button id="yenidenDene">Yeniden dene</button></div>
-<div id="surumBildirimi" class="surum-bildirimi" role="status" hidden><span id="surumBildirimMetni"></span><button id="surumBildirimAc">Görüntüle</button></div>
+<div id="surumBildirimi" class="surum-bildirimi" role="status" hidden><span id="surumBildirimMetni"></span><button id="surumHizliGuncelle">Güncelle</button><button id="surumBildirimAc">Ayrıntılar</button></div>
 <main class="workspace">
 <aside class="sidebar" aria-label="Notlar">
   <div class="sidebar-heading"><h1>Notlarım <span id="noteCount">0</span></h1><button id="add" class="add" data-islem aria-label="Yeni not oluştur" title="Yeni not">+</button></div>
@@ -25,7 +25,7 @@
 <section class="editor" aria-label="Not düzenleyici"><div class="toolbar"><span id="status" role="status">Yazmaya hazır</span><button id="delete" class="delete" data-islem title="Notu sil" aria-label="Notu sil"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg><span>Sil</span></button></div><div id="writing" class="writing"><label class="sr-only" for="title">Not başlığı</label><input id="title" class="title" placeholder="Başlıksız not" autocomplete="off" maxlength="500"><div id="date" class="date"></div><label class="sr-only" for="body">Not içeriği</label><textarea id="body" placeholder="Aklından geçenleri yaz…" spellcheck="false" maxlength="1000000"></textarea></div><div id="empty" class="empty" hidden><h2>Henüz not yok</h2><button id="first" class="primary" data-islem>+ İlk notunu yaz</button></div><footer class="editor-footer"><span id="words">0 kelime</span></footer></section>
 </main>
 <div id="toast" class="toast" role="status" hidden>Not silindi. <button id="undo" data-islem>Geri al</button></div>
-<dialog id="confirm"><h2>Bu not silinsin mi?</h2><p>Silinen notu kısa süre içinde geri alabilirsin.</p><div><button id="cancel" class="secondary">Vazgeç</button><button id="confirmDelete" class="danger">Notu sil</button></div></dialog>
+<dialog id="confirm"><h2>Bu not silinsin mi?</h2><p>Silinen notu 10 saniye içinde geri alabilirsin. Not, otomatik kurtarma kopyasında ve daha önce aldığın yedeklerde kalabilir. Silmek, tüm kopyaların güvenli biçimde imha edildiği anlamına gelmez.</p><div><button id="cancel" class="secondary">Vazgeç</button><button id="confirmDelete" class="danger">Notu sil</button></div></dialog>
 <dialog id="surumPenceresi" aria-labelledby="surumBasligi">
   <h2 id="surumBasligi">Yeni sürümler</h2>
   <p id="kuruluSurum"></p>
@@ -34,18 +34,19 @@
   <form id="erisimFormu" hidden>
     <p>Güncelleme dosyaların özel. Bu bilgisayarın yeni sürümleri görebilmesi için GitHub’da yalnızca bu depoya okuma izni ver.</p>
     <button id="izinSayfasi" type="button" data-surum>GitHub’da erişim izni oluştur</button>
-    <p>Açılan sayfada yalnızca <strong>Notes</strong> deposunu seç ve <strong>Contents → Read-only</strong> izni ver. Diğer izinleri açma.</p>
+    <p>Açılan sayfada yalnızca <strong>Notes</strong> deposunu seç ve <strong>Contents → Read-only</strong> izni ver. Diğer izinleri açma. Uygulama, anahtarın diğer izinlerini denetleyemez.</p>
     <label for="erisimAnahtari">GitHub erişim anahtarı</label>
     <input id="erisimAnahtari" type="password" autocomplete="off" spellcheck="false" maxlength="260" required>
     <p>GitHub parolanı kullanma. Bu anahtar Windows tarafından şifrelenerek bu bilgisayarda saklanır. Süresi dolarsa bağlantıyı yenileyebilirsin.</p>
     <button type="submit" data-surum>Bildirimleri etkinleştir</button>
   </form>
-  <p class="surum-aciklamasi">Yeni sürümü denetle düğmesi beklemeden kontrol eder. Altı saatlik aralık yalnızca otomatik denetim içindir. Yeni sürüm varsa kurulum dosyasını tarayıcıdan indirip uygulamayı kapatarak kendin kurarsın. Uygulama e-posta göndermez ve kendi kendine kurulum yapmaz.</p>
+  <p class="surum-aciklamasi">Yayımlanmış yeni sürümler uygulama açıkken yaklaşık dakikada bir denetlenir. Güncelle düğmesi kurulumu indirip doğrular, notlarını kaydeder ve Notes'u kapatarak mevcut klasöre sessizce kurar. Ardından uygulama yeniden açılır. Kaydetme başarısızsa kurulum başlamaz. İndirme sırasında notlarını kullanabilirsin.</p>
   <div class="surum-islemleri">
     <button id="surumAyir" hidden>Bağlantıyı kaldır</button>
     <button id="surumDenetle" data-surum>Yeni sürümü denetle</button>
-    <button id="surumIndir" class="primary" data-surum hidden>Kurulum dosyasını indir</button>
+    <button id="surumIndir" class="primary" data-surum hidden>Güncelle</button>
     <button id="surumKapat">Kapat</button>
   </div>
+  <p class="surum-aciklamasi">Bağlantıyı kaldırmak yalnızca bu bilgisayardaki kaydı siler. Anahtarı tamamen iptal etmek için GitHub ayarlarını kullan.</p>
 </dialog>
 </body></html>

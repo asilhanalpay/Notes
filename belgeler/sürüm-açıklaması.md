@@ -1,16 +1,13 @@
 ## Bu sürümde
 
-- Sol bölüm daraltıldı, not yazma alanı genişledi.
-- Not listesinde yalnızca başlık ve tek satırlık önizleme var. Tarih açık notta görünür.
-- **Yedek al**, **Yedekten ekle** ve **Not klasörünü aç**, sol alttaki **⋯** menüsüne taşındı.
-- Süs metinleri kaldırıldı; kayıt durumu ve kelime sayısı korundu.
+- Logo aynı tasarımla daha dolu görünür; görev çubuğu ve kurulum ikonları yenilendi.
+- Yeni kararlı sürümler, GitHub bağlantısı etkin ve uygulama açıkken yaklaşık dakikada bir denetlenir.
+- Bildirimdeki **Güncelle**, kurulumu indirip doğrular, notları kaydeder ve mevcut klasöre sessizce kurar. Klasör yeniden sorulmaz; ardından Notes açılır.
+- Minimatch derleme bağımlılığı düzeltilmiş 11.0.3 sürümüne geçirildi; eski derleme API çağrıları uyumluluk testleriyle korundu.
+- Electron ve paketleme araçları güncellendi; mevcut şifreli erişim kaydı uyumu ve paket güçlendirmeleri korundu.
 
-## İndir ve kur
+## İlk geçiş
 
-**Notes.exe** dosyasını indir. Önce yedek al, Notes’u kapat ve kurulumu çalıştır.
+0.0.4 veya daha eski kurulumda bu tek tuş akışı bulunmaz. Yeni **Notes.exe** dosyasını bir kez indir, yedek al, Notes’u kapat ve mevcut konuma kur. Eski sürümü kaldırman gerekmez. Sonraki yayımlanmış sürümlerde **Güncelle** düğmesini kullanabilirsin.
 
-**Notes zaten kuruluysa:** Kurulumda mevcut konumu değiştirmeden devam et. Yeni sürüm eskisinin üzerine kurulur; notların korunur. Eski sürümü kaldırman gerekmez.
-
-GitHub bağlantın etkinse **Yeni sürümler → Yeni sürümü denetle** düğmesiyle kontrol edebilirsin. 0.0.1 kullanıyorsan depo adı değiştiği için bu sürümü indirme sayfasından elle indir.
-
-Notlar ve yedekler şifrelenmez. Windows 10/11, 64 bit. Kurulum dosyası henüz dijital imzalı değildir.
+Notlar, kurtarma kopyaları ve dış yedekler şifrelenmez. Kurulum dosyası henüz yayıncı imzalı değildir. Güncelleme doğrulaması özel GitHub yayınının SHA-256 özetine güvenir; bağımsız yayıncı imzası değildir.

@@ -1,0 +1,88 @@
+name: Windows veri koruma — yayınsız denetim
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/windows-denetimi-*']
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'masaüstü/**'
+      - 'arayüz/**'
+      - 'denetimler/**'
+      - 'kurulum-kaynakları/**'
+      - '.github/workflows/**'
+
+concurrency:
+  group: windows-aday-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  aday:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Node.js hazırla
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Bağımlılıkları kur
+        run: npm ci
+      - name: Birim denetimleri
+        run: npm run denetle
+      - name: Gerçek Electron ve eski şifreli kayıt uyumu
+        run: npm run denetle:electron
+      - name: Normal Windows kurulumunu paketle
+        run: npm run paketle:windows
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Gerçek EXE ve ASAR davranışı
+        shell: pwsh
+        run: ./denetimler/windows-paket.ps1
+      - name: Önceki yayımlanan kurulumu al
+        run: gh release download v0.0.3 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPO: ${{ github.repository }}
+      - name: Özel yayından gerçek güncelleme indirmesi
+        run: node denetimler/windows-indirme.cjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Standart yetkiyle kurulum yaşam döngüsü ve izinler
+        shell: pwsh
+        run: ./denetimler/windows-standart-kullanıcı.ps1
+      - name: Başka standart hesaptan dosya erişimi
+        shell: pwsh
+        run: ./denetimler/windows-diğer-hesap.ps1
+      - name: Windows kurulum çıktısının özetini kaydet
+        shell: pwsh
+        run: |
+          $dosya = Get-Item ./kurulum/Notes.exe
+          @{ commit = $env:GITHUB_SHA; os = [Environment]::OSVersion.VersionString; sha256 = (Get-FileHash $dosya.FullName -Algorithm SHA256).Hash; bayt = $dosya.Length; imza = "$(Get-AuthenticodeSignature $dosya.FullName | Select-Object -ExpandProperty Status)" } |
+            ConvertTo-Json | Set-Content ./denetim-çıktıları/windows-kurulum-paket.json -Encoding utf8
+      - name: Test edilen Windows kurulumunu kısa süre sakla
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Notes-Windows-test
+          path: kurulum/Notes.exe
+          if-no-files-found: error
+          retention-days: 1
+      # Davranış kanıtı audit kırmızı olsa da toplanabilsin. Yayın işi yoktur;
+      # audit hatası iş akışını yine başarısız yapar, bastırılmaz.
+      - name: Bileşen güvenliği
+        if: always()
+        run: npm audit --audit-level=moderate
+      - name: Denetim kanıtlarını sakla
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Guclendirme-adayi-denetimleri
+          path: denetim-çıktıları/
+          if-no-files-found: ignore
+          retention-days: 14

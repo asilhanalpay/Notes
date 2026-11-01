@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
 const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./sürüm-bildirimi.cjs');
+const { kurulumHazirla } = require('./güncelleme.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
 
 app.setName('Notes');
@@ -18,6 +19,8 @@ let pencere;
 let depo;
 let kapanabilir = false;
 let surumBildirimleri;
+let bekleyenGuncelleme;
+let guncellemeKapanisi = false;
 const arayuz = path.join(__dirname, '..', 'arayüz', 'pencere.html');
 const arayuzAdresi = pathToFileURL(arayuz).href;
 
@@ -120,8 +123,19 @@ else {
     islemTanimla('surum:durum', () => surumBildirimleri.gorunum());
     islemTanimla('surum:denetle', () => surumBildirimleri.denetle({ elle: true }));
     islemTanimla('surum:bagla', anahtar => surumBildirimleri.bagla(anahtar));
-    islemTanimla('surum:ayir', () => surumBildirimleri.ayir());
-    islemTanimla('surum:indir', () => shell.openExternal(surumBildirimleri.indirmeAdresi()));
+    islemTanimla('surum:ayir', () => {
+      if (guncellemeKapanisi) throw new Error('Güncelleme hazırlanıyor. Uygulamanın kapanmasını bekle.');
+      bekleyenGuncelleme?.temizle(); bekleyenGuncelleme = null;
+      return surumBildirimleri.ayir();
+    });
+    islemTanimla('surum:indir', async () => {
+      bekleyenGuncelleme = await surumBildirimleri.guncelle(ayar => kurulumHazirla({
+        ...ayar, kok: path.join(app.getPath('userData'), 'guncellemeler')
+      }));
+      // Normal kapanış not düzenleyicisinin son kaydı bitirmesini bekler.
+      setImmediate(() => pencere?.close());
+      return surumBildirimleri.gorunum();
+    });
     islemTanimla('surum:izin', () => shell.openExternal(IZIN_SAYFASI));
     islemTanimla('tema:sec', tema => {
       if (!['acik', 'karanlik'].includes(tema)) throw new Error('Tema seçimi geçersiz.');
@@ -153,9 +167,33 @@ else {
       const hata = await shell.openPath(app.getPath('userData'));
       if (hata) throw new Error('Not klasörü açılamadı.');
     });
-    islemTanimla('uygulama:kapat', () => { kapanabilir = true; pencere.close(); });
+    islemTanimla('uygulama:kapat', async () => {
+      if (bekleyenGuncelleme) {
+        if (guncellemeKapanisi) throw new Error('Güncelleme hazırlanıyor.');
+        guncellemeKapanisi = true;
+        try { await bekleyenGuncelleme.baslat(); }
+        catch (hata) {
+          guncellemeKapanisi = false;
+          bekleyenGuncelleme.temizle(); bekleyenGuncelleme = null;
+          surumBildirimleri.mesgul = false;
+          surumBildirimleri.bildir('yeni-surum', hata.message, { yeniSurum: surumBildirimleri.yayin?.surum });
+          throw hata;
+        }
+      }
+      kapanabilir = true; pencere.close();
+    });
     pencereOlustur();
-    surumBildirimleri.baslat();
+    try {
+      const sonucDosyasi = path.join(app.getPath('userData'), 'guncellemeler', 'sonuc.json');
+      if (fs.existsSync(sonucDosyasi) && fs.statSync(sonucDosyasi).size < 4096) {
+        const sonuc = JSON.parse(fs.readFileSync(sonucDosyasi, 'utf8').replace(/^\uFEFF/, ''));
+        if (sonuc.basarili === false) {
+          fs.rmSync(sonucDosyasi);
+          dialog.showErrorBox('Güncelleme tamamlanamadı', 'Kurulum tamamlanamadı. Notların saklandığı klasör korunur. Yeniden kurmayı deneyebilirsin.');
+        }
+      }
+    } catch { /* Eksik güncelleme günlüğü not düzenleyicisini engellemez. */ }
+    void surumBildirimleri.baslat();
     powerMonitor.on('resume', () => { void surumBildirimleri.denetle(); });
     app.on('will-quit', () => surumBildirimleri.durdur());
     app.on('activate', () => { if (!pencere) pencereOlustur(); });

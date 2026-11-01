@@ -47,6 +47,9 @@ jobs:
         run: npm run paketle:windows
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Gerçek EXE ve ASAR bütünlük davranışını denetle
+        shell: pwsh
+        run: ./denetimler/windows-paket.ps1
       - name: Önceki yayımlanan sürümü indir
         run: gh release download v0.0.3 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
         env:
@@ -54,7 +57,18 @@ jobs:
           DEPO: ${{ github.repository }}
       - name: Eski sürümün üzerine kurulumu ve notların korunmasını denetle
         shell: pwsh
-        run: ./denetimler/windows-kurulum.ps1
+        run: ./denetimler/windows-standart-kullanıcı.ps1
+      - name: Başka standart hesaptan veri ve uygulama izinlerini denetle
+        shell: pwsh
+        run: ./denetimler/windows-diğer-hesap.ps1
+      - name: Windows izin gözlemlerini sakla
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Windows-izin-denetimi
+          path: denetim-çıktıları/windows-*.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Kurulum dosyasını sakla
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
