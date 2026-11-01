@@ -11,6 +11,7 @@ async function paketle() {
   if (process.platform !== 'linux') throw new Error('Bu komut yalnız Linux içindir; Windows üzerinde paketle:windows kullan.');
   assert.equal(require('electron-builder/package.json').version, '26.18.1', 'Linux NSIS uyarlayıcısı yeni builder sürümüyle tekrar doğrulanmalı.');
   assert.equal(require('app-builder-lib/package.json').version, '26.18.1');
+  require('./minimatch-uyumu.cjs')();
   const argumanlar = process.argv.slice(2);
   if (argumanlar.some(a => a !== '--aday') || argumanlar.length > 1) throw new Error('Yalnız --aday seçeneği destekleniyor.');
   const { build, Platform, Arch } = require('electron-builder');

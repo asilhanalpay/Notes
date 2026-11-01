@@ -3,6 +3,7 @@
 - Logo aynı tasarımla daha dolu görünür; görev çubuğu ve kurulum ikonları yenilendi.
 - Yeni kararlı sürümler, GitHub bağlantısı etkin ve uygulama açıkken yaklaşık dakikada bir denetlenir.
 - Bildirimdeki **Güncelle**, kurulumu indirip doğrular, notları kaydeder ve mevcut klasöre sessizce kurar. Klasör yeniden sorulmaz; ardından Notes açılır.
+- Minimatch derleme bağımlılığı düzeltilmiş 11.0.3 sürümüne geçirildi; eski derleme API çağrıları uyumluluk testleriyle korundu.
 - Electron ve paketleme araçları güncellendi; mevcut şifreli erişim kaydı uyumu ve paket güçlendirmeleri korundu.
 
 ## İlk geçiş

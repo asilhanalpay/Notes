@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
+require('../kurulum-kaynakları/minimatch-uyumu.cjs')();
 const asar = require('@electron/asar');
 const { getCurrentFuseWire, FuseV1Options } = require('@electron/fuses');
 const { NtExecutable, NtExecutableResource } = require('resedit');

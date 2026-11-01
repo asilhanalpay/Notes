@@ -1,5 +1,7 @@
 # İkon ve tek tuş güncelleme — 0.0.5 adayı
 
+Bu belge ilk adayın geçmiş denemelerini kaydeder. Sonraki minimatch düzeltmesi ve yayın sonuçları [ayrı kayıttadır](minimatch-düzeltmesi.md).
+
 Logo yeniden çizilmeden, 512 piksel kaynakta 48 piksel civarındaki kenar boşluğu azaltıldı. Dolu alan yaklaşık %81’den %96’ya çıktı. PNG ve 16/20/24/32/40/48/64/128/256 boyutlarında ICO aynı kaynaktan üretildi. Windows ikon önbelleği/pinlenmiş kısayolun yenilenmesi gerekebilir.
 
 Güncelleme bildirimi bir kod gönderimini değil, daha yüksek kararlı GitHub yayını ve geçerli Notes.exe varlığını izler. Uygulama açık, çevrimiçi ve özel depoya bağlıyken yaklaşık dakikada bir kontrol yapılır; cihaz uykudayken anlık teslim garantisi yoktur. Kullanıcı tek Güncelle tıklamasıyla indirir. Dosyanın boyutu ve SHA-256 özeti doğrulanır. Anahtar yalnız API isteğinde kullanılır; GitHub veri sunucularına aktarılmaz. Gizli notlar ağa gönderilmez.
