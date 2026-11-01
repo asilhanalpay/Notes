@@ -101,3 +101,7 @@ npm run paketle:windows:linux:aday
 İnternetsiz kullanımda `NOTES_ELECTRON_CACHE` Electron arşivinin önbelleğini, `ELECTRON_BUILDER_CACHE` NSIS/7zip araç önbelleğini seçebilir. Electron önbelleğine resmî `SHASUMS256.txt-45.2.1` de konulmalı; sağlama veya TLS doğrulaması kapatılmamalıdır. Bu komutlar ağsız konteynerde normal ve aday kurulum için doğrulanmıştır. Kurulum üretimi ve arşiv bütünlüğü, gerçek Windows kurulum/veri/ACL/DPAPI testlerinin yerini tutmaz.
 
 [Bakım sonuçları ve kalan doğrulamalar](bakım-doğrulama.md) · [Veri koruma taslakları](veri-koruma-tasarımı.md)
+
+## Minimatch derleme uyumu
+
+Minimatch 11.0.3 sabittir; eski dolaylı kopyalar aynı sürüme yönlendirilir. npm paketleme komutları, resmi builder CLI'sinden önce yalnız Node derleme sürecinde `minimatch-uyumu.cjs` yükler. Uygulama NODE_OPTIONS/fuse ayarları değiştirilmez. Callable/Matcher ve Windows ayırıcı köprüsü üst paketlerin API farklarını korur; sürüm değişiminde yeniden sınanmalıdır. [Düzeltme, testler ve geri dönüş](minimatch-düzeltmesi.md).

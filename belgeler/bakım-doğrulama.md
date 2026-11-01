@@ -1,5 +1,7 @@
 # Notes 0.0.4 bakım ve doğrulama kaydı
 
+Bu belge ilk bakım aşamasının geçmiş kaydıdır. Sonraki [minimatch düzeltmesi ve 0.0.5 yayın doğrulaması](minimatch-düzeltmesi.md), aşağıdaki eski audit sonucunun yerini alır.
+
 Tarih: 1 Kasım 2026. Bu çalışma bir sürüm yayını veya yeni tam güvenlik taraması değildir. Sağlanan `report.md` raporunda doğrulanmış raporlanabilir açık sayısı sıfırdır. Kaynak bakımına ilişkin değişiklikler bu sonucu yeni açık iddialarına dönüştürmez. Rapordaki kaynak anlık görüntüsünün mevcut çalışma ağacıyla bayt eşitliği ayrıca doğrulanmamıştır.
 
 Bu kayıttaki ilk Linux aşamasından sonra gerçek Windows denetimleri de çalıştırıldı. Güncel sonuçlar [Windows doğrulama kaydındadır](windows-doğrulama.md).

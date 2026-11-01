@@ -47,6 +47,9 @@ jobs:
         run: npm run paketle:windows
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Gerçek EXE ve ASAR bütünlük davranışını denetle
+        shell: pwsh
+        run: ./denetimler/windows-paket.ps1
       - name: Önceki yayımlanan sürümü indir
         run: gh release download v0.0.3 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
         env:

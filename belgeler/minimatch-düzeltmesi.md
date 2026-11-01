@@ -23,7 +23,12 @@ Değişen dosyalar: package.json, package-lock.json; yeni minimatch-uyumu.cjs ve
 - Sonra: aynı kontrol 64'te durur; ikinci örüntü sınıfı 32 sınırında durur. 1.001 girdili kümede ikinci aşamanın ikili karşılaştırmaya girmediği doğrulanır.
 - Yedi odaklı test; gerçek glob7/filelist, ASAR glob/unpack, dir-compare ve builder'ın kaynak dosyası sınırlarını denetler. Dot/Unicode/extglob/defaults ve Windows ayırıcı/escape kontrolleri vardır. İlk yalnız callable köprü glob7'nin Matcher farkını kaçırdı; gerçek tüketici testleri bunu yakaladı. Bağımsız incelemenin Windows FileList hatası da düzeltildi.
 - Kilitte tek minimatch11.0.3; bütün altı tüketici aynı modülü çözer. npm audit --audit-level=moderate sıfır bulgu verdi. Temiz npm ci geçti; diğer kullanım dışı dolaylı paketlerin uyarıları kaldı.
-- Yeni tam birim sayısı 62'dir. Gerçek Windows ve yayın sonuçları bu kaydın sonuna eklenecektir; henüz bu yeni bağımlılık zinciriyle Windows/yayın tamamlandı sayılmaz.
+- 62 birim ve 1 gerçek Electron testi temiz Windows Server 2025 x64 üzerinde de geçti. [41314078270](https://github.com/asilhanalpay/Notes/actions/runs/41314078270), doğrulanan kaynak `5fa654d869f6b35232d54fb4a69cab83a4954fc8`, başarıyla tamamlandı. Audit sıfır bulgu; NSIS üretimi; gerçek fuse/ASAR davranışı; canlı özel yayın indirmesi; standart yetkide sessiz güncelleme/normal kapanış/yeniden açma ve veri koruma; 0.0.3 yükseltmesi; ayrı standart hesabın kurulum/izin deneyleri geçti.
+- [Kanıt arşivi](https://github.com/asilhanalpay/Notes/actions/runs/41314078270/artifacts/13085484907) ZIP SHA-256: `ffec14dd44bb79b6259622419c845e2b759e914d814c7ddf65ee8a5269e584e3`. Bu adayın kurulum çıktısı ayrı ZIP kimliği 13085599438; son yayımlanan EXE, main üzerindeki yeniden doğrulanan üretimden gelir ve özeti değişebilir.
+- Yayın hattı artık oluşturduğu gerçek EXE/ASAR davranışını da zorunlu olarak sınar. Npm audit --audit-level=moderate adımı olduğu gibi korunur; advisory istisnası veya continue-on-error eklenmedi.
+- Yayının güncel durumu [PR6](https://github.com/asilhanalpay/Notes/pull/6), [normal iş akışı](https://github.com/asilhanalpay/Notes/actions/workflows/windows-kurulum.yml) ve [v0.0.5 sürüm kaydından](https://github.com/asilhanalpay/Notes/releases/tag/v0.0.5) izlenir. Yayın yalnız main denetimleri geçtikten sonra normal iş akışıyla yapılır.
+
+Atlanan kapsam: Windows 10/11 istemci görseli ve macOS/universal paketlemesi bu Windows yayınının doğrulaması değildir. İsteğe bağlı Linux NSIS yardımcısının yeni bağımlılıkla tam arşiv üretimi yeniden çalıştırılmadı; hazırlık kodu ve Linux'taki gerçek API tüketicileri sınandı. Paket hâlâ yayıncı imzasızdır. Npm audit sonucu Electron içine gömülü tüm Chromium/Node kodunun güvenlik sertifikası değildir.
 
 ## Geri dönüş
 
