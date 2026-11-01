@@ -8,7 +8,13 @@ try {
     # Önce uygulamanın normal kayıt/kapanış akışı tamamlanır; zorla sonlandırma yok.
     if (-not $notes.WaitForExit(300000)) { throw 'Notes kapanmadı; kurulum başlatılmadı.' }
     $Asama = 'ozet'
-    if ((Get-FileHash -LiteralPath $Kurulum -Algorithm SHA256).Hash.ToLowerInvariant() -ne $Ozet) { throw 'Kurulum özeti değişti.' }
+    # Get-FileHash bir modül işlevi olabilir; başlatanın PSModulePath değerine
+    # güvenmeden Windows PowerShell 5.1'in .NET API'si kullanılır.
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $akim = [IO.File]::OpenRead($Kurulum)
+    try { $gercekOzet = [BitConverter]::ToString($sha.ComputeHash($akim)).Replace('-', '').ToLowerInvariant() }
+    finally { $akim.Dispose(); $sha.Dispose() }
+    if ($gercekOzet -ne $Ozet) { throw 'Kurulum özeti değişti.' }
     # /D son parametredir; NSIS kalan metni (boşluklar dahil) hedef yol sayar.
     $Asama = 'kurulum-baslat'
     $p = Start-Process -FilePath $Kurulum -ArgumentList "/S --updated /currentuser /D=$Hedef" -PassThru
