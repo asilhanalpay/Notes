@@ -137,6 +137,17 @@ test('Kapanış bekleme süresini atlar; diske yazma bitmeden pencere kapanmaz',
   assert.equal(durum.kapandi, true);
   assert.equal(kayitlar[0][0].body, 'Kapanıştaki son metin');
 });
+test('Güncelleme yardımcısı başlatılamazsa düzenleyici açık kalır ve kapanış yeniden denenebilir', async t => {
+  const { dom, oge, yaz, durum } = await arayuzAc(t);
+  oge('add').click(); yaz('body', 'Son değişiklik korunmalı');
+  dom.window.notDefterim.kapat = async () => ({ basarili: false, hata: 'Yardımcı başlatılamadı.' });
+  await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, false);
+  assert.ok(dom.window.document.body.textContent.includes('Yardımcı başlatılamadı.'));
+  dom.window.notDefterim.kapat = async () => { durum.kapandi = true; return { basarili: true }; };
+  await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, true);
+});
 
 test('Devam eden kayıt sırasındaki değişiklikler eski kopyanın arkasında tek son kayıtta birleşir', async t => {
   const { dom, yaz, durum, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: '', updated: 1000 }]);

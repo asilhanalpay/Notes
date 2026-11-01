@@ -158,6 +158,43 @@ try {
     if ($engellenen.ExitCode -eq 0 -or $uygulama.HasExited) { throw 'Açık uygulama korunarak kurulum engellenmedi.' }
     if ((Get-FileHash $notDosyasi -Algorithm SHA256).Hash -ne $oncekiOzet) { throw 'Açık uygulama denetiminde not değişti.' }
     VerileriDogrula
+    # Ürünün gerçek güncelleme yardımcısı: bekleme, normal kapanış, /S ve aynı hedef.
+    $guncellemeKoku = Join-Path $env:TEMP ('notes-guncelleme-' + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $guncellemeKoku | Out-Null
+    $testKurulum = Join-Path $guncellemeKoku 'Kurulum.exe'
+    Copy-Item -LiteralPath $yeni.FullName -Destination $testKurulum
+    $ayarDosyasi = Join-Path $guncellemeKoku 'ayar.json'
+    $hazir = Join-Path $guncellemeKoku 'hazir'
+    $guncellemeSonucu = Join-Path $guncellemeKoku 'sonuc.json'
+    @{ dosya = $testKurulum; hedef = $hedef; pid = $uygulama.Id; ozet = (Get-FileHash $testKurulum -Algorithm SHA256).Hash.ToLowerInvariant(); sonuc = $guncellemeSonucu; hazir = $hazir } |
+        ConvertTo-Json | Set-Content -LiteralPath $ayarDosyasi -Encoding utf8
+    $kod = & node -e "const fs=require('fs');const g=require('./masaüstü/güncelleme.cjs');process.stdout.write(Buffer.from(g.yardimciMetni(JSON.parse(fs.readFileSync(process.argv[1],'utf8').replace(/^\uFEFF/,''))),'utf16le').toString('base64'))" $ayarDosyasi
+    if ($LASTEXITCODE -ne 0) { throw 'Gerçek güncelleme yardımcısı üretilemedi.' }
+    $ps = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    $yardimci = Start-Process -FilePath $ps -ArgumentList @('-NoProfile', '-NonInteractive', '-EncodedCommand', $kod) -WindowStyle Hidden -PassThru
+    $saat = [Diagnostics.Stopwatch]::StartNew()
+    while (-not (Test-Path $hazir)) {
+        if ($yardimci.HasExited -or $saat.Elapsed.TotalSeconds -gt 20) { throw 'Güncelleme yardımcısı hazır olmadı.' }
+        Start-Sleep -Milliseconds 200
+    }
+    Start-Sleep -Seconds 2
+    $uygulama.Refresh()
+    if ($uygulama.HasExited -or (Test-Path $guncellemeSonucu)) { throw 'Yardımcı uygulamanın normal kapanışını beklemedi.' }
+    if (-not $uygulama.CloseMainWindow()) { throw 'Notes normal kapanış isteği gönderilemedi.' }
+    if (-not $uygulama.WaitForExit(30000)) { throw 'Notes normal kayıttan sonra kapanmadı.' }
+    if (-not $yardimci.WaitForExit(180000)) { throw 'Sessiz güncelleme zamanında bitmedi.' }
+    $guncellemeKaydi = Get-Content -LiteralPath $guncellemeSonucu -Raw | ConvertFrom-Json
+    if (-not $guncellemeKaydi.basarili) { throw 'Gerçek güncelleme yardımcısı kurulumu tamamlayamadı.' }
+    $yenidenAcildi = $false
+    for ($i = 0; $i -lt 30; $i++) {
+        if (@(Get-Process -Name Notes -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe }).Count -gt 0) { $yenidenAcildi = $true; break }
+        Start-Sleep -Milliseconds 500
+    }
+    if (-not $yenidenAcildi -or (SurumuOku) -ne $beklenen) { throw 'Güncellemeden sonra aynı klasördeki Notes açılmadı.' }
+    VerileriDogrula
+    @{ basarili = $true; standartYetki = -not $yonetici; ayniKlasor = $true; normalKapanisBeklendi = $true; yenidenAcildi = $true; notlarKorundu = $true } |
+        ConvertTo-Json | Set-Content (Join-Path $cikti 'windows-guncelleme.json') -Encoding utf8
+    Remove-Item -LiteralPath $guncellemeKoku -Recurse -Force
     Write-Host 'Yeniden kurulum başarılı; açık uygulama zorla kapatılmadan kurulum engellendi.'
     Write-Host "Windows üzerinde $eskiSurum sürümünden $kurulu sürümüne geçiş başarılı; Türkçe not dosyası aynen korundu."
     @{ yoneticiTokeni = $yonetici; standartKullaniciOturumu = -not $yonetici; kurulumKaldirmaGecti = $true; yoneticiGerektirmeyenKurulumDogrulandi = -not $yonetici; testDosyalari = @($notDosyasi, $kurtarmaDosyasi, $erisimDosyasi, $exe) } |

@@ -247,8 +247,12 @@ async function baslat() {
     if (!yuklendi) { await masaustu.kapat(); return; }
     mesgul = true;
     denetimleriAyarla();
-    if (await kaydet()) await masaustu.kapat();
-    else { mesgul = false; denetimleriAyarla(); }
+    if (await kaydet()) {
+      const sonuc = await masaustu.kapat();
+      if (sonuc?.basarili !== false) return;
+      hataGoster(sonuc.hata || 'Uygulama kapatılamadı. Yeniden dene.');
+    }
+    mesgul = false; denetimleriAyarla();
   });
   try {
     const sonuc = await masaustu.oku();

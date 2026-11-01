@@ -61,3 +61,13 @@ test('Elle denetim düğmesi hemen istek gönderir ve sonucu indirme düğmesiyl
   assert.equal(oge('surumBildirimMetni').textContent, 'Yeni sürüm hazır: 0.0.3');
   assert.equal(durum.indirmeler, 0);
 });
+test('Bildirimdeki Güncelle tek tıkla başlatır; indirme sırasında tekrar başlatılamaz', async t => {
+  const { oge, durum } = await ac(t, { durum: 'yeni-surum', aciklama: 'Hazır', surum: '0.0.4', yeniSurum: '0.0.5' });
+  oge('surumHizliGuncelle').click(); await bekle();
+  assert.equal(durum.indirmeler, 1);
+  durum.dinle({ durum: 'indiriliyor', aciklama: 'Güncelleme indiriliyor: %50', surum: '0.0.4', yeniSurum: '0.0.5' });
+  assert.equal(oge('surumBildirimi').hidden, false);
+  assert.equal(oge('surumHizliGuncelle').hidden, true);
+  assert.equal(oge('surumDenetle').disabled, true);
+  assert.equal(oge('surumBildirimMetni').textContent, 'Güncelleme indiriliyor: %50');
+});

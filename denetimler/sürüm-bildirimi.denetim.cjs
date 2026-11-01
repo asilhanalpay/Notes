@@ -34,10 +34,11 @@ test('Kullanıcı bağlantı kurmadan ağ isteği yapılmaz', async () => {
   assert.equal(durum.istekler.length, 0);
   assert.equal(yonetici.gorunum().durum, 'baglanti-gerekli');
 });
-test('Altı saatlik denetim yalnızca yeni sürüm bildirir; anahtar arayüze dönmez', async () => {
+test('Dakikalık denetim yalnızca yeni sürüm bildirir; anahtar arayüze dönmez', async () => {
   const { yonetici, durum } = kur(); await yonetici.baslat();
   const sonuc = await yonetici.denetle();
   assert.deepEqual(durum.araliklar, [ARALIK]);
+  assert.equal(ARALIK, 60000);
   assert.equal(sonuc.durum, 'yeni-surum');
   assert.equal(sonuc.yeniSurum, '0.2.4');
   assert.equal(durum.istekler.length, 2);

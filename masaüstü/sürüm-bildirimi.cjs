@@ -6,8 +6,8 @@ const { atomikYaz } = require('./depolama.cjs');
 
 const DEPO = 'asilhanalpay/Notes';
 const DEPO_KIMLIGI = '1427086629';
-const ARALIK = 6 * 60 * 60 * 1000;
-const BEKLEME = 2 * 60 * 1000;
+const ARALIK = 60 * 1000;
+const BEKLEME = 45 * 1000;
 const IZIN_SAYFASI = 'https://github.com/settings/personal-access-tokens/new?name=Notes%20Surum%20Bildirimi&target_name=asilhanalpay&contents=read&expires_in=90';
 
 class ErisimHatasi extends Error {}
@@ -124,7 +124,7 @@ function yayiniDogrula(veri) {
       dosya.size > 500 * 1024 * 1024 || dosya.browser_download_url !== adres) {
     throw new Error('Yeni sürümün kurulum dosyası doğrulanamadı.');
   }
-  return { surum, adres };
+  return { surum, adres, kimlik: dosya.id, boyut: dosya.size, ozet: dosya.digest };
 }
 
 class SurumBildirimi extends EventEmitter {
@@ -161,7 +161,7 @@ class SurumBildirimi extends EventEmitter {
       if (kusak !== this.kusak) return this.gorunum();
       this.bildir('baglanti-gerekli', 'GitHub bağlantısı okunamadı. Bağlantıyı yeniden kur.');
     } finally { this.mesgul = false; }
-    if (this.anahtar) this.bildir('bekliyor', 'Açılışta ve altı saatte bir otomatik denetlenir. Düğmeyle istediğin zaman hemen denetleyebilirsin.');
+    if (this.anahtar) this.bildir('bekliyor', 'Yeni sürümler açılışta ve yaklaşık dakikada bir denetlenir.');
     this.ilkSayac = this.zamanlayici.setTimeout(() => { void this.denetle(); }, 10000);
     this.sayac = this.zamanlayici.setInterval(() => { void this.denetle(); }, ARALIK);
     this.ilkSayac?.unref?.(); this.sayac?.unref?.();
@@ -223,7 +223,7 @@ class SurumBildirimi extends EventEmitter {
       this.yayin = null;
       if (!dahaYeniMi(yayin.surum, this.surum)) return this.bildir('guncel', 'En güncel sürümü kullanıyorsun.');
       this.yayin = yayin;
-      return this.bildir('yeni-surum', 'Yeni sürüm hazır. Kurulum dosyasını indirip uygulamayı kapatarak üzerine kurabilirsin.', { yeniSurum: yayin.surum });
+      return this.bildir('yeni-surum', 'Yeni sürüm hazır. Güncelle düğmesi indirir, notlarını kaydeder ve mevcut klasöre kurar.', { yeniSurum: yayin.surum });
     } catch (hata) {
       if (kusak !== this.kusak) return this.gorunum();
       if (hata instanceof ErisimHatasi) {
@@ -235,6 +235,29 @@ class SurumBildirimi extends EventEmitter {
         'Şu anda yeni sürüm denetlenemedi. İnternet bağlantını kontrol et; sonraki denetim otomatik yapılacak.',
         this.yayin ? { yeniSurum: this.yayin.surum } : {});
     } finally { this.mesgul = false; }
+  }
+  async guncelle(hazirla) {
+    if (this.mesgul) throw new Error('Devam eden işlemin bitmesini bekle.');
+    this.indirmeAdresi();
+    const kusak = this.kusak;
+    const yayin = this.yayin;
+    this.mesgul = true;
+    this.iptal = new AbortController();
+    this.bildir('indiriliyor', 'Güncelleme indiriliyor…', { yeniSurum: yayin.surum });
+    let paket;
+    try {
+      paket = await hazirla({ yayin, anahtar: this.anahtar, signal: this.iptal.signal,
+        ilerle: yuzde => { if (kusak === this.kusak) this.bildir('indiriliyor', `Güncelleme indiriliyor: %${yuzde}`, { yeniSurum: yayin.surum }); } });
+      if (kusak !== this.kusak) { paket.temizle(); throw new Error('Güncelleme iptal edildi.'); }
+      this.bildir('kuruluyor', 'İndirme doğrulandı. Notların kaydedilip uygulama yeniden başlatılıyor…', { yeniSurum: yayin.surum });
+      return paket;
+    } catch (hata) {
+      if (kusak === this.kusak) this.bildir('yeni-surum', hata.message, { yeniSurum: yayin.surum });
+      throw hata;
+    } finally {
+      // Kurulum hazırlanmışsa kapanışa kadar başka bir işlem başlatılmaz.
+      if (!paket || kusak !== this.kusak) this.mesgul = false;
+    }
   }
   indirmeAdresi() {
     if (!this.anahtar || !this.yayin || this.bilgi.durum !== 'yeni-surum') {

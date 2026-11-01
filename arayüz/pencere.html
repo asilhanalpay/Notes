@@ -7,7 +7,7 @@
 <header class="topbar"><div class="brand"><img class="logo" src="simge.png" alt="" width="36" height="36"> Notes</div><div class="ust-islemler"><label class="tema-secimi" for="tema">Tema<select id="tema"><option value="acik">Açık</option><option value="karanlik">Karanlık</option></select></label><button id="surumler" class="surum-dugmesi">Yeni sürümler</button></div></header>
 <p id="temaUyarisi" class="tema-uyarisi" role="status" hidden>Tema değişti ama tercihin kaydedilemedi. Bir sonraki açılışta yeniden seçmen gerekebilir.</p>
 <div id="hata" class="hata" role="alert" hidden><span id="hataMetni"></span><button id="yenidenDene">Yeniden dene</button></div>
-<div id="surumBildirimi" class="surum-bildirimi" role="status" hidden><span id="surumBildirimMetni"></span><button id="surumBildirimAc">Görüntüle</button></div>
+<div id="surumBildirimi" class="surum-bildirimi" role="status" hidden><span id="surumBildirimMetni"></span><button id="surumHizliGuncelle">Güncelle</button><button id="surumBildirimAc">Ayrıntılar</button></div>
 <main class="workspace">
 <aside class="sidebar" aria-label="Notlar">
   <div class="sidebar-heading"><h1>Notlarım <span id="noteCount">0</span></h1><button id="add" class="add" data-islem aria-label="Yeni not oluştur" title="Yeni not">+</button></div>
@@ -40,11 +40,11 @@
     <p>GitHub parolanı kullanma. Bu anahtar Windows tarafından şifrelenerek bu bilgisayarda saklanır. Süresi dolarsa bağlantıyı yenileyebilirsin.</p>
     <button type="submit" data-surum>Bildirimleri etkinleştir</button>
   </form>
-  <p class="surum-aciklamasi">Yeni sürümü denetle düğmesi beklemeden kontrol eder. Altı saatlik aralık yalnızca otomatik denetim içindir. Yeni sürüm varsa kurulum dosyasını tarayıcıdan indirip uygulamayı kapatarak kendin kurarsın. Uygulama e-posta göndermez ve kendi kendine kurulum yapmaz.</p>
+  <p class="surum-aciklamasi">Yayımlanmış yeni sürümler uygulama açıkken yaklaşık dakikada bir denetlenir. Güncelle düğmesi kurulumu indirip doğrular, notlarını kaydeder ve Notes'u kapatarak mevcut klasöre sessizce kurar. Ardından uygulama yeniden açılır. Kaydetme başarısızsa kurulum başlamaz. İndirme sırasında notlarını kullanabilirsin.</p>
   <div class="surum-islemleri">
     <button id="surumAyir" hidden>Bağlantıyı kaldır</button>
     <button id="surumDenetle" data-surum>Yeni sürümü denetle</button>
-    <button id="surumIndir" class="primary" data-surum hidden>Kurulum dosyasını indir</button>
+    <button id="surumIndir" class="primary" data-surum hidden>Güncelle</button>
     <button id="surumKapat">Kapat</button>
   </div>
   <p class="surum-aciklamasi">Bağlantıyı kaldırmak yalnızca bu bilgisayardaki kaydı siler. Anahtarı tamamen iptal etmek için GitHub ayarlarını kullan.</p>
