@@ -44,7 +44,7 @@ jobs:
           DEPO: ${{ github.repository }}
       - name: Adayın kurulum yaşam döngüsü ve izin gözlemleri
         shell: pwsh
-        run: ./denetimler/windows-kurulum.ps1 -KurulumKlasoru ./kurulum/güçlendirme-adayı
+        run: ./denetimler/windows-standart-kullanıcı.ps1
       # Davranış kanıtı audit kırmızı olsa da toplanabilsin. Yayın işi yoktur;
       # audit hatası iş akışını yine başarısız yapar, bastırılmaz.
       - name: Bileşen güvenliği

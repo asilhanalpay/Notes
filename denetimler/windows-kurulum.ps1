@@ -1,11 +1,15 @@
-param([string]$KurulumKlasoru = (Join-Path $PSScriptRoot '../kurulum'))
+param(
+    [string]$KurulumKlasoru = (Join-Path $PSScriptRoot '../kurulum'),
+    [switch]$StandartKullaniciGerekli
+)
 # Yalnızca geçici GitHub Windows denetim makinesinde çalıştırılır.
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
     throw 'Bu denetim yalnızca geçici GitHub Windows makinesinde çalıştırılabilir.'
 }
 $proje = Split-Path $PSScriptRoot -Parent
-$hedef = Join-Path $env:RUNNER_TEMP ('notes-kurulum-' + [guid]::NewGuid().ToString('N'))
+$hedef = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Programs\Notes'
+if (Test-Path $hedef) { throw 'Var olan kurulum konumuna dokunulmayacak.' }
 $eskiExe = Join-Path $hedef 'Notes.exe'
 $exe = Join-Path $hedef 'Notes.exe'
 $veriKlasoru = Join-Path $env:APPDATA 'Not Defterim'
@@ -15,6 +19,7 @@ $erisimDosyasi = Join-Path $veriKlasoru 'surum-erisim.bin'
 if (Test-Path $veriKlasoru) { throw 'Var olan not klasörüne dokunulmayacak. Denetim durduruldu.' }
 $kimlik = [Security.Principal.WindowsIdentity]::GetCurrent()
 $yonetici = ([Security.Principal.WindowsPrincipal]::new($kimlik)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($StandartKullaniciGerekli -and $yonetici) { throw 'Bu denetim standart kullanıcı yetkisiyle çalışmalı.' }
 $cikti = Join-Path $proje 'denetim-çıktıları'
 New-Item -ItemType Directory -Path $cikti -Force | Out-Null
 @{ yoneticiTokeni = $yonetici; standartKullaniciOturumu = -not $yonetici; kurulumKaldirmaGecti = $false } |
@@ -60,13 +65,21 @@ function IzinleriDogrula {
         $acl = Get-Acl -LiteralPath $dosya
         foreach ($kural in $acl.Access) {
             $sid = $kural.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value
-            if ($kural.AccessControlType -eq 'Allow' -and $sid -notin $izinli) {
-                throw "Beklenmeyen izin: $sid; $([IO.Path]::GetFileName($dosya))"
-            }
-            @{ dosya = [IO.Path]::GetFileName($dosya); sid = $sid; tur = "$($kural.AccessControlType)"; hak = "$($kural.FileSystemRights)" }
+            @{ dosya = [IO.Path]::GetFileName($dosya); sid = $sid; tur = "$($kural.AccessControlType)"; hak = "$($kural.FileSystemRights)"; sayisalHak = [int]$kural.FileSystemRights; veri = $dosya -notin @($hedef, $exe) }
         }
     }
     $kayitlar | ConvertTo-Json | Set-Content (Join-Path $cikti 'windows-acl.json') -Encoding utf8
+    $yazmaHaklari = [Security.AccessControl.FileSystemRights]::Write -bor
+        [Security.AccessControl.FileSystemRights]::Delete -bor
+        [Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles -bor
+        [Security.AccessControl.FileSystemRights]::ChangePermissions -bor
+        [Security.AccessControl.FileSystemRights]::TakeOwnership
+    foreach ($kayit in $kayitlar) {
+        if ($kayit.tur -eq 'Allow' -and $kayit.sid -notin $izinli -and
+            ($kayit.veri -or ($kayit.sayisalHak -band [int]$yazmaHaklari) -ne 0)) {
+            throw "Beklenmeyen izin: $($kayit.sid); $($kayit.dosya); $($kayit.hak)"
+        }
+    }
     # ACL listeleme başka hesapla etkin erişim denemesinin yerini tutmaz.
 }
 function Kaldir {
@@ -147,7 +160,7 @@ try {
     VerileriDogrula
     Write-Host 'Yeniden kurulum başarılı; açık uygulama zorla kapatılmadan kurulum engellendi.'
     Write-Host "Windows üzerinde $eskiSurum sürümünden $kurulu sürümüne geçiş başarılı; Türkçe not dosyası aynen korundu."
-    @{ yoneticiTokeni = $yonetici; standartKullaniciOturumu = -not $yonetici; kurulumKaldirmaGecti = $true; yoneticiGerektirmeyenKurulumDogrulandi = -not $yonetici } |
+    @{ yoneticiTokeni = $yonetici; standartKullaniciOturumu = -not $yonetici; kurulumKaldirmaGecti = $true; yoneticiGerektirmeyenKurulumDogrulandi = -not $yonetici; testDosyalari = @($notDosyasi, $kurtarmaDosyasi, $erisimDosyasi, $exe) } |
         ConvertTo-Json | Set-Content (Join-Path $cikti 'windows-yetki.json') -Encoding utf8
 } finally {
     UygulamayiDurdur
