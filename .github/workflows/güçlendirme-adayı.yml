@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   push:
     branches: ['codex/windows-denetimi-*']
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'masaüstü/**'
+      - 'arayüz/**'
+      - 'denetimler/**'
+      - 'kurulum-kaynakları/**'
+      - '.github/workflows/**'
 
 concurrency:
   group: windows-aday-${{ github.ref }}
