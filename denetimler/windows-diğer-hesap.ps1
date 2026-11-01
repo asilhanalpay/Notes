@@ -46,6 +46,17 @@ $ayar = Get-Content (Join-Path $PSScriptRoot 'ayar.json') -Raw | ConvertFrom-Jso
 $kimlik = [Security.Principal.WindowsIdentity]::GetCurrent()
 if ($kimlik.User.Value -ne $ayar.sid) { throw 'Beklenen ayrı hesap kullanılmadı.' }
 if (([Security.Principal.WindowsPrincipal]::new($kimlik)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Probe hesabı yönetici olamaz.' }
+# Start-Process -Credential yeni kimliği yükler, ancak başlatanın ortamını
+# devralabilir. Yeni, geçici hesabın profilini SID kaydından çözümle.
+$profilKaydi = Get-ItemProperty -LiteralPath ('Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\' + $kimlik.User.Value)
+$profil = [Environment]::ExpandEnvironmentVariables($profilKaydi.ProfileImagePath)
+if (-not $profil -or $profil -eq $env:USERPROFILE) { throw 'Ayrı hesabın profili doğrulanamadı.' }
+$env:USERPROFILE = $profil
+$env:APPDATA = Join-Path $profil 'AppData\Roaming'
+$env:LOCALAPPDATA = Join-Path $profil 'AppData\Local'
+$env:TEMP = Join-Path $env:LOCALAPPDATA 'Temp'
+$env:TMP = $env:TEMP
+New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
 $kayitlar = foreach ($dosya in $ayar.dosyalar) {
     foreach ($erisim in @([IO.FileAccess]::Read, [IO.FileAccess]::Write)) {
         $izin = $false
