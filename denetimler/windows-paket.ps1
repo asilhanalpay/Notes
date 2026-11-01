@@ -6,7 +6,9 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUN
 $veriKlasoru = Join-Path $env:APPDATA 'Not Defterim'
 if (Test-Path $veriKlasoru) { throw 'Var olan uygulama profiline dokunulmayacak.' }
 $Paket = (Resolve-Path -LiteralPath $Paket).Path
-& node (Join-Path $PSScriptRoot 'paket.cjs') $Paket
+New-Item -ItemType Directory -Path (Join-Path $PSScriptRoot '../denetim-çıktıları') -Force | Out-Null
+& node (Join-Path $PSScriptRoot 'paket.cjs') $Paket |
+    Tee-Object -FilePath (Join-Path $PSScriptRoot '../denetim-çıktıları/windows-paket-statik.json')
 if ($LASTEXITCODE -ne 0) { throw 'Statik paket denetimi geçmedi.' }
 $gecici = Join-Path $env:RUNNER_TEMP ('notes-paket-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $gecici | Out-Null

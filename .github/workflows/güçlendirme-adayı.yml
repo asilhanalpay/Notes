@@ -45,6 +45,22 @@ jobs:
       - name: Adayın kurulum yaşam döngüsü ve izin gözlemleri
         shell: pwsh
         run: ./denetimler/windows-standart-kullanıcı.ps1
+      - name: Başka standart hesaptan dosya erişimi
+        shell: pwsh
+        run: ./denetimler/windows-diğer-hesap.ps1
+      - name: Windows kurulum çıktısının özetini kaydet
+        shell: pwsh
+        run: |
+          $dosya = Get-Item ./kurulum/güçlendirme-adayı/Notes.exe
+          @{ commit = $env:GITHUB_SHA; os = [Environment]::OSVersion.VersionString; sha256 = (Get-FileHash $dosya.FullName -Algorithm SHA256).Hash; bayt = $dosya.Length; imza = "$(Get-AuthenticodeSignature $dosya.FullName | Select-Object -ExpandProperty Status)" } |
+            ConvertTo-Json | Set-Content ./denetim-çıktıları/windows-kurulum-paket.json -Encoding utf8
+      - name: Test edilen Windows kurulumunu kısa süre sakla
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Notes-Windows-test
+          path: kurulum/güçlendirme-adayı/Notes.exe
+          if-no-files-found: error
+          retention-days: 1
       # Davranış kanıtı audit kırmızı olsa da toplanabilsin. Yayın işi yoktur;
       # audit hatası iş akışını yine başarısız yapar, bastırılmaz.
       - name: Bileşen güvenliği
