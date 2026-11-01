@@ -1,5 +1,7 @@
 # Gerçek Windows doğrulaması
 
+Bu belge 0.0.4 bakım aşamasının kaydıdır. Sonraki ikon ve 0.0.5 tek tuş güncelleme sonuçları [ayrı kayıttadır](tek-tuş-güncelleme.md).
+
 1 Kasım 2026. Bu kayıt, mevcut Notes 0.0.4 güvenlik raporuna dayalı bakımın gerçek Windows denemelerini açıklar. Yeni tam güvenlik taraması veya yayın onayı değildir. Raporda doğrulanmış uygulama açığı bulunmadığı sonucu yeni varsayımsal açık iddialarına dönüştürülmedi.
 
 ## Ortam ve sınırlar
