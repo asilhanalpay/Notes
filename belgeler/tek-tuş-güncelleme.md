@@ -10,7 +10,7 @@ Yardımcı, son kaydın bitip Notes’un normal kapanmasını bekler; işlem zor
 
 ## Doğrulama
 
-Yerel birim testleri: 55 geçti. Canlı özel yayın indirme, standart yetkide gerçek yardımcı kurulum/kapanış/yeniden açma ve veri koruma için Windows çalıştırması bekleniyor. Yayımlanmamış 0.0.5’in canlı yayın bildirimi test edilmiş sayılmaz.
+Yerel birim testleri: 55 geçti. İlk Windows çalıştırması [41310158152](https://github.com/asilhanalpay/Notes/actions/runs/41310158152), kaynak `2b402e1`, paket/ASAR ve gerçek Electron kontrollerinden geçti; yardımcı kurulum sonucu başarısızdı. İlk sonuç ayrıntılı aşama kaydı içermediğinden neden doğrulanmış sayılmaz. Yardımcıya aşama/çıkış kodu kaydı ve Windows PowerShell süreç tanıtıcısının açık tutulması eklendi; yeniden doğrulanıyor. Canlı özel yayın indirme, standart yetkide gerçek yardımcı kurulum/kapanış/yeniden açma ve veri koruma için Windows çalıştırması bekleniyor. Yayımlanmamış 0.0.5’in canlı yayın bildirimi test edilmiş sayılmaz.
 
 ## Sınırlar ve geri dönüş
 

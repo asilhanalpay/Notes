@@ -184,6 +184,8 @@ try {
     if (-not $uygulama.WaitForExit(30000)) { throw 'Notes normal kayıttan sonra kapanmadı.' }
     if (-not $yardimci.WaitForExit(180000)) { throw 'Sessiz güncelleme zamanında bitmedi.' }
     $guncellemeKaydi = Get-Content -LiteralPath $guncellemeSonucu -Raw | ConvertFrom-Json
+    Copy-Item -LiteralPath $guncellemeSonucu -Destination (Join-Path $cikti 'windows-guncelleme-yardimci.json')
+    Write-Host ($guncellemeKaydi | ConvertTo-Json)
     if (-not $guncellemeKaydi.basarili) { throw 'Gerçek güncelleme yardımcısı kurulumu tamamlayamadı.' }
     $yenidenAcildi = $false
     for ($i = 0; $i -lt 30; $i++) {

@@ -50,13 +50,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEPO: ${{ github.repository }}
-      - name: Standart yetkiyle kurulum yaşam döngüsü ve izinler
-        shell: pwsh
-        run: ./denetimler/windows-standart-kullanıcı.ps1
       - name: Özel yayından gerçek güncelleme indirmesi
         run: node denetimler/windows-indirme.cjs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Standart yetkiyle kurulum yaşam döngüsü ve izinler
+        shell: pwsh
+        run: ./denetimler/windows-standart-kullanıcı.ps1
       - name: Başka standart hesaptan dosya erişimi
         shell: pwsh
         run: ./denetimler/windows-diğer-hesap.ps1

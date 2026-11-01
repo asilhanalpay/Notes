@@ -187,8 +187,10 @@ else {
       const sonucDosyasi = path.join(app.getPath('userData'), 'guncellemeler', 'sonuc.json');
       if (fs.existsSync(sonucDosyasi) && fs.statSync(sonucDosyasi).size < 4096) {
         const sonuc = JSON.parse(fs.readFileSync(sonucDosyasi, 'utf8').replace(/^\uFEFF/, ''));
-        fs.rmSync(sonucDosyasi);
-        if (sonuc.basarili === false) dialog.showErrorBox('Güncelleme tamamlanamadı', 'Kurulum tamamlanamadı. Notların saklandığı klasör korunur. Yeniden kurmayı deneyebilirsin.');
+        if (sonuc.basarili === false) {
+          fs.rmSync(sonucDosyasi);
+          dialog.showErrorBox('Güncelleme tamamlanamadı', 'Kurulum tamamlanamadı. Notların saklandığı klasör korunur. Yeniden kurmayı deneyebilirsin.');
+        }
       }
     } catch { /* Eksik güncelleme günlüğü not düzenleyicisini engellemez. */ }
     void surumBildirimleri.baslat();
