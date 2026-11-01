@@ -63,3 +63,36 @@ Depo adı `asilhanalpay/Notes` olarak kullanılır; sabit sayısal depo kimliği
 ## Sade görünüm
 
 Masaüstünde not listesi 230 piksel genişliğindedir. Kartlar başlık ve tek satırlık önizleme içerir; tarih yalnızca düzenleyicide gösterilir. Dosya işlemleri yerleşik açılır menüde toplanır. Bu menü, CSS bağlama konumlandırmasıyla ⋯ düğmesinin üzerinde ve üst katmanda açılır; kenar çubuğunun taşma sınırında kırpılmaz. Gerçek Electron denetimi klavyeyle açma, Tab ile ilk işleme ulaşma, Esc ile kapatma/odağı geri verme ve dışarı tıklamayı sınar.
+
+## Denetim raporuna dayalı bakım
+
+Electron 45.2.1 ve electron-builder 26.18.1 sabitlenmiştir. Kasa `isAsyncEncryptionAvailable`, `encryptStringAsync` ve `decryptStringAsync` kullanır. `decryptStringAsync` sonucunun `result` alanı doğrulanır; eski şifreli kayıtlar açılışta yeniden yazılmaz. Şifreleme beklerken bağlantıyı kaldırma veya kapanış, gecikmiş dosya yazımını iptal eder. Asenkron kasa okuması not düzenleyicisini bekletmez. Gerçek Windows şifreleme uyumu için sentetik test `denetimler/electron.cjs` içindedir; Linux üzerinde atlanır. Yeni asenkron API ile açıkça kurulan bağlantının eski Electron ile okunacağı varsayılmaz; sürüm geri dönüşünde GitHub bağlantısını yeniden kurmak gerekebilir. Bu değişiklik not dosyalarını şifrelemez.
+
+Kurulum betiği yalnız GitHub-hosted geçici Windows ortamında çalışır; mevcut not klasörü varsa durur. İlk kurulum, kaldırıp yeniden kurma, 0.0.3 üzerinden yükseltme ve aynı sürümün üzerine kurma sırasında sentetik ana/kurtarma/kasa dosyalarını karşılaştırır. ACL ve oturum yetkisini `denetim-çıktıları/windows-*.json` altında kaydeder. Yükseltilmiş oturumda geçen kurulum testi, standart kullanıcıda yönetici gerektirmeyen kurulum kanıtı sayılmaz. Normal `npm run baslat` gerçek kullanıcı veri yolunu kullanır; deneme amacıyla kişisel profilde başlatma.
+
+Fuse/ASAR ayarları henüz normal dağıtım yapılandırmasında etkinleştirilmemiştir. Ayrı aday için:
+
+```sh
+npm run paketle:windows:aday:dizin
+npm run denetle:paket
+npm run paketle:windows:aday
+```
+
+İlk komut yalnız Windows uygulama klasörünü üretir. `denetle:paket` gerçek EXE fuse değerlerini, EXE'ye gömülü ASAR başlık özetini ve dosya bütünlüklerini statik olarak kontrol eder; uygulamayı çalıştırmaz. Son komut NSIS kurulumunu üretir. `denetimler/windows-paket.ps1` adayın açılış/kapanışını, Node ortam değişkenlerini, değiştirilmiş ASAR'ı ve alternatif app klasörünü geçici Windows hesabında sınamak içindir. Inspector kapalı olduğundan bu aday Playwright'ın ana işlem bağlantısıyla sınanmaz; kaynak Electron güvenlik testleri ayrı kalır.
+
+`Güçlendirme adayı — yayınsız Windows denetimi` iş akışı yalnız elle başlatılır, depo okuma yetkisi kullanır ve yayın işi içermez. Bu çalışma kapsamında tetiklenmemiştir. Bağımlılık audit'i hata verirse iş akışı başarısız olur. Aday ayarlar ancak gerçek Windows davranışı doğrulanıp incelendikten sonra normal dağıtım ayarına taşınmalıdır.
+
+### Linux bulut ortamında NSIS üretimi
+
+32 bit Wine çalıştıramayan Linux ortamları için ayrı komutlar vardır:
+
+```sh
+npm run paketle:windows:linux
+npm run paketle:windows:linux:aday
+```
+
+`kurulum-kaynakları/linux-nsis.cjs`, electron-builder'ın macOS NSIS yolunda da kullandığı `UninstallerReader` ile derleme sırasında kaldırıcıyı çıkarır. Son kurulum yine aynı NSIS derleyicisi ve ürünün mevcut kurulum betiğiyle oluşturulur. Bu uyarlayıcı yalnız kendi derleme sürecinde, beklenen tek NSIS çağrısını değiştirir; `node_modules` dosyalarını değiştirmez. İç API kullandığı için builder ve app-builder-lib sürümleri tam olarak 26.18.1 değilse durur. Sürüm yükseltildiğinde gerçek kurulum/kaldırıcı arşiv kontrolleri yeniden yapılmalıdır. Standart Windows komutları bu uyarlayıcıyı kullanmaz. Yardımcı betik uygulamaya paketlenmez; yayın her iki komutta da kapalıdır.
+
+İnternetsiz kullanımda `NOTES_ELECTRON_CACHE` Electron arşivinin önbelleğini, `ELECTRON_BUILDER_CACHE` NSIS/7zip araç önbelleğini seçebilir. Electron önbelleğine resmî `SHASUMS256.txt-45.2.1` de konulmalı; sağlama veya TLS doğrulaması kapatılmamalıdır. Bu komutlar ağsız konteynerde normal ve aday kurulum için doğrulanmıştır. Kurulum üretimi ve arşiv bütünlüğü, gerçek Windows kurulum/veri/ACL/DPAPI testlerinin yerini tutmaz.
+
+[Bakım sonuçları ve kalan doğrulamalar](bakım-doğrulama.md) · [Veri koruma taslakları](veri-koruma-tasarımı.md)

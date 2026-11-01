@@ -55,6 +55,14 @@ jobs:
       - name: Eski sürümün üzerine kurulumu ve notların korunmasını denetle
         shell: pwsh
         run: ./denetimler/windows-kurulum.ps1
+      - name: Windows izin gözlemlerini sakla
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Windows-izin-denetimi
+          path: denetim-çıktıları/windows-*.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Kurulum dosyasını sakla
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

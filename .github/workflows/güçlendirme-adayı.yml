@@ -1,0 +1,60 @@
+name: Güçlendirme adayı — yayınsız Windows denetimi
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/windows-denetimi-*']
+
+concurrency:
+  group: windows-aday-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  aday:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Node.js hazırla
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Bağımlılıkları kur
+        run: npm ci
+      - name: Birim denetimleri
+        run: npm run denetle
+      - name: Gerçek Electron ve eski şifreli kayıt uyumu
+        run: npm run denetle:electron
+      - name: Güçlendirme adayını paketle
+        run: npm run paketle:windows:aday
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Gerçek aday EXE ve ASAR davranışı
+        shell: pwsh
+        run: ./denetimler/windows-paket.ps1
+      - name: Önceki yayımlanan kurulumu al
+        run: gh release download v0.0.3 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPO: ${{ github.repository }}
+      - name: Adayın kurulum yaşam döngüsü ve izin gözlemleri
+        shell: pwsh
+        run: ./denetimler/windows-kurulum.ps1 -KurulumKlasoru ./kurulum/güçlendirme-adayı
+      # Davranış kanıtı audit kırmızı olsa da toplanabilsin. Yayın işi yoktur;
+      # audit hatası iş akışını yine başarısız yapar, bastırılmaz.
+      - name: Bileşen güvenliği
+        if: always()
+        run: npm audit --audit-level=moderate
+      - name: Denetim kanıtlarını sakla
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Guclendirme-adayi-denetimleri
+          path: denetim-çıktıları/
+          if-no-files-found: ignore
+          retention-days: 14

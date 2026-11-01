@@ -8,6 +8,7 @@ const os = require('node:os');
 const http = require('node:http');
 const { _electron: electron } = require('playwright');
 const { expect } = require('@playwright/test');
+const { ErisimKasasi } = require('../masaüstü/sürüm-bildirimi.cjs');
 
 test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temalar ve kapanışta kayıt', {
   skip: process.platform !== 'win32' ? 'Gerçek Windows oturumu gerekir.' : false,
@@ -40,6 +41,25 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
     return sayfa;
   };
   let sayfa = await ac();
+  // Gerçek Windows sağlayıcısı: eski şifreli kayıt yeni API ile okunmalı.
+  // Yalnızca geçici profildeki sentetik anahtar kullanılır; GitHub'a bağlanılmaz.
+  const sentetikAnahtar = 'github_pat_' + 't'.repeat(30);
+  const kasaDosyasi = path.join(profil, 'sentetik-erisim.bin');
+  const eskiSifreli = Buffer.from(await uygulama.evaluate(({ safeStorage }, s) => Array.from(safeStorage.encryptString(s)), sentetikAnahtar));
+  fs.writeFileSync(kasaDosyasi, eskiSifreli);
+  // İşletim sistemi sağlayıcısı gerçek Electron ana işleminde çalışır.
+  // evaluate callback'inde CommonJS require varlığına güvenilmez.
+  const gercekSifreleme = {
+    isAsyncEncryptionAvailable: () => uygulama.evaluate(({ safeStorage }) => safeStorage.isAsyncEncryptionAvailable()),
+    decryptStringAsync: b => uygulama.evaluate(({ safeStorage }, d) => safeStorage.decryptStringAsync(Buffer.from(d)), Array.from(b)),
+    encryptStringAsync: async s => Buffer.from(await uygulama.evaluate(async ({ safeStorage }, d) => Array.from(await safeStorage.encryptStringAsync(d)), s))
+  };
+  const kasa = new ErisimKasasi(kasaDosyasi, gercekSifreleme);
+  assert.equal(await kasa.oku(), sentetikAnahtar);
+  assert.deepEqual(fs.readFileSync(kasaDosyasi), eskiSifreli);
+  await kasa.kaydet(sentetikAnahtar);
+  assert.equal(await kasa.oku(), sentetikAnahtar);
+  kasa.sil();
   const tercihler = await uygulama.evaluate(({ BrowserWindow, app }) => {
     const w = BrowserWindow.getAllWindows()[0];
     const p = w.webContents.getLastWebPreferences();
@@ -59,7 +79,8 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect.poll(() => fs.existsSync(notDosyasi) && JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0]?.body).toBe('Türkçe gerçek Electron notu');
   assert.equal(await sayfa.locator('.note img').count(), 0);
   await expect(sayfa.locator('.note strong')).toHaveText('<img src=x onerror=alert(1)>');
-  assert.equal((await sayfa.locator('.sidebar').boundingBox()).width, 230);
+  // Chromium, ekran ölçeğine göre kesirli CSS pikseli döndürebilir.
+  assert.ok(Math.abs((await sayfa.locator('.sidebar').boundingBox()).width - 230) <= 1);
   assert.equal(await sayfa.locator('.note time').count(), 0);
   await expect(sayfa.locator('#date')).not.toBeEmpty();
   await expect(sayfa.locator('#words')).toHaveText('4 kelime');

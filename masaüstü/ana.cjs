@@ -155,7 +155,7 @@ else {
     });
     islemTanimla('uygulama:kapat', () => { kapanabilir = true; pencere.close(); });
     pencereOlustur();
-    surumBildirimleri.baslat();
+    void surumBildirimleri.baslat();
     powerMonitor.on('resume', () => { void surumBildirimleri.denetle(); });
     app.on('will-quit', () => surumBildirimleri.durdur());
     app.on('activate', () => { if (!pencere) pencereOlustur(); });
