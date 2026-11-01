@@ -54,7 +54,10 @@ jobs:
           DEPO: ${{ github.repository }}
       - name: Eski sürümün üzerine kurulumu ve notların korunmasını denetle
         shell: pwsh
-        run: ./denetimler/windows-kurulum.ps1
+        run: ./denetimler/windows-standart-kullanıcı.ps1
+      - name: Başka standart hesaptan veri ve uygulama izinlerini denetle
+        shell: pwsh
+        run: ./denetimler/windows-diğer-hesap.ps1
       - name: Windows izin gözlemlerini sakla
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

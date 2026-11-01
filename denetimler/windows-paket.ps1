@@ -1,4 +1,4 @@
-param([string]$Paket = (Join-Path $PSScriptRoot '../kurulum/güçlendirme-adayı/win-unpacked'))
+param([string]$Paket = (Join-Path $PSScriptRoot '../kurulum/win-unpacked'))
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
     throw 'Yalnızca geçici GitHub-hosted Windows hesabında çalıştırılabilir.'

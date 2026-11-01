@@ -66,7 +66,7 @@ async function denetle(klasor) {
 }
 
 if (require.main === module) {
-  denetle(path.resolve(process.argv[2] || 'kurulum/güçlendirme-adayı/win-unpacked')).catch(hata => {
+  denetle(path.resolve(process.argv[2] || 'kurulum/win-unpacked')).catch(hata => {
     console.error(hata.message);
     process.exitCode = 1;
   });

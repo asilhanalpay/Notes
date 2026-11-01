@@ -1,15 +1,8 @@
 'use strict';
 
-// Windows davranış denetimleri geçene kadar normal dağıtım ayarına taşınmaz.
+// Ayrı çıktı konumunda deneme paketi; doğrulanan fuse ayarları ana yapılandırmadadır.
 const { build } = require('../package.json');
 module.exports = {
   ...build,
-  directories: { ...build.directories, output: 'kurulum/güçlendirme-adayı' },
-  electronFuses: {
-    runAsNode: false,
-    enableNodeOptionsEnvironmentVariable: false,
-    enableNodeCliInspectArguments: false,
-    enableEmbeddedAsarIntegrityValidation: true,
-    onlyLoadAppFromAsar: true
-  }
+  directories: { ...build.directories, output: 'kurulum/güçlendirme-adayı' }
 };

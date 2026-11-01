@@ -1,4 +1,4 @@
-name: Güçlendirme adayı — yayınsız Windows denetimi
+name: Windows veri koruma — yayınsız denetim
 
 on:
   workflow_dispatch:
@@ -30,11 +30,11 @@ jobs:
         run: npm run denetle
       - name: Gerçek Electron ve eski şifreli kayıt uyumu
         run: npm run denetle:electron
-      - name: Güçlendirme adayını paketle
-        run: npm run paketle:windows:aday
+      - name: Normal Windows kurulumunu paketle
+        run: npm run paketle:windows
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      - name: Gerçek aday EXE ve ASAR davranışı
+      - name: Gerçek EXE ve ASAR davranışı
         shell: pwsh
         run: ./denetimler/windows-paket.ps1
       - name: Önceki yayımlanan kurulumu al
@@ -42,7 +42,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEPO: ${{ github.repository }}
-      - name: Adayın kurulum yaşam döngüsü ve izin gözlemleri
+      - name: Standart yetkiyle kurulum yaşam döngüsü ve izinler
         shell: pwsh
         run: ./denetimler/windows-standart-kullanıcı.ps1
       - name: Başka standart hesaptan dosya erişimi
@@ -51,14 +51,14 @@ jobs:
       - name: Windows kurulum çıktısının özetini kaydet
         shell: pwsh
         run: |
-          $dosya = Get-Item ./kurulum/güçlendirme-adayı/Notes.exe
+          $dosya = Get-Item ./kurulum/Notes.exe
           @{ commit = $env:GITHUB_SHA; os = [Environment]::OSVersion.VersionString; sha256 = (Get-FileHash $dosya.FullName -Algorithm SHA256).Hash; bayt = $dosya.Length; imza = "$(Get-AuthenticodeSignature $dosya.FullName | Select-Object -ExpandProperty Status)" } |
             ConvertTo-Json | Set-Content ./denetim-çıktıları/windows-kurulum-paket.json -Encoding utf8
       - name: Test edilen Windows kurulumunu kısa süre sakla
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Notes-Windows-test
-          path: kurulum/güçlendirme-adayı/Notes.exe
+          path: kurulum/Notes.exe
           if-no-files-found: error
           retention-days: 1
       # Davranış kanıtı audit kırmızı olsa da toplanabilsin. Yayın işi yoktur;

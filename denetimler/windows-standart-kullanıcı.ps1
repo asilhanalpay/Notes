@@ -1,3 +1,4 @@
+param([string]$KurulumKlasoru = (Join-Path $PSScriptRoot '../kurulum'))
 # Yalnız geçici hosted Windows makinesinde; kişisel hesap veya parola kullanılmaz.
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
@@ -41,7 +42,7 @@ $yerler = @{
     '__LOG__' = (Join-Path $cikti 'windows-standart.log')
     '__PROJECT__' = $proje
     '__SCRIPT__' = (Join-Path $PSScriptRoot 'windows-kurulum.ps1')
-    '__PACKAGE__' = (Join-Path $proje 'kurulum/güçlendirme-adayı')
+    '__PACKAGE__' = (Resolve-Path -LiteralPath $KurulumKlasoru).Path
     '__RESULT__' = $sonuc
 }
 foreach ($ad in $yerler.Keys) { $altIcerik = $altIcerik.Replace($ad, (Sabit $yerler[$ad])) }
