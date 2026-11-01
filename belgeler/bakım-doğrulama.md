@@ -2,14 +2,16 @@
 
 Tarih: 1 Kasım 2026. Bu çalışma bir sürüm yayını veya yeni tam güvenlik taraması değildir. Sağlanan `report.md` raporunda doğrulanmış raporlanabilir açık sayısı sıfırdır. Kaynak bakımına ilişkin değişiklikler bu sonucu yeni açık iddialarına dönüştürmez. Rapordaki kaynak anlık görüntüsünün mevcut çalışma ağacıyla bayt eşitliği ayrıca doğrulanmamıştır.
 
+Bu kayıttaki ilk Linux aşamasından sonra gerçek Windows denetimleri de çalıştırıldı. Güncel sonuçlar [Windows doğrulama kaydındadır](windows-doğrulama.md).
+
 ## Uygulanan değişiklikler
 
 - Electron 45.0.0 → 45.2.1; electron-builder 26.15.3 → 26.18.1. Aynı kararlı major serilerinde, tam sürüm sabitlemesi; zorunlu audit fix veya major override yok. Builder `latest` etiketi sorguda 26.18.0, `v26` etiketi 26.18.1 döndürdü; 26.18.1 seçildi. Node.js 24 ile kurulum/derleme değerlendirmesi yapıldı; bu, Windows çalışma zamanı uyumluluğu kanıtı değildir.
 - Piksel testi: 230 CSS piksel için en fazla 1 piksel tolerans. Sandbox, contextIsolation, Node erişimi, IPC, CSP ve ağ kontrolü beklentileri gevşetilmedi.
-- safeStorage asenkron API'ye geçti. Eski kaydı okuma sırasında dönüştürmez; iptal/kapanış sonrası gecikmiş şifreleme veya açılış işlemi bağlantıyı geri getiremez. Eski şifreli kayıt uyumu gerçek Windows sağlayıcısıyla ayrıca sınanmalıdır.
+- safeStorage asenkron API'ye geçti. Eski kaydı okuma sırasında dönüştürmez; iptal/kapanış sonrası gecikmiş şifreleme veya açılış işlemi bağlantıyı geri getiremez. Eski şifreli kayıt uyumu daha sonra gerçek Windows sağlayıcısıyla sentetik kayıt üzerinde doğrulandı; ayrıntılar Windows kaydındadır.
 - Silme penceresi/README kurtarma kopyası ve eski dış yedeklerde içerik kalabileceğini açıklar. GitHub bağlantısının yerelde kaldırılması, anahtarın uzakta iptali ve en az yetki seçimi birbirinden ayrılır.
 - Windows kurulum denetimi ilk kurulum/kaldırma/yeniden kurma ve ana/kurtarma/sentetik kasa korumasıyla genişletildi. ACL gözlemleri ve yükseltilmiş oturum bilgisi ayrı kaydedilir.
-- Ayrı fuse adayı, gerçek paket statik denetimi, Windows davranış betiği ve yalnız elle çalıştırılan yayınsız iş akışı eklendi. Normal paket ayarları, Windows davranış doğrulaması olmadan fuse adayıyla değiştirilmedi.
+- Ayrı fuse adayı, gerçek paket statik denetimi ve yayınsız Windows işi eklendi. Adayın gerçek Windows davranışı geçtikten sonra beş fuse ayarı normal pakete taşındı ve normal paket yeniden doğrulandı.
 
 ## Bağımlılık uyarısı ve erişilebilirlik
 
@@ -45,11 +47,11 @@ ASAR 4.x'e veya minimatch 11.x'e zorla geçmek üst araçların API beklentileri
 | Kurulum/kaldırıcı arşivleri | İki kurulum ve içlerinden çıkarılan iki kaldırıcı `7zz t` denetiminden geçti. Gömülü ASAR'lar denetlenen unpacked paketlerle bayt eşit. Bu bir kurulum/kaldırma çalıştırması değildir. |
 | PowerShell 7.6.9 ayrıştırıcısı | İki Windows test betiği sözdizimi kontrolünden geçti; bu, Windows çalıştırması değildir. |
 | İş akışı YAML / manifest-kilit eşleşmesi / `git diff --check` | Geçti. YAML ayrıştırması GitHub Actions çalıştırması değildir. |
-| Windows kurulum/ACL/UAC/safeStorage ve bozuk ASAR davranışı | Çalıştırılmadı; gerçek Windows ortamı yok. |
+| Windows kurulum/ACL/safeStorage ve bozuk ASAR davranışı | İlk Linux aşamasında çalıştırılamadı; sonrasında temiz Windows Server 2025 üzerinde çalıştırıldı. Ayrıntılar Windows kaydında. |
 
 Statik denetim yapılan EXE SHA-256: `00ed9cc921420416f8b9cf90ca7614ff73607ef76f460a3111dee537137d5303`. ASAR başlık SHA-256: `a338604a1900fdf7aad4ac206c62b0cba30dec013de8b928cc5828935685b558`. Bunlar bu yerel aday çıktısını tanımlar; Authenticode imzası veya yayımlanmış kurulum doğrulaması değildir. Yeniden paketlemede özetler değişebilir.
 
-### Kurulum üretimini tamamlayan ek çalışma
+### İlk Linux aşamasında kurulum üretimini tamamlayan ek çalışma
 
 Normal çıktı `kurulum/Notes.exe`: 121.519.085 bayt, SHA-256 `4c57629d523bac1cefcc0914643140f13a47a01af04ff1cd1759d38ced6882e9`.
 
@@ -59,13 +61,13 @@ Güçlendirme adayı `kurulum/güçlendirme-adayı/Notes.exe`: 121.518.975 bayt,
 
 Wine araştırması: sistem Wine 10'un 32 bit Linux programı `Exec format error` verdi. electron-builder Wine 11 araç arşivinin SHA-256'sı yerleşik değerle eşleşti; bu ortamda DLL/profil ve 32 bit başlatma aşamaları tamamlanamadı. Tam Wine 11 WoW64 paketiyle 64 bit komut deneyi geçti, 32 bit komut deneyi `ShellExecuteEx failed` ile başarısız oldu. Bunlar gerçek Windows deneyi değildir; 32 bit başarısızlığın bütün nedenleri doğrulanmadı. Karışık Wine sürümleriyle bir ürün dağıtımı hazırlanmadı.
 
-Üretim için `linux-nsis.cjs` eklendi: yalnız Linux'ta, tam 26.18.1 sürümüyle, beklenen NSIS çağrısında vendor'ın mevcut yerel çıkarıcısını kullanır. Kaldırıcının PE başlığı ve çağrı bağlamı doğrulanır; başka Wine işlemleri bu yolla çalıştırılmaz. İç API değişikliği riski sürüm kilidiyle görünür tutulur. Windows iş akışı, uygulama kodu, kurulum kimliği, veri yolu ve normal Windows derleme komutu değiştirilmedi. Aday fuse ayarları normal pakete taşınmadı.
+Üretim için `linux-nsis.cjs` eklendi: yalnız Linux'ta, tam 26.18.1 sürümüyle, beklenen NSIS çağrısında vendor'ın mevcut yerel çıkarıcısını kullanır. Kaldırıcının PE başlığı ve çağrı bağlamı doğrulanır; başka Wine işlemleri bu yolla çalıştırılmaz. İç API değişikliği riski sürüm kilidiyle görünür tutulur. Bu Linux yardımcısı uygulama koduna, kurulum kimliğine, veri yoluna veya normal Windows derleme komutuna müdahale etmez. Daha sonraki Windows aşamasında doğrulanan fuse ayarları normal pakete alındı.
 
 Kaynak derlemesi Docker'da `network=none`, kapalı ek yetkiler ve host dizini bağlamadan yapıldı. Açık sistem araçları ayrı bir aşamada hazırlandı; özel kaynaklı derleme konteynerine proxy sertifikası veya erişim anahtarı verilmedi. Ağ erişimli ilk konteyner önerisi otomatik onay denetimince veri aktarımı riski nedeniyle reddedildi; ağsız yöntemle üretim tamamlandı. Çalışan uygulama veya kişisel Windows profili kullanılmadı.
 
 Ek kontrolde 46 birim testi geçti (`node --test --test-isolation=none denetimler/*.denetim.cjs`); yeni derleme betiğinin sözdizimi, manifest/kilit eşleşmesi ve `git diff --check` de geçti. Test sürecinin bu çalıştırma seçimi ürünün Electron sandbox ayarını değiştirmez.
 
-Gerçek Windows testleri hâlâ bekliyor: kullanıcı yalnız ücretsiz kotaya izin verdi; ücretli kullanımı durduran 0 USD sınırının etkin olduğu doğrulanmadı. Bağlı GitHub araçları kota/bütçe durumunu göstermedi. Bu nedenle hiçbir Actions işi veya yeni ücretli Windows ortamı başlatılmadı. Ücretsiz koşul doğrulandıktan veya kullanıcıya ait ayrı bir Windows test ortamı sağlandıktan sonra kurulum, yükseltme, kaldırma/yeniden kurma, standart kullanıcı/ikinci hesap erişimi ve gerçek safeStorage uyumu ayrıca çalıştırılmalıdır.
+İlk Linux aşamasında Windows işi, kullanıcının yalnız ücretsiz kota koşulu nedeniyle bekletildi. Kullanıcı ücretli aşımı durduran sınırın hazır olduğunu bildirdikten sonra ayrı test dalında yayınsız Windows işleri başlatıldı. Bütçe sınırı artırılmadı, ücretli yeni ortam sağlanmadı. Gerçek sonuçlar ve her çalıştırmanın bağlantısı Windows kaydında tutulur.
 
 ## Temiz Windows VM kabul matrisi
 
@@ -79,7 +81,7 @@ Kişisel bilgisayar yerine geri alınabilir temiz Windows 10/11 x64 VM ve yalnı
 6. Adayın gerçek açılış/kapanışı; RunAsNode/NODE_OPTIONS engeli; değiştirilmiş ASAR başlığının bütünlük nedeniyle reddi; ASAR yokken alternatif app klasörünün yüklenmemesi. `windows-paket.ps1` bunları geçici hosted Windows hesabında otomatik denemek içindir. Inspector kapalı aday için Playwright bağlantısı açılmamalı veya fuse gevşetilmemelidir.
 7. İmza eklenirse `Get-AuthenticodeSignature`, yayıncı ve zaman damgası gerçek installer/EXE üzerinde ayrıca doğrulanmalı. Bu çalışma sertifika veya hizmet satın almaz. SmartScreen/Defender davranışı hakkında sonuç yoktur.
 
-0.2.4 eski kaldırıcı uyumluluk dalı için uygun eski kurulum örneği yoktur; 0.0.3 testi bu dalın kanıtı değildir. Hiçbir Windows adımı bu kayıtta tamamlanmış olarak işaretlenmez.
+0.2.4 eski kaldırıcı uyumluluk dalı için uygun eski kurulum örneği yoktur; 0.0.3 testi bu dalın kanıtı değildir. Windows Server 2025 sonuçları yukarıdaki Windows 10/11 istemci matrisinin tamamının çalıştırıldığı anlamına gelmez.
 
 ## Geri dönüş ve kapsam sınırı
 
@@ -87,6 +89,6 @@ Değişiklikleri çalışma öncesi kaynak kaydı `901b90f` ile dosya bazında k
 
 Not depolama biçimi, uygulama kimliği ve `Not Defterim` veri yolu değişmedi. Mevcut şifreli GitHub kaydı okurken yeniden yazılmaz. Kullanıcı yeni bağlantı oluşturursa asenkron biçimin eski Electron tarafından okunacağı henüz doğrulanmadığından eski sürüme dönüşte bağlantıyı yeniden kurmak gerekebilir; notlara bunun için dokunulmaz. Gerçek anahtarlar depoya veya test kanıtlarına eklenmemeli.
 
-Fuse adayını geri almak, normal paketi varsayılan ayarlarla yeniden üretmektir; EXE üzerinde sonradan fuse yamalama imzayı geçersiz kılabilir. Veri şifreleme/temizleme taslağı için [ayrı karar belgesine](veri-koruma-tasarımı.md) bak. Bu özellikler uygulanmadı; geri döndürülemez kullanıcı verisi geçişi yapılmadı. Kaynak değişiklikleri gönderilmedi, iş akışları tetiklenmedi ve yayın yapılmadı.
+Fuse değişikliğini geri almak için `build.electronFuses` alanı önceki yapılandırmaya döndürülüp yeni paket üretilmelidir; mevcut EXE üzerinde fuse yamalama, daha sonra eklenecek imzayı geçersiz kılabilir. Veri şifreleme/temizleme taslağı için [ayrı karar belgesine](veri-koruma-tasarımı.md) bak. Bu özellikler uygulanmadı; geri döndürülemez kullanıcı verisi geçişi yapılmadı. Kaynak değişiklikleri ayrı test dalına gönderildi ve yayınsız denetimler çalıştırıldı; main dalına birleştirme veya sürüm yayını yapılmadı.
 
 Linux derleme uyarlayıcısını geri almak için iki `paketle:windows:linux*` komutu ve `kurulum-kaynakları/linux-nsis.cjs` kaldırılabilir. Standart Windows derleme yolu ve kullanıcı verileri bu geri dönüşten etkilenmez; yerel üretilmiş kurulumlar ayrıca silinebilir.

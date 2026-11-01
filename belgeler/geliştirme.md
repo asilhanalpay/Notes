@@ -70,17 +70,20 @@ Electron 45.2.1 ve electron-builder 26.18.1 sabitlenmiştir. Kasa `isAsyncEncryp
 
 Kurulum betiği yalnız GitHub-hosted geçici Windows ortamında çalışır; mevcut not klasörü varsa durur. İlk kurulum, kaldırıp yeniden kurma, 0.0.3 üzerinden yükseltme ve aynı sürümün üzerine kurma sırasında sentetik ana/kurtarma/kasa dosyalarını karşılaştırır. ACL ve oturum yetkisini `denetim-çıktıları/windows-*.json` altında kaydeder. Yükseltilmiş oturumda geçen kurulum testi, standart kullanıcıda yönetici gerektirmeyen kurulum kanıtı sayılmaz. Normal `npm run baslat` gerçek kullanıcı veri yolunu kullanır; deneme amacıyla kişisel profilde başlatma.
 
-Fuse/ASAR ayarları henüz normal dağıtım yapılandırmasında etkinleştirilmemiştir. Ayrı aday için:
+Windows davranış denetimleri geçen fuse/ASAR ayarları normal paket yapılandırmasındadır. `RunAsNode`, `NODE_OPTIONS` ve Node inspector argümanları kapalı; gömülü ASAR doğrulaması ve yalnız ASAR'dan yükleme açıktır:
 
 ```sh
-npm run paketle:windows:aday:dizin
+npm run paketle:windows
 npm run denetle:paket
-npm run paketle:windows:aday
 ```
 
-İlk komut yalnız Windows uygulama klasörünü üretir. `denetle:paket` gerçek EXE fuse değerlerini, EXE'ye gömülü ASAR başlık özetini ve dosya bütünlüklerini statik olarak kontrol eder; uygulamayı çalıştırmaz. Son komut NSIS kurulumunu üretir. `denetimler/windows-paket.ps1` adayın açılış/kapanışını, Node ortam değişkenlerini, değiştirilmiş ASAR'ı ve alternatif app klasörünü geçici Windows hesabında sınamak içindir. Inspector kapalı olduğundan bu aday Playwright'ın ana işlem bağlantısıyla sınanmaz; kaynak Electron güvenlik testleri ayrı kalır.
+İlk komut NSIS kurulumunu ve uygulama klasörünü üretir. `denetle:paket` gerçek EXE fuse değerlerini, EXE'ye gömülü ASAR başlık özetini ve dosya bütünlüklerini statik olarak kontrol eder; uygulamayı çalıştırmaz. `denetimler/windows-paket.ps1` normal paketin açılış/kapanışını, Node ortam değişkenlerini, değiştirilmiş ASAR'ı ve alternatif app klasörünü geçici Windows hesabında sınar. Inspector kapalı olduğundan paketli uygulamaya Playwright ana işlem bağlantısı açılmaz; kaynak Electron güvenlik testleri ayrı kalır. Ayrı çıktı için `paketle:windows:aday` ve `paketle:windows:aday:dizin` komutları korunur; o klasörün statik denetimi `npm run denetle:paket -- kurulum/güçlendirme-adayı/win-unpacked` ile yapılır.
 
-`Güçlendirme adayı — yayınsız Windows denetimi` iş akışı yalnız elle başlatılır, depo okuma yetkisi kullanır ve yayın işi içermez. Bu çalışma kapsamında tetiklenmemiştir. Bağımlılık audit'i hata verirse iş akışı başarısız olur. Aday ayarlar ancak gerçek Windows davranışı doğrulanıp incelendikten sonra normal dağıtım ayarına taşınmalıdır.
+`Windows veri koruma — yayınsız denetim` iş akışı elle veya `codex/windows-denetimi-*` test dallarında kod/ayar değişince çalışır, depo okuma yetkisi kullanır ve yayın işi içermez. Belge değişiklikleri bu ayrı işi tekrar başlatmaz. Bağımlılık audit'i hata verirse iş akışı başarısız olur; Windows işlev testleri daha önce toplanır. Main dalının mevcut yayın kapısındaki audit kontrolü korunur.
+
+`windows-standart-kullanıcı.ps1`, geçici hosted hesabın yönetici yetkilerini SAFER NormalUser belirteciyle kaldırarak kurulum yaşam döngüsünü çalıştırır. `windows-diğer-hesap.ps1`, rastgele parolalı ayrı bir standart test hesabıyla etkin dosya erişimini ve hesabın kendi profilindeki kurulumu sınar. Gerçek kullanıcı hesabı/parolası kullanılmaz; not/uygulama ACL'leri testi geçirmek için değiştirilmez. Test yardım dosyalarını paylaşan geçici dizinin izinleri yalnız iki test hesabı, SYSTEM ve yöneticilerle sınırlandırılır; hesap sonunda kaldırılır. Testler kişisel bilgisayarda çalıştırılmayı reddeder.
+
+[Gerçek Windows sonuçları ve kalan sınırlar](windows-doğrulama.md).
 
 ### Linux bulut ortamında NSIS üretimi
 
