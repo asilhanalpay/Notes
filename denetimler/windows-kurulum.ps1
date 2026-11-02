@@ -164,25 +164,27 @@ try {
     $testKurulum = Join-Path $guncellemeKoku 'Kurulum.exe'
     Copy-Item -LiteralPath $yeni.FullName -Destination $testKurulum
     $ayarDosyasi = Join-Path $guncellemeKoku 'ayar.json'
-    $hazir = Join-Path $guncellemeKoku 'hazir'
+    $hazir = Join-Path $guncellemeKoku 'surucu-hazir.json'
     $guncellemeSonucu = Join-Path $guncellemeKoku 'sonuc.json'
-    @{ dosya = $testKurulum; hedef = $hedef; pid = $uygulama.Id; ozet = (Get-FileHash $testKurulum -Algorithm SHA256).Hash.ToLowerInvariant(); sonuc = $guncellemeSonucu; hazir = $hazir } |
+    @{ dosya = $testKurulum; exe = $exe; pid = $uygulama.Id; kok = $guncellemeKoku } |
         ConvertTo-Json | Set-Content -LiteralPath $ayarDosyasi -Encoding utf8
-    $kod = & node -e "const fs=require('fs');const g=require('./masaüstü/güncelleme.cjs');process.stdout.write(Buffer.from(g.yardimciMetni(JSON.parse(fs.readFileSync(process.argv[1],'utf8').replace(/^\uFEFF/,''))),'utf16le').toString('base64'))" $ayarDosyasi
-    if ($LASTEXITCODE -ne 0) { throw 'Gerçek güncelleme yardımcısı üretilemedi.' }
-    $ps = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
-    $yardimci = Start-Process -FilePath $ps -ArgumentList @('-NoProfile', '-NonInteractive', '-EncodedCommand', $kod) -WindowStyle Hidden -PassThru
-    $saat = [Diagnostics.Stopwatch]::StartNew()
-    while (-not (Test-Path $hazir)) {
-        if ($yardimci.HasExited -or $saat.Elapsed.TotalSeconds -gt 20) { throw 'Güncelleme yardımcısı hazır olmadı.' }
-        Start-Sleep -Milliseconds 200
-    }
+    $surucuBetigi = Join-Path $PSScriptRoot 'windows-paket-guncellemesi.cjs'
+    $surucu = Start-Process -FilePath (Join-Path $proje 'node_modules/electron/dist/electron.exe') -ArgumentList @(('"' + $surucuBetigi + '"'), ('"' + $ayarDosyasi + '"')) -WorkingDirectory $proje -PassThru -RedirectStandardOutput (Join-Path $cikti 'windows-paket-guncellemesi.stdout.log') -RedirectStandardError (Join-Path $cikti 'windows-paket-guncellemesi.stderr.log')
+    $null = $surucu.Handle
+    if (-not $surucu.WaitForExit(120000) -or $surucu.ExitCode -ne 0 -or -not (Test-Path $hazir)) { throw 'Paketin kendi güncelleme başlatıcısı hazır olmadı.' }
+    $surucuKaniti = Get-Content -LiteralPath $hazir -Raw | ConvertFrom-Json
+    if ($surucuKaniti.surum -ne $beklenen -or -not $surucuKaniti.basarili) { throw 'Yanlış paket güncelleme kodu sınandı.' }
+    Copy-Item -LiteralPath $hazir -Destination (Join-Path $cikti 'windows-paket-guncellemesi.json')
     Start-Sleep -Seconds 2
     $uygulama.Refresh()
     if ($uygulama.HasExited -or (Test-Path $guncellemeSonucu)) { throw 'Yardımcı uygulamanın normal kapanışını beklemedi.' }
     if (-not $uygulama.CloseMainWindow()) { throw 'Notes normal kapanış isteği gönderilemedi.' }
     if (-not $uygulama.WaitForExit(30000)) { throw 'Notes normal kayıttan sonra kapanmadı.' }
-    if (-not $yardimci.WaitForExit(180000)) { throw 'Sessiz güncelleme zamanında bitmedi.' }
+    $saat = [Diagnostics.Stopwatch]::StartNew()
+    while (-not (Test-Path $guncellemeSonucu)) {
+        if ($saat.Elapsed.TotalSeconds -gt 180) { throw 'Sessiz güncelleme zamanında bitmedi.' }
+        Start-Sleep -Milliseconds 500
+    }
     $guncellemeKaydi = Get-Content -LiteralPath $guncellemeSonucu -Raw | ConvertFrom-Json
     Copy-Item -LiteralPath $guncellemeSonucu -Destination (Join-Path $cikti 'windows-guncelleme-yardimci.json')
     Write-Host ($guncellemeKaydi | ConvertTo-Json)
@@ -194,7 +196,12 @@ try {
     }
     if (-not $yenidenAcildi -or (SurumuOku) -ne $beklenen) { throw 'Güncellemeden sonra aynı klasördeki Notes açılmadı.' }
     VerileriDogrula
-    @{ basarili = $true; standartYetki = -not $yonetici; ayniKlasor = $true; normalKapanisBeklendi = $true; yenidenAcildi = $true; notlarKorundu = $true } |
+    for ($i = 0; $i -lt 100; $i++) {
+        if (@(Get-ChildItem -LiteralPath $guncellemeKoku -Filter hazir -Recurse -File).Count -eq 0) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if (@(Get-ChildItem -LiteralPath $guncellemeKoku -Filter hazir -Recurse -File).Count -ne 0) { throw 'Güncelleme yardımcısı temizliği tamamlanmadı.' }
+    @{ basarili = $true; standartYetki = -not $yonetici; ayniKlasor = $true; normalKapanisBeklendi = $true; yenidenAcildi = $true; notlarKorundu = $true; paketlenmisBaslatici = $true; yerelAgFiksturu = $true } |
         ConvertTo-Json | Set-Content (Join-Path $cikti 'windows-guncelleme.json') -Encoding utf8
     Remove-Item -LiteralPath $guncellemeKoku -Recurse -Force
     Write-Host 'Yeniden kurulum başarılı; açık uygulama zorla kapatılmadan kurulum engellendi.'
