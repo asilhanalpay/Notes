@@ -25,8 +25,8 @@ function Kayitlar {
                     foreach ($ad in $ana.GetSubKeyNames()) {
                         $alt = $ana.OpenSubKey($ad)
                         try {
-                            if ($alt.GetValue('DisplayName') -eq 'Notes') {
-                                [pscustomobject]@{ kimlik = "$kovan/$gorunum/$ad"; surum = $alt.GetValue('DisplayVersion'); kaldir = $alt.GetValue('UninstallString') }
+                            if ($alt.GetValue('DisplayName') -match '^Notes(?: \d+\.\d+\.\d+)?$') {
+                                [pscustomobject]@{ kimlik = "$kovan/$gorunum/$ad"; ad = $alt.GetValue('DisplayName'); surum = $alt.GetValue('DisplayVersion'); kaldir = $alt.GetValue('UninstallString') }
                             }
                         } finally { if ($alt) { $alt.Dispose() } }
                     }
