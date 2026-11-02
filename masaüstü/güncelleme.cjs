@@ -99,14 +99,19 @@ async function kurulumHazirla({ kok, yayin, anahtar, signal, ilerle, exe = proce
     async baslat() {
       const metin = yardimciMetni({ dosya, hedef: path.dirname(exe), pid, ozet: yayin.ozet.slice(7), sonuc, hazir });
       const ps = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
-      const surec = spawn(ps, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(metin, 'utf16le').toString('base64')], {
-        detached: true, windowsHide: true, stdio: 'ignore', cwd: klasor
+      const kod = Buffer.from(metin, 'utf16le').toString('base64');
+      // DETACHED_PROCESS ile doğrudan açılan Windows PowerShell betiği
+      // çalıştırmadan çıkabilir. Kısa başlatıcı, asıl yardımcıya kendi gizli
+      // penceresini verir; yardımcı Notes ve başlatıcı kapansa da devam eder.
+      const baslatma = `$ErrorActionPreference='Stop'; Start-Process -FilePath ${psMetni(ps)} -ArgumentList @('-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand','${kod}') -WindowStyle Hidden -ErrorAction Stop`;
+      const surec = spawn(ps, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(baslatma, 'utf16le').toString('base64')], {
+        detached: false, windowsHide: true, stdio: 'ignore', cwd: klasor
       });
       let hata;
       surec.on('error', () => { hata = true; });
       surec.unref();
       for (let i = 0; i < 100; i++) {
-        if (hata || surec.exitCode !== null) throw new Error('Güncelleme yardımcısı başlatılamadı.');
+        if (hata || (surec.exitCode !== null && surec.exitCode !== 0)) throw new Error('Güncelleme yardımcısı başlatılamadı.');
         if (fs.existsSync(hazir)) return;
         await new Promise(resolve => setTimeout(resolve, 100));
       }

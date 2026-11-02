@@ -1,5 +1,5 @@
 'use strict';
-// Yayımlanmış eski ASAR, gerçek Electron ana sürecinde doğrudan çalıştırılır.
+// Başlatma adayı, yayımlanmış kurucular ve eski ASAR yardımcısıyla gerçek Electron'da sınanır.
 // Üründe test kapısı, sahte ağ yanıtı veya kalıcı erişim anahtarı yoktur.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -18,6 +18,10 @@ async function main() {
   const ayar = JSON.parse(fs.readFileSync(dosya, 'utf8').replace(/^\uFEFF/, ''));
   if (!process.versions.electron) throw new Error('Gerçek Electron ana süreci gerekir.');
   const kaynak = path.join(path.dirname(ayar.exe), 'resources', 'app.asar', 'masaüstü');
+  const aday = path.join(ayar.gecici, 'baslatma-adayi');
+  fs.mkdirSync(aday);
+  fs.copyFileSync(path.join(__dirname, '../masaüstü/güncelleme.cjs'), path.join(aday, 'güncelleme.cjs'));
+  fs.writeFileSync(path.join(aday, 'güncelleme-yardımcısı.ps1'), fs.readFileSync(path.join(kaynak, 'güncelleme-yardımcısı.ps1')));
   const { yayiniDogrula } = require(path.join(kaynak, 'sürüm-bildirimi.cjs'));
   const yayin = yayiniDogrula(JSON.parse(fs.readFileSync(ayar.yayin, 'utf8').replace(/^\uFEFF/, '')));
   if (yayin.surum !== '0.0.6') throw new Error('Beklenmeyen hedef sürüm.');
@@ -30,7 +34,7 @@ async function main() {
     return alt;
   };
   try {
-    const hazirlik = await require(path.join(kaynak, 'güncelleme.cjs')).kurulumHazirla({
+    const hazirlik = await require(path.join(aday, 'güncelleme.cjs')).kurulumHazirla({
       kok: ayar.kok, yayin, exe: ayar.exe, pid: ayar.pid, anahtar: process.env.GH_TOKEN
     });
     await hazirlik.baslat();
@@ -44,7 +48,7 @@ async function main() {
   } finally {
     cp.spawn = asilSpawn;
   }
-  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet, baslatmaKaynagi: 'yayinlanmis-asar-elektron' }));
+  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet, kimlik: yayin.kimlik, baslatmaKaynagi: 'calisma-dali-adayi-gercek-Electron' }));
 }
 if (process.versions.electron) {
   const { app } = require('electron');
