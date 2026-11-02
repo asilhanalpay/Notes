@@ -11,7 +11,7 @@ $cikti = Join-Path $proje 'denetim-çıktıları'
 $varsayilan = Join-Path $env:LOCALAPPDATA 'Programs\Notes'
 $ozel = Join-Path $env:LOCALAPPDATA "Notes Güncelleme Denetimi\Özel klasör 'İğdır'\Notes"
 $veri = Join-Path $env:APPDATA 'Not Defterim'
-$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'calisma-dali-adayi'; kurulumlar = 'yayinlanmis-0.0.5-ve-0.0.6'; senaryolar = @() }
+$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'yayinlanmis-asar-gercek-Electron'; kurulumlar = 'yayinlanmis-0.0.5-ve-0.0.6'; senaryolar = @() }
 function Kayitlar {
     foreach ($kovan in @([Microsoft.Win32.RegistryHive]::CurrentUser, [Microsoft.Win32.RegistryHive]::LocalMachine)) {
         foreach ($gorunum in @([Microsoft.Win32.RegistryView]::Registry64, [Microsoft.Win32.RegistryView]::Registry32)) {
@@ -100,8 +100,11 @@ try {
         @{ exe = $uygulama.Path; pid = $uygulama.Id; kok = $kok; gecici = $gecici; yayin = (Join-Path $KurulumKlasoru 'yayin.json') } |
             ConvertTo-Json | Set-Content -LiteralPath (Join-Path $gecici 'ayar.json') -Encoding utf8
         $s.asama = 'gercek-indirme-ve-yardimci'
-        & node $nodeBetik hazirla (Join-Path $gecici 'ayar.json')
-        if ($LASTEXITCODE -ne 0 -or -not (Test-Path (Join-Path $gecici 'hazir.json'))) { throw 'Yayımlanmış indirici/yardımcı hazırlanamadı.' }
+        # Start-Process -Wait kullanılmaz: tüm süreç ağacı yerine yalnız sürücü
+        # beklenir; güncelleme yardımcısı Notes'un kapanışını beklemeye devam eder.
+        $surucu = Start-Process -FilePath (Join-Path $proje 'node_modules/electron/dist/electron.exe') -ArgumentList @(('"' + $nodeBetik + '"'), 'hazirla', ('"' + (Join-Path $gecici 'ayar.json') + '"')) -PassThru -RedirectStandardOutput (Join-Path $cikti 'windows-elektron-surucu.stdout.log') -RedirectStandardError (Join-Path $cikti 'windows-elektron-surucu.stderr.log')
+        $null = $surucu.Handle
+        if (-not $surucu.WaitForExit(180000) -or $surucu.ExitCode -ne 0 -or -not (Test-Path (Join-Path $gecici 'hazir.json'))) { throw 'Yayımlanmış indirici/yardımcı hazırlanamadı.' }
         $sonuc = Join-Path $kok 'sonuc.json'
         Start-Sleep -Seconds 2
         $uygulama.Refresh()

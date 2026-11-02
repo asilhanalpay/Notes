@@ -1,5 +1,5 @@
 'use strict';
-// Yayımlanmış eski ASAR'daki gerçek indirici ve yardımcı çalıştırılır.
+// Yayımlanmış eski ASAR, gerçek Electron ana sürecinde doğrudan çalıştırılır.
 // Üründe test kapısı, sahte ağ yanıtı veya kalıcı erişim anahtarı yoktur.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -16,24 +16,17 @@ async function main() {
   }
   if (islem !== 'hazirla') throw new Error('Bilinmeyen denetim.');
   const ayar = JSON.parse(fs.readFileSync(dosya, 'utf8').replace(/^\uFEFF/, ''));
-  const kaynak = path.join(ayar.gecici, 'yayin-kaynagi');
-  fs.mkdirSync(kaynak);
-  const paket = path.join(path.dirname(ayar.exe), 'resources', 'app.asar');
-  for (const ad of ['güncelleme.cjs', 'güncelleme-yardımcısı.ps1', 'sürüm-bildirimi.cjs', 'depolama.cjs']) {
-    fs.writeFileSync(path.join(kaynak, ad), asar.extractFile(paket, `masaüstü/${ad}`));
-  }
-  // Eski yayındaki yardımcı/sürüm ayrıştırıcısı korunur; başlatma düzeltmesi adayı sınanır.
-  fs.copyFileSync(path.join(__dirname, '../masaüstü/güncelleme.cjs'), path.join(kaynak, 'güncelleme.cjs'));
+  if (!process.versions.electron) throw new Error('Gerçek Electron ana süreci gerekir.');
+  const kaynak = path.join(path.dirname(ayar.exe), 'resources', 'app.asar', 'masaüstü');
   const { yayiniDogrula } = require(path.join(kaynak, 'sürüm-bildirimi.cjs'));
   const yayin = yayiniDogrula(JSON.parse(fs.readFileSync(ayar.yayin, 'utf8').replace(/^\uFEFF/, '')));
   if (yayin.surum !== '0.0.6') throw new Error('Beklenmeyen hedef sürüm.');
-  // Aynı komut/argüman/ortam korunur; yalnız normalde yutulan hata çıktısı kanıta gider.
+  // Çocuk sürecin komutu, ortamı ve stdio seçenekleri değiştirilmez.
   const kanit = path.resolve('denetim-çıktıları');
-  const fd = fs.openSync(path.join(kanit, 'windows-yardimci-stderr.log'), 'a');
   const asilSpawn = cp.spawn;
   let alt;
   cp.spawn = (komut, args, secenekler) => {
-    alt = asilSpawn(komut, args, { ...secenekler, stdio: ['ignore', fd, fd] });
+    alt = asilSpawn(komut, args, secenekler);
     return alt;
   };
   try {
@@ -50,8 +43,16 @@ async function main() {
     throw hata;
   } finally {
     cp.spawn = asilSpawn;
-    fs.closeSync(fd);
   }
-  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet, baslatmaKaynagi: 'calisma-dali-adayi' }));
+  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet, baslatmaKaynagi: 'yayinlanmis-asar-elektron' }));
 }
-main().catch(hata => { console.error(hata.message); process.exitCode = 1; });
+if (process.versions.electron) {
+  const { app } = require('electron');
+  const ayar = JSON.parse(fs.readFileSync(process.argv[3], 'utf8').replace(/^\uFEFF/, ''));
+  const profil = path.join(ayar.gecici, 'elektron-profili');
+  fs.mkdirSync(profil, { recursive: true });
+  app.setPath('userData', profil);
+  app.whenReady().then(main).then(() => app.exit(0)).catch(hata => { console.error(hata.message); app.exit(1); });
+} else {
+  main().catch(hata => { console.error(hata.message); process.exitCode = 1; });
+}
