@@ -94,7 +94,7 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   assert.ok(Math.abs(menuKonumu.x - dugmeKonumu.x) <= 1);
   assert.ok(menuKonumu.y >= 0 && menuKonumu.y + menuKonumu.height <= dugmeKonumu.y);
   await sayfa.keyboard.press('Tab');
-  await expect(sayfa.locator('#yedekle')).toBeFocused();
+  await expect(sayfa.locator('#farkliKaydet')).toBeFocused();
   await sayfa.keyboard.press('Escape');
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
   await expect(sayfa.locator('#digerIslemler')).toBeFocused();
@@ -103,16 +103,54 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await sayfa.locator('#body').click();
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
 
+  // Gerçek UI → IPC → disk: yalnız yerel dosya seçici/Explorer çağrısı taklit
+  // edilir. Ürüne test kapısı eklenmez; kişisel profil kullanılmaz.
+  const txtHedef = path.join(gecici, 'farklı.txt');
+  const txtKlasoru = path.join(profil, 'Not Defterim', 'Kaydedilen notlar');
+  await uygulama.evaluate(({ dialog, shell }, hedef) => {
+    globalThis.__notesDosyaTesti = { save: dialog.showSaveDialog, open: shell.openPath, acilan: null };
+    dialog.showSaveDialog = async () => ({ canceled: false, filePath: hedef });
+    shell.openPath = async p => { globalThis.__notesDosyaTesti.acilan = p; return ''; };
+  }, txtHedef);
+  try {
+    await sayfa.locator('#body').fill('Farklı kaydet için son metin\nİğdır');
+    await sayfa.locator('#digerIslemler').click();
+    await sayfa.locator('#farkliKaydet').click();
+    await expect(sayfa.locator('#status')).toHaveText('farklı.txt kaydedildi');
+    assert.equal(fs.readFileSync(txtHedef, 'utf8'), '<img src=x onerror=alert(1)>\r\n\r\nFarklı kaydet için son metin\r\nİğdır');
+    await sayfa.locator('#body').fill('Uygulama klasörü için son metin');
+    await sayfa.locator('#digerIslemler').click();
+    await sayfa.locator('#uygulamayaKaydet').click();
+    await expect.poll(() => uygulama.evaluate(() => globalThis.__notesDosyaTesti.acilan)).toBe(txtKlasoru);
+    const dosyalar = fs.readdirSync(txtKlasoru);
+    assert.equal(dosyalar.length, 1);
+    assert.ok(dosyalar[0].endsWith('.txt'));
+    assert.equal(fs.readFileSync(path.join(txtKlasoru, dosyalar[0]), 'utf8'), '<img src=x onerror=alert(1)>\r\n\r\nUygulama klasörü için son metin');
+    assert.equal(JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0].body, 'Uygulama klasörü için son metin');
+    await sayfa.locator('#body').fill('Türkçe gerçek Electron notu');
+    await sayfa.keyboard.press('Control+s');
+    await expect.poll(() => JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0].body).toBe('Türkçe gerçek Electron notu');
+  } finally {
+    await uygulama.evaluate(({ dialog, shell }) => {
+      dialog.showSaveDialog = globalThis.__notesDosyaTesti.save;
+      shell.openPath = globalThis.__notesDosyaTesti.open;
+      delete globalThis.__notesDosyaTesti;
+    });
+  }
+
   // Farklı bir gerçek webContents, geçerli kanal adını bilse de kayıt yapamaz.
   const onceki = fs.readFileSync(notDosyasi, 'utf8');
   const yetkisiz = await uygulama.evaluate(async ({ BrowserWindow }) => {
     const saldirgan = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, contextIsolation: false, sandbox: false } });
     try {
       await saldirgan.loadURL('about:blank');
-      return await saldirgan.webContents.executeJavaScript("require('electron').ipcRenderer.invoke('notlar:kaydet', [])");
+      return await saldirgan.webContents.executeJavaScript("Promise.all([require('electron').ipcRenderer.invoke('notlar:kaydet', []),require('electron').ipcRenderer.invoke('notlar:farkli-kaydet','bir'),require('electron').ipcRenderer.invoke('notlar:uygulamaya-kaydet','bir')])");
     } finally { saldirgan.destroy(); }
   });
-  assert.equal(yetkisiz.basarili, false);
+  for (const sonuc of yetkisiz) {
+    assert.equal(sonuc.basarili, false);
+    assert.equal(sonuc.hata, 'Bu işleme izin verilmiyor.');
+  }
   assert.equal(fs.readFileSync(notDosyasi, 'utf8'), onceki);
   const gecersiz = await sayfa.evaluate(() => window.notDefterim.kaydet([{ id: 'x', title: 'Hatalı veri' }]));
   assert.equal(gecersiz.basarili, false);

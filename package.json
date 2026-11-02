@@ -1,13 +1,13 @@
 {
   "name": "not-defterim",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Windows için çevrimdışı çalışan Türkçe not defteri",
   "author": "asilhanalpay",
   "private": true,
   "main": "masaüstü/ana.cjs",
   "scripts": {
     "baslat": "electron .",
-    "denetle": "node --check masaüstü/güncelleme.cjs && node --check masaüstü/ana.cjs && node --check masaüstü/köprü.cjs && node --check masaüstü/depolama.cjs && node --check masaüstü/sürüm-bildirimi.cjs && node --check arayüz/tema.js && node --check arayüz/notlar.js && node --check arayüz/sürüm-bildirimi.js && node --test denetimler/*.denetim.cjs",
+    "denetle": "node --check masaüstü/not-dosyaları.cjs && node --check masaüstü/güncelleme.cjs && node --check masaüstü/ana.cjs && node --check masaüstü/köprü.cjs && node --check masaüstü/depolama.cjs && node --check masaüstü/sürüm-bildirimi.cjs && node --check arayüz/tema.js && node --check arayüz/notlar.js && node --check arayüz/sürüm-bildirimi.js && node --test denetimler/*.denetim.cjs",
     "paketle:windows": "node --require ./kurulum-kaynakları/minimatch-uyumu.cjs ./node_modules/electron-builder/cli.js --win nsis --x64 --publish never",
     "denetle:electron": "node --test denetimler/electron.cjs",
     "paketle:windows:aday": "node --require ./kurulum-kaynakları/minimatch-uyumu.cjs ./node_modules/electron-builder/cli.js --config kurulum-kaynakları/güçlendirme-adayı.cjs --win nsis --x64 --publish never",

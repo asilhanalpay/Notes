@@ -41,6 +41,9 @@ function denetimleriAyarla() {
   oge('body').disabled = kilitli;
   oge('search').disabled = kilitli;
   oge('klasor').disabled = !masaustu || mesgul;
+  for (const kimlik of ['farkliKaydet', 'uygulamayaKaydet']) {
+    oge(kimlik).disabled = kilitli || !notlar.some(not => not.id === seciliKimlik);
+  }
 }
 
 function kelimeleriSay() {
@@ -205,6 +208,17 @@ oge('yedekle').addEventListener('click', () => dosyaIslemi(async () => {
   const sonuc = await masaustu.yedekle();
   if (!sonuc.basarili) throw new Error(sonuc.hata);
   if (!sonuc.veri.iptal) oge('status').textContent = 'Yedek dosyası kaydedildi';
+}));
+oge('farkliKaydet').addEventListener('click', () => dosyaIslemi(async () => {
+  const sonuc = await masaustu.farkliKaydet(seciliKimlik);
+  if (!sonuc.basarili) throw new Error(sonuc.hata);
+  if (!sonuc.veri.iptal) oge('status').textContent = `${sonuc.veri.ad} kaydedildi`;
+}));
+oge('uygulamayaKaydet').addEventListener('click', () => dosyaIslemi(async () => {
+  const sonuc = await masaustu.uygulamayaKaydet(seciliKimlik);
+  if (!sonuc.basarili) throw new Error(sonuc.hata);
+  oge('status').textContent = `${sonuc.veri.ad} kaydedildi`;
+  if (!sonuc.veri.klasorAcildi) hataGoster('Not kaydedildi ancak klasör açılamadı. Dosyan Kaydedilen notlar klasöründe.');
 }));
 oge('iceAktar').addEventListener('click', () => dosyaIslemi(async () => {
   const sonuc = await masaustu.iceAktar();

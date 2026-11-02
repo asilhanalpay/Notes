@@ -188,3 +188,57 @@ test('Köprü eşzamanlı hata verse de yeniden kayıt denenebilir', async t => 
   assert.equal(kayitlar.at(-1)[0].body, 'Korunacak metin');
   assert.equal(oge('hata').hidden, true);
 });
+test('Farklı kaydet açık notun son değişikliğini önce saklar ve yalnız seçili kimliği gönderir', async t => {
+  const { dom, oge, yaz, kayitlar } = await arayuzAc(t, [
+    { id: 'bir', title: 'Birinci', body: '', updated: 1000 },
+    { id: 'iki', title: 'İkinci', body: 'Başka not', updated: 1000 }
+  ]);
+  let gonderilen;
+  dom.window.notDefterim.farkliKaydet = async id => {
+    gonderilen = id;
+    assert.equal(kayitlar.at(-1)[0].body, 'TXT dosyasına son metin');
+    return { basarili: true, veri: { iptal: false, ad: 'Birinci.txt' } };
+  };
+  yaz('body', 'TXT dosyasına son metin');
+  oge('farkliKaydet').click(); await bekle();
+  assert.equal(gonderilen, 'bir');
+  assert.equal(oge('status').textContent, 'Birinci.txt kaydedildi');
+  assert.equal(oge('body').disabled, false);
+});
+test('TXT seçenekleri not yokken devre dışıdır; kayıt hatasında dışa aktarma başlamaz', async t => {
+  const { dom, oge, yaz, durum } = await arayuzAc(t);
+  assert.equal(oge('farkliKaydet').disabled, true);
+  assert.equal(oge('uygulamayaKaydet').disabled, true);
+  oge('add').click(); await bekle();
+  durum.hata = true; yaz('body', 'Henüz saklanmadı');
+  let sayi = 0;
+  dom.window.notDefterim.uygulamayaKaydet = async () => { sayi++; };
+  oge('uygulamayaKaydet').click(); await bekle();
+  assert.equal(sayi, 0);
+  assert.equal(oge('status').textContent, 'Kaydedilemedi');
+  assert.equal(oge('body').value, 'Henüz saklanmadı');
+  assert.equal(oge('body').disabled, false);
+});
+test('Klasör açma hatası, kaydedilmiş dosyayı başarısız kayıt gibi göstermez', async t => {
+  const { dom, oge } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Metin', updated: 1000 }]);
+  dom.window.notDefterim.uygulamayaKaydet = async id => {
+    assert.equal(id, 'bir');
+    return { basarili: true, veri: { ad: 'Not.txt', klasorAcildi: false } };
+  };
+  oge('uygulamayaKaydet').click(); await bekle();
+  assert.equal(oge('status').textContent, 'Not.txt kaydedildi');
+  assert.equal(oge('hata').hidden, false);
+  assert.ok(oge('hataMetni').textContent.includes('Not kaydedildi ancak klasör açılamadı'));
+});
+test('İptal edilen farklı kaydet başarı mesajı vermez ve aynı anda ikinci dosya işlemi başlamaz', async t => {
+  const { dom, oge } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Metin', updated: 1000 }]);
+  let bitir, sayi = 0;
+  dom.window.notDefterim.farkliKaydet = () => { sayi++; return new Promise(r => { bitir = r; }); };
+  oge('farkliKaydet').click(); await bekle();
+  oge('farkliKaydet').click(); oge('uygulamayaKaydet').click();
+  assert.equal(sayi, 1);
+  assert.equal(oge('body').disabled, true);
+  bitir({ basarili: true, veri: { iptal: true } }); await bekle();
+  assert.equal(oge('status').textContent, 'Notların hazır');
+  assert.equal(oge('body').disabled, false);
+});
