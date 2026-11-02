@@ -60,13 +60,18 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await kasa.kaydet(sentetikAnahtar);
   assert.equal(await kasa.oku(), sentetikAnahtar);
   kasa.sil();
-  const tercihler = await uygulama.evaluate(({ BrowserWindow, app }) => {
+  const tercihler = await uygulama.evaluate(({ BrowserWindow, app, systemPreferences }) => {
     const w = BrowserWindow.getAllWindows()[0];
     const p = w.webContents.getLastWebPreferences();
-    return { sandbox: p.sandbox, contextIsolation: p.contextIsolation, nodeIntegration: p.nodeIntegration, userData: app.getPath('userData') };
+    const kenar = w.getAccentColor();
+    return { sandbox: p.sandbox, contextIsolation: p.contextIsolation, nodeIntegration: p.nodeIntegration, userData: app.getPath('userData'),
+      kenar: kenar === true ? systemPreferences.getAccentColor() : kenar };
   });
   assert.equal(tercihler.userData, path.join(profil, 'Not Defterim'));
   assert.deepEqual([tercihler.sandbox, tercihler.contextIsolation, tercihler.nodeIntegration], [true, true, false]);
+  assert.match(String(tercihler.kenar).replace(/^#/, ''), /^000000(?:ff)?$/i);
+  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(0, 0, 0)');
+  assert.equal(await sayfa.locator('.workspace').evaluate(e => getComputedStyle(e).boxShadow), 'none');
   assert.deepEqual(await sayfa.evaluate(() => [typeof require, typeof process, typeof Buffer, typeof window.notDefterim.oku]), ['undefined', 'undefined', 'undefined', 'function']);
   assert.equal(await sayfa.evaluate(() => 'ipcRenderer' in window.notDefterim), false);
   const temaReddi = await sayfa.evaluate(() => window.notDefterim.temaSec('izin-verilmeyen-deger'));
@@ -173,7 +178,13 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await sayfa.locator('#tema').selectOption('karanlik');
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(true);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(9, 9, 9)');
-  assert.equal(await sayfa.locator('.sidebar').evaluate(e => getComputedStyle(e).borderRightColor), 'rgb(94, 89, 78)');
+  assert.equal(await sayfa.locator('.sidebar').evaluate(e => getComputedStyle(e).borderRightColor), 'rgb(102, 102, 102)');
+  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(0, 0, 0)');
+  const karanlikKenar = await uygulama.evaluate(({ BrowserWindow, systemPreferences }) => {
+    const kenar = BrowserWindow.getAllWindows()[0].getAccentColor();
+    return kenar === true ? systemPreferences.getAccentColor() : kenar;
+  });
+  assert.match(String(karanlikKenar).replace(/^#/, ''), /^000000(?:ff)?$/i);
   await sayfa.screenshot({ path: 'denetim-çıktıları/karanlık.png', animations: 'disabled' });
   await sayfa.locator('#tema').selectOption('acik');
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(false);

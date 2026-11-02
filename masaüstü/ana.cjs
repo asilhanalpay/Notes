@@ -47,6 +47,7 @@ function pencereOlustur() {
   pencere = new BrowserWindow({
     title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
     backgroundColor: '#ffffff', show: false,
+    ...(process.platform === 'win32' ? { accentColor: '#000000' } : {}),
     icon: path.join(__dirname, '..', 'arayüz', 'simge.png'),
     webPreferences: {
       preload: path.join(__dirname, 'köprü.cjs'), contextIsolation: true,

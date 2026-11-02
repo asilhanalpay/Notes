@@ -1,5 +1,7 @@
 ## Bu sürümde
 
+- Siyah pencere kenarı ve daha belirgin hatlarla sade görünüm. Köşeler ve tipografi keskinleştirildi; gereksiz gölgeler kaldırıldı.
+
 - Sol alttaki menüye **Farklı kaydet…** eklendi: açık not .txt olarak seçtiğin konuma kaydedilir.
 - **Kaydet ve klasörü aç**, notu uygulamanın kullanıcı verilerindeki **Kaydedilen notlar** klasörüne kaydeder ve bu klasörü açar. Aynı adlı dosyalar numaralandırılır; önceki kopyalar ezilmez.
 - Dışa aktarmadan önce bekleyen son değişiklikler uygulamaya kaydedilir. Kayıt hatasında dışa aktarma başlamaz. Yedek alma/ekleme seçenekleri korunur.
