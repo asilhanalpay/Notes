@@ -12,6 +12,31 @@ $varsayilan = Join-Path $env:LOCALAPPDATA 'Programs\Notes'
 $ozel = Join-Path $env:LOCALAPPDATA "Notes Güncelleme Denetimi\Özel klasör 'İğdır'\Notes"
 $veri = Join-Path $env:APPDATA 'Not Defterim'
 $rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'calisma-dali-adayi-gercek-Electron'; kurulumlar = 'yayinlanmis-0.0.5-ve-0.0.6'; senaryolar = @() }
+# WScript.Shell.TargetPath bazı karakterleri ANSI kod sayfasına çevirebilir.
+# Dosya yolunu Windows'un Unicode kısayol arayüzünden oku; aynı konum beklentisi korunur.
+Add-Type -TypeDefinition @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+public static class NotesShortcutUnicode {
+    [ComImport, Guid("00021401-0000-0000-C000-000000000046")]
+    private class ShellLink { }
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("000214F9-0000-0000-C000-000000000046")]
+    private interface IShellLinkW {
+        void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder path, int length, IntPtr findData, uint flags);
+    }
+    public static string Target(string file) {
+        var link = new ShellLink();
+        try {
+            ((IPersistFile)link).Load(file, 0);
+            var path = new StringBuilder(32768);
+            ((IShellLinkW)link).GetPath(path, path.Capacity, IntPtr.Zero, 4);
+            return path.ToString();
+        } finally { Marshal.FinalReleaseComObject(link); }
+    }
+}
+'@
 function Kayitlar {
     foreach ($kovan in @([Microsoft.Win32.RegistryHive]::CurrentUser, [Microsoft.Win32.RegistryHive]::LocalMachine)) {
         foreach ($gorunum in @([Microsoft.Win32.RegistryView]::Registry64, [Microsoft.Win32.RegistryView]::Registry32)) {
@@ -51,9 +76,10 @@ function Kisayollar([string]$exe) {
         $yol = [Environment]::GetFolderPath($klasor)
         if ($yol -and (Test-Path $yol)) {
             foreach ($link in @(Get-ChildItem -LiteralPath $yol -Filter 'Notes.lnk' -Recurse)) {
-                $hedef = $kabuk.CreateShortcut($link.FullName).TargetPath
-                if ($hedef -ne $exe) { throw "Kısayol başka konuma gidiyor: $hedef" }
-                $bulunan += @{ dosya = $link.FullName; hedef = $hedef }
+                $hedef = [NotesShortcutUnicode]::Target($link.FullName)
+                Copy-Item -LiteralPath $link.FullName -Destination (Join-Path $cikti ("windows-kisayol-$($bulunan.Count).lnk")) -Force
+                if (-not [string]::Equals($hedef, $exe, [StringComparison]::OrdinalIgnoreCase)) { throw "Unicode kısayol başka konuma gidiyor: $hedef" }
+                $bulunan += @{ dosya = $link.FullName; hedef = $hedef; wscriptHedef = $kabuk.CreateShortcut($link.FullName).TargetPath }
             }
         }
     }
