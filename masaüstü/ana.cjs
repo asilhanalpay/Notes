@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
 const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./sürüm-bildirimi.cjs');
 const { kurulumHazirla } = require('./güncelleme.cjs');
+const { NotDosyalari } = require('./not-dosyaları.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
 
 app.setName('Notes');
@@ -46,6 +47,7 @@ function pencereOlustur() {
   pencere = new BrowserWindow({
     title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
     backgroundColor: '#ffffff', show: false,
+    ...(process.platform === 'win32' ? { accentColor: '#000000' } : {}),
     icon: path.join(__dirname, '..', 'arayüz', 'simge.png'),
     webPreferences: {
       preload: path.join(__dirname, 'köprü.cjs'), contextIsolation: true,
@@ -88,6 +90,7 @@ else {
   app.whenReady().then(() => {
     app.setAppUserModelId('com.asilhanalpay.notdefterim');
     depo = new NotDeposu(app.getPath('userData'));
+    const notDosyalari = new NotDosyalari({ depo, veriKlasoru: app.getPath('userData'), dialog, shell, pencere: () => pencere });
     surumBildirimleri = new SurumBildirimi({
       surum: app.getVersion(), paketli: app.isPackaged, platform: process.platform,
       kasa: new ErisimKasasi(path.join(app.getPath('userData'), 'surum-erisim.bin'), safeStorage)
@@ -144,6 +147,8 @@ else {
     });
     islemTanimla('notlar:oku', () => depo.oku());
     islemTanimla('notlar:kaydet', notlar => depo.kaydet(notlar));
+    islemTanimla('notlar:farkli-kaydet', kimlik => notDosyalari.farkliKaydet(kimlik));
+    islemTanimla('notlar:uygulamaya-kaydet', kimlik => notDosyalari.uygulamayaKaydet(kimlik));
     islemTanimla('notlar:yedekle', async () => {
       const sonuc = await dialog.showSaveDialog(pencere, {
         title: 'Notlarını yedekle', buttonLabel: 'Yedeği kaydet',

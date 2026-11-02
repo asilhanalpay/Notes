@@ -1,13 +1,13 @@
 ## Bu sürümde
 
-- Logo aynı tasarımla daha dolu görünür; görev çubuğu ve kurulum ikonları yenilendi.
-- Yeni kararlı sürümler, GitHub bağlantısı etkin ve uygulama açıkken yaklaşık dakikada bir denetlenir.
-- Bildirimdeki **Güncelle**, kurulumu indirip doğrular, notları kaydeder ve mevcut klasöre sessizce kurar. Klasör yeniden sorulmaz; ardından Notes açılır.
-- Minimatch derleme bağımlılığı düzeltilmiş 11.0.3 sürümüne geçirildi; eski derleme API çağrıları uyumluluk testleriyle korundu.
-- Electron ve paketleme araçları güncellendi; mevcut şifreli erişim kaydı uyumu ve paket güçlendirmeleri korundu.
+- Siyah pencere kenarı ve daha belirgin hatlarla sade görünüm. Köşeler ve tipografi keskinleştirildi; gereksiz gölgeler kaldırıldı.
 
-## İlk geçiş
+- Sol alttaki menüye **Farklı kaydet…** eklendi: açık not .txt olarak seçtiğin konuma kaydedilir.
+- **Kaydet ve klasörü aç**, notu uygulamanın kullanıcı verilerindeki **Kaydedilen notlar** klasörüne kaydeder ve bu klasörü açar. Aynı adlı dosyalar numaralandırılır; önceki kopyalar ezilmez.
+- Dışa aktarmadan önce bekleyen son değişiklikler uygulamaya kaydedilir. Kayıt hatasında dışa aktarma başlamaz. Yedek alma/ekleme seçenekleri korunur.
 
-0.0.4 veya daha eski kurulumda bu tek tuş akışı bulunmaz. Yeni **Notes.exe** dosyasını bir kez indir, yedek al, Notes’u kapat ve mevcut konuma kur. Eski sürümü kaldırman gerekmez. Sonraki yayımlanmış sürümlerde **Güncelle** düğmesini kullanabilirsin.
+## Güncelle
 
-Notlar, kurtarma kopyaları ve dış yedekler şifrelenmez. Kurulum dosyası henüz yayıncı imzalı değildir. Güncelleme doğrulaması özel GitHub yayınının SHA-256 özetine güvenir; bağımsız yayıncı imzası değildir.
+0.0.5'te GitHub bağlantın etkinse yayımlandıktan sonra **Güncelle** düğmesini kullanabilirsin. Daha eski sürümde Notes'u kapatıp yeni Notes.exe dosyasını bir kez mevcut konuma kur. Not ve kullanıcı veri yolu değişmedi.
+
+Notlar, .txt kopyaları ve JSON yedekleri şifrelenmez. Paket henüz yayıncı imzalı değildir.

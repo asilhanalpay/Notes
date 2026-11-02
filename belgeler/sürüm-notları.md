@@ -1,3 +1,12 @@
+# 0.0.6 adayı
+
+- Siyah pencere kenarı, belirgin ayırıcılar, keskin köşeler ve sade tipografi.
+- Yinelenen CSS düzenlendi; dosya rolleri ve kaynak biçim kuralları güncellendi.
+
+- Farklı kaydet: seçili notu konumu seçilen UTF-8 .txt dosyasına kaydetme.
+- Kaydet ve klasörü aç: kullanıcı veri klasöründe numaralandırılmış .txt kopyası ve otomatik klasör açılışı.
+- Son değişikliklerin önce saklanması; iptal, hata ve dosya çakışması yönetimi.
+
 # 0.0.5
 
 - Minimatch uyarısı 11.0.3 ve eski API uyumluluk katmanıyla giderildi; audit sıfır uyarı, 62 birim ve gerçek Windows denetimleri geçti.

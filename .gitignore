@@ -5,3 +5,11 @@ denetim-çıktıları/
 .DS_Store
 Thumbs.db
 .openai/
+
+# Yanlışlıkla proje klasörüne kopyalanan kişisel veriler.
+notlar.json
+notlar.yedek.json
+surum-erisim.bin
+Notes-Yedek-*.json
+Kaydedilen notlar/
+Not Defterim/
