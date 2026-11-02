@@ -179,6 +179,11 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(true);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(9, 9, 9)');
   assert.equal(await sayfa.locator('.sidebar').evaluate(e => getComputedStyle(e).borderRightColor), 'rgb(102, 102, 102)');
+  const odakSiniri = await sayfa.locator('#body').evaluate(e => {
+    const stil = getComputedStyle(e), alan = e.getBoundingClientRect(), kapsayici = e.parentElement.getBoundingClientRect();
+    return { alt: alan.bottom + parseFloat(stil.outlineWidth) + parseFloat(stil.outlineOffset), sinir: kapsayici.bottom };
+  });
+  assert.ok(odakSiniri.alt <= odakSiniri.sinir + 1, 'Yazı alanının odak çizgisi kırpılmamalı.');
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(0, 0, 0)');
   const karanlikKenar = await uygulama.evaluate(({ BrowserWindow, systemPreferences }) => {
     const kenar = BrowserWindow.getAllWindows()[0].getAccentColor();
@@ -220,5 +225,17 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   assert.equal(gezinti.adres, gezinti.oncekiAdres);
   assert.equal(gezinti.metin, 'Kapanışta beklemeden saklanan son metin');
   assert.equal(gezinti.pencereSayisi, 1);
+
+  // Yüksek yakınlaştırmada düzenleyiciye kaydırılarak ulaşılabilir; not değişmez.
+  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));
+  await sayfa.locator('#body').scrollIntoViewIfNeeded();
+  const yakinlastirma = await sayfa.locator('#body').evaluate(e => {
+    const r = e.getBoundingClientRect();
+    return { ust: r.top, alt: r.bottom, yukseklik: innerHeight, tasma: getComputedStyle(document.body).overflowY };
+  });
+  assert.equal(yakinlastirma.tasma, 'auto');
+  assert.ok(yakinlastirma.ust >= -1 && yakinlastirma.alt <= yakinlastirma.yukseklik + 1);
+  await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
+  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
 
 });
