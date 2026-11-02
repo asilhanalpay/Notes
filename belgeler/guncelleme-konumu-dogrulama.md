@@ -1,5 +1,7 @@
 # Güncelleme ve kurulum konumu — 2 Kasım 2026
 
+**0.0.7 hazırlığı:** aşağıdaki kayıt `e205eea` adayının doğrulamasını anlatır. Başlatma düzeltmesi 0.0.7 kaynaklarına dahil edilmiştir. Yeni paket denetimi, üretilen kurucuyla kurulan uygulamanın kendi ASAR'ındaki `kurulumHazirla().baslat()` yolunu gerçek Electron'da çalıştırır. Bu ek paket denetiminde yalnız ağ cevabı yerel kurucu fikstürüdür; aşağıdaki canlı indirme testinin yerine geçmez. Güncel yayın durumu [0.0.7 sürüm sayfasından](https://github.com/asilhanalpay/Notes/releases/tag/v0.0.7) doğrulanabilir. Aşağıdaki “henüz yayımlanmadı” ifadeleri önceki aday kaydının durumudur.
+
 **Sonuç:** yayımlanmış güncelleme kodunun gerçek Electron altında başlatma hatası doğrulandı. Çalışma dalındaki düzeltmeyle varsayılan ve özel kişisel kurulum klasörlerinde gerçek 0.0.5 → 0.0.6 yükseltmesi geçti. Düzeltme henüz ana dala alınmadı, yeni bir kurulum dosyası olarak paketlenmedi veya yayımlanmadı. Yayımdaki 0.0.6 dosyası değiştirilmedi.
 
 Bu sonuç bir işlev hatasıdır; yeni bir uygulama güvenlik açığı olarak sınıflandırılmadı.

@@ -1,13 +1,13 @@
 ## Bu sürümde
 
-- Siyah pencere kenarı ve daha belirgin hatlarla sade görünüm. Köşeler ve tipografi keskinleştirildi; gereksiz gölgeler kaldırıldı.
+Windows güncelleme yardımcısının kurulumu başlatamamasına neden olan hata düzeltildi. Yardımcı hazır olmadan uygulama kapanmaz; son kayıt tamamlandıktan sonra kurulum devam eder.
 
-- Sol alttaki menüye **Farklı kaydet…** eklendi: açık not .txt olarak seçtiğin konuma kaydedilir.
-- **Kaydet ve klasörü aç**, notu uygulamanın kullanıcı verilerindeki **Kaydedilen notlar** klasörüne kaydeder ve bu klasörü açar. Aynı adlı dosyalar numaralandırılır; önceki kopyalar ezilmez.
-- Dışa aktarmadan önce bekleyen son değişiklikler uygulamaya kaydedilir. Kayıt hatasında dışa aktarma başlamaz. Yedek alma/ekleme seçenekleri korunur.
+Güncelleme mevcut kişisel kurulum klasörüne sessizce yapılır. Notların konumu değişmez. Varsayılan ve Türkçe karakterli özel klasör testlerinde tek kurulum kaydı ve doğru kısayollar korundu; sentetik not ve kurtarma dosyaları değişmedi.
 
-## Güncelle
+## 0.0.7’ye geçiş
 
-0.0.5'te GitHub bağlantın etkinse yayımlandıktan sonra **Güncelle** düğmesini kullanabilirsin. Daha eski sürümde Notes'u kapatıp yeni Notes.exe dosyasını bir kez mevcut konuma kur. Not ve kullanıcı veri yolu değişmedi.
+Eski güncelleyicideki hata nedeniyle ilk geçişte **Notes.exe** dosyasını indirip Notes’u kapatarak bir kez çalıştırman gerekebilir. Mevcut kurulumun üzerine kur; not klasörünü silme. Sonraki güncellemelerde uygulama içindeki **Güncelle** düğmesi mevcut klasörü kullanır.
+
+Bu doğrulama yönetici gerektirmeyen kişisel kurulum içindir. Tüm kullanıcılar için kurulum test edilmedi.
 
 Notlar, .txt kopyaları ve JSON yedekleri şifrelenmez. Paket henüz yayıncı imzalı değildir.

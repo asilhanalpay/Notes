@@ -1,4 +1,11 @@
-# 0.0.6 adayı
+# 0.0.7 — 2 Kasım 2026
+
+- Windows güncelleme yardımcısının hazır olmadan kapanmasına neden olan başlatma biçimi düzeltildi. Asıl yardımcı Windows Start-Process ile gizli açılır; hazır işareti olmadan Notes kapanmaz.
+- Güncelleme mevcut kişisel kurulum klasörüne sessizce yapılır. Tek kurulum kaydı, kısayollar, Türkçe karakterli özel konum ve sentetik veri koruması Windows üzerinde doğrulandı.
+- Yayın öncesi paket testine, paketin kendi ASAR koduyla gerçek Electron üzerinden hazırlama ve başlatma denetimi eklendi.
+- Eski sürümden ilk geçişte Notes.exe dosyasını bir kez elle çalıştırmak gerekebilir. Notların konumu ve veri biçimi değişmedi.
+
+# 0.0.6
 
 - Siyah pencere kenarı, belirgin ayırıcılar, keskin köşeler ve sade tipografi.
 - Yinelenen CSS düzenlendi; dosya rolleri ve kaynak biçim kuralları güncellendi.
