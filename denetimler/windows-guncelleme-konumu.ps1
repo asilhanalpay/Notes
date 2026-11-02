@@ -11,7 +11,7 @@ $cikti = Join-Path $proje 'denetim-çıktıları'
 $varsayilan = Join-Path $env:LOCALAPPDATA 'Programs\Notes'
 $ozel = Join-Path $env:LOCALAPPDATA "Notes Güncelleme Denetimi\Özel klasör 'İğdır'\Notes"
 $veri = Join-Path $env:APPDATA 'Not Defterim'
-$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; senaryolar = @() }
+$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'calisma-dali-adayi'; kurulumlar = 'yayinlanmis-0.0.5-ve-0.0.6'; senaryolar = @() }
 function Kayitlar {
     foreach ($kovan in @([Microsoft.Win32.RegistryHive]::CurrentUser, [Microsoft.Win32.RegistryHive]::LocalMachine)) {
         foreach ($gorunum in @([Microsoft.Win32.RegistryView]::Registry64, [Microsoft.Win32.RegistryView]::Registry32)) {

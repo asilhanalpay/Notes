@@ -22,6 +22,8 @@ async function main() {
   for (const ad of ['güncelleme.cjs', 'güncelleme-yardımcısı.ps1', 'sürüm-bildirimi.cjs', 'depolama.cjs']) {
     fs.writeFileSync(path.join(kaynak, ad), asar.extractFile(paket, `masaüstü/${ad}`));
   }
+  // Eski yayındaki yardımcı/sürüm ayrıştırıcısı korunur; başlatma düzeltmesi adayı sınanır.
+  fs.copyFileSync(path.join(__dirname, '../masaüstü/güncelleme.cjs'), path.join(kaynak, 'güncelleme.cjs'));
   const { yayiniDogrula } = require(path.join(kaynak, 'sürüm-bildirimi.cjs'));
   const yayin = yayiniDogrula(JSON.parse(fs.readFileSync(ayar.yayin, 'utf8').replace(/^\uFEFF/, '')));
   if (yayin.surum !== '0.0.6') throw new Error('Beklenmeyen hedef sürüm.');
@@ -50,6 +52,6 @@ async function main() {
     cp.spawn = asilSpawn;
     fs.closeSync(fd);
   }
-  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet }));
+  fs.writeFileSync(path.join(ayar.gecici, 'hazir.json'), JSON.stringify({ surum: yayin.surum, ozet: yayin.ozet, baslatmaKaynagi: 'calisma-dali-adayi' }));
 }
 main().catch(hata => { console.error(hata.message); process.exitCode = 1; });
