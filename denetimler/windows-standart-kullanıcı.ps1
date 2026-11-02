@@ -1,4 +1,7 @@
-param([string]$KurulumKlasoru = (Join-Path $PSScriptRoot '../kurulum'))
+param(
+    [string]$KurulumKlasoru = (Join-Path $PSScriptRoot '../kurulum'),
+    [switch]$GuncellemeKonumu
+)
 # Yalnız geçici hosted Windows makinesinde; kişisel hesap veya parola kullanılmaz.
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
@@ -41,7 +44,7 @@ $yerler = @{
     '__PIDFILE__' = $surecKimligi
     '__LOG__' = (Join-Path $cikti 'windows-standart.log')
     '__PROJECT__' = $proje
-    '__SCRIPT__' = (Join-Path $PSScriptRoot 'windows-kurulum.ps1')
+    '__SCRIPT__' = (Join-Path $PSScriptRoot $(if ($GuncellemeKonumu) { 'windows-guncelleme-konumu.ps1' } else { 'windows-kurulum.ps1' }))
     '__PACKAGE__' = (Resolve-Path -LiteralPath $KurulumKlasoru).Path
     '__RESULT__' = $sonuc
 }
@@ -60,8 +63,13 @@ try {
     }
     $durum = Get-Content -LiteralPath $sonuc -Raw | ConvertFrom-Json
     if (-not $durum.basarili) { throw "Standart kullanıcı denetimi başarısız: $($durum.hata)" }
-    $yetki = Get-Content (Join-Path $cikti 'windows-yetki.json') -Raw | ConvertFrom-Json
-    if (-not $yetki.yoneticiGerektirmeyenKurulumDogrulandi) { throw 'Yönetici gerektirmeyen kurulum kanıtı eksik.' }
+    if ($GuncellemeKonumu) {
+        $yetki = Get-Content (Join-Path $cikti 'windows-guncelleme-konumu.json') -Raw | ConvertFrom-Json
+        if (-not $yetki.basarili -or -not $yetki.standartYetki) { throw 'Güncelleme konumu kanıtı eksik.' }
+    } else {
+        $yetki = Get-Content (Join-Path $cikti 'windows-yetki.json') -Raw | ConvertFrom-Json
+        if (-not $yetki.yoneticiGerektirmeyenKurulumDogrulandi) { throw 'Yönetici gerektirmeyen kurulum kanıtı eksik.' }
+    }
 } finally {
     if (Test-Path $surecKimligi) {
         $altPid = [int](Get-Content -LiteralPath $surecKimligi)
