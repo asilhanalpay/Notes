@@ -19,6 +19,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Gerçek Electron çalıştırıcısını hazırla
+        run: node -e "require('electron')"
       - name: Yayımlanmış sürümleri hazırla
         shell: pwsh
         run: |

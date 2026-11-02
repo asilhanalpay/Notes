@@ -100,10 +100,7 @@ async function kurulumHazirla({ kok, yayin, anahtar, signal, ilerle, exe = proce
       const metin = yardimciMetni({ dosya, hedef: path.dirname(exe), pid, ozet: yayin.ozet.slice(7), sonuc, hazir });
       const ps = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
       const surec = spawn(ps, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(metin, 'utf16le').toString('base64')], {
-        // Windows PowerShell konsolsuz, detached başlatmada betiği işletmeden
-        // çıkabilir. Windows çocuk süreci ebeveyni kapandığında da yaşayabilir;
-        // unref() Notes'un yardımcıyı beklemesini engeller.
-        detached: false, windowsHide: true, stdio: 'ignore', cwd: klasor
+        detached: true, windowsHide: true, stdio: 'ignore', cwd: klasor
       });
       let hata;
       surec.on('error', () => { hata = true; });
