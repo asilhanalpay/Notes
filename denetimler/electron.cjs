@@ -212,6 +212,18 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
   await expect(sayfa.locator('#tema')).toHaveValue('karanlik');
 
+  // Yüksek yakınlaştırmada düzenleyiciye kaydırılarak ulaşılabilir; not değişmez.
+  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));
+  await sayfa.locator('#body').scrollIntoViewIfNeeded();
+  const yakinlastirma = await sayfa.locator('#body').evaluate(e => {
+    const r = e.getBoundingClientRect();
+    return { ust: r.top, alt: r.bottom, yukseklik: innerHeight, tasma: getComputedStyle(document.body).overflowY };
+  });
+  assert.equal(yakinlastirma.tasma, 'auto');
+  assert.ok(yakinlastirma.ust >= -1 && yakinlastirma.alt <= yakinlastirma.yukseklik + 1);
+  await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
+  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
+
   // Engellenen gezinti Playwright'ın gezinme bekleyicisini açık bırakabilir.
   // Gerçek Electron olayını ve kalan belgeyi doğrudan doğrula; zaman aşımına dayanma.
   const gezinti = await uygulama.evaluate(async ({ BrowserWindow }) => {
@@ -226,16 +238,6 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   assert.equal(gezinti.metin, 'Kapanışta beklemeden saklanan son metin');
   assert.equal(gezinti.pencereSayisi, 1);
 
-  // Yüksek yakınlaştırmada düzenleyiciye kaydırılarak ulaşılabilir; not değişmez.
-  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));
-  await sayfa.locator('#body').scrollIntoViewIfNeeded();
-  const yakinlastirma = await sayfa.locator('#body').evaluate(e => {
-    const r = e.getBoundingClientRect();
-    return { ust: r.top, alt: r.bottom, yukseklik: innerHeight, tasma: getComputedStyle(document.body).overflowY };
-  });
-  assert.equal(yakinlastirma.tasma, 'auto');
-  assert.ok(yakinlastirma.ust >= -1 && yakinlastirma.alt <= yakinlastirma.yukseklik + 1);
-  await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
-  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
+
 
 });
