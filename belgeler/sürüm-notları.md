@@ -1,3 +1,7 @@
+# 0.0.10 adayı
+
+- Yardım → Notes Hakkında penceresine iletişim adresi eklendi: asilhan.alpay@agentmail.to.
+
 # 0.0.9 adayı
 
 - Sol alttaki Dosyalar menüsü sadeleştirildi; Notların klasörünü aç ilk sıraya alındı.

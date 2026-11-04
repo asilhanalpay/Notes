@@ -118,7 +118,7 @@ else {
       { label: 'Yardım', submenu: [
         { label: 'Notes Hakkında', click: () => dialog.showMessageBox(pencere, {
           type: 'info', title: 'Notes', message: 'Notes',
-          detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.`, buttons: ['Tamam']
+          detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.\n\nİletişim: asilhan.alpay@agentmail.to`, buttons: ['Tamam']
         }) }
       ] }
     ]));

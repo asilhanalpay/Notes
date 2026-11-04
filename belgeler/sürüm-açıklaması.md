@@ -1,7 +1,7 @@
 ## Bu sürümde
 
-Sol alttaki **Dosyalar (☰)** menüsü sadeleştirildi. En üstteki **Notların klasörünü aç**, notların ve kurtarma kopyasının bulunduğu klasöre doğrudan ulaşır.
+İletişim adresi artık uygulama içinde **Yardım → Notes Hakkında** penceresinde de görünür:
 
-**Farklı kaydet…** ve **Kaydet ve klasörü aç** seçenekleri korunur. Daha seyrek kullanılan **Yedek al** ve **Yedekten ekle**, **Yedekleme** bölümündedir.
+**asilhan.alpay@agentmail.to**
 
-Notların konumu ve dosya biçimi değişmedi. Yeni bir depolama alanı oluşturulmadı; mevcut notlar taşınmadı veya silinmedi.
+Menü çubuğu gizliyse **Alt** tuşuyla açabilirsin. Sürüm bilgisi aynı pencerede korunur.
