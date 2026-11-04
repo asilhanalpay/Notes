@@ -37,4 +37,8 @@ Depoya kod göndermek tek başına bildirim oluşturmaz: daha yüksek numaralı 
 
 Eski yerel erişim anahtarı kaydı kullanılmaz, yeniden şifrelenmez ve kendiliğinden silinmez. Anahtarı GitHub hesabından iptal edebilirsin. Not dosyalarının biçimi ve konumu değişmez.
 
+## İletişim
+
+Soru, öneri ve geri bildirim için: [asilhan.alpay@agentmail.to](mailto:asilhan.alpay@agentmail.to).
+
 [Dosyalar ne işe yarar?](belgeler/dosyalar.md) · [Sürüm notları](belgeler/sürüm-notları.md) · [Geliştirme bilgileri](belgeler/geliştirme.md)
