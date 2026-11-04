@@ -1,3 +1,7 @@
+## Notes 0.1.0
+
+Sürüm numarası 0.1.0 olarak düzenlendi. Sonraki sürümler 0.1.1, …, 0.1.9, 0.2.0 sırasıyla ilerler. 0.0.10’da sunulan özellikler korunur; veri biçimi ve bağımlılıklar değişmedi.
+
 ## Bu sürümde
 
 - Sol alttaki Dosyalar menüsünde yalnız **Farklı kaydet…** ve **Dosya aç…** var.
