@@ -66,7 +66,9 @@ class NotDosyalari {
   }
   oku() {
     this.hazirMi();
-    return { ...this.depo.oku(), dosyalar: Object.fromEntries([...this.baglar].map(([id, bag]) => [id, path.basename(bag.dosya)])) };
+    const veri = this.depo.oku();
+    const bekleyenKayit = veri.notlar.some(n => this.baglar.has(n.id) && ozet(satirlar(n.body)) !== this.baglar.get(n.id).govdeHash);
+    return { ...veri, bekleyenKayit, dosyalar: Object.fromEntries([...this.baglar].map(([id, bag]) => [id, path.basename(bag.dosya)])) };
   }
   notuOku(kimlik) {
     if (typeof kimlik !== 'string' || !kimlik || kimlik.length > 100) throw new Error('Kaydedilecek not geçersiz.');
@@ -104,9 +106,10 @@ class NotDosyalari {
     const dosya = path.resolve(sonuc.filePaths[0]);
     const { notlar } = this.depo.oku();
     const bag = [...this.baglar.values()].find(b => b.dosya.toLowerCase() === dosya.toLowerCase());
-    // Yeniden açma, bekleyen düzenlemeyi diskten gelen eski içerikle değiştirmez.
-    if (bag && notlar.some(n => n.id === bag.id)) return { iptal: false, not: this.notuOku(bag.id), ad: path.basename(dosya) };
     const txt = txtOku(dosya);
+    // Yeniden açma, bekleyen düzenlemeyi diskten gelen eski içerikle değiştirmez.
+    if (bag && notlar.some(n => n.id === bag.id)) return { iptal: false, not: this.notuOku(bag.id), ad: path.basename(dosya),
+      uyari: bag.hash !== txt.hash ? 'TXT dışarıda değişmiş. Notes içindeki mevcut kopyan açıldı. İki metni karşılaştır; Farklı kaydet ile başka bir hedef seçebilirsin.' : null };
     if (!bag && this.baglar.size >= 10000) throw new Error('TXT bağlantısı sınırına ulaşıldı.');
     const not = { id: bag?.id ?? randomUUID(), title: path.basename(dosya, path.extname(dosya)).slice(0, 500), body: txt.body, updated: Date.now() };
     kodla([not, ...notlar]);

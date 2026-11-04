@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(__dirname, '../arayüz/pencere.html'), 'u
 const kod = fs.readFileSync(path.join(__dirname, '../arayüz/notlar.js'), 'utf8');
 const bekle = async () => { for (let i = 0; i < 12; i++) await new Promise(resolve => setImmediate(resolve)); };
 
-async function arayuzAc(t, ilkNotlar = []) {
+async function arayuzAc(t, ilkNotlar = [], okumaEkleri = {}) {
   const kayitlar = [];
   const durum = { hata: false, kapandi: false, kapatmaIstegi: null };
   const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'file:///uygulama/arayüz/pencere.html' });
@@ -27,7 +27,7 @@ async function arayuzAc(t, ilkNotlar = []) {
     await bekle();
   };
   dom.window.notDefterim = {
-    oku: async () => ({ basarili: true, veri: { notlar: ilkNotlar, kurtarildi: false } }),
+    oku: async () => ({ basarili: true, veri: { notlar: ilkNotlar, kurtarildi: false, ...okumaEkleri } }),
     kaydet: async notlar => {
       if (durum.kayitKancasi) await durum.kayitKancasi();
       if (durum.hata) return { basarili: false, hata: 'Disk dolu' };
@@ -245,4 +245,13 @@ test('Dış TXT kaydı başarısızken Farklı kaydet son metinle kurtarma sağl
   assert.equal(kayitlar.at(-1)[0].body, 'Kurtarılacak son metin');
   assert.equal(oge('status').textContent, 'Kurtarılan.txt kaydedildi');
   assert.equal(oge('hata').hidden, true);
+});
+
+test('Önceki oturumdan kalan başarısız TXT kaydı yeniden açılışta uyarılır ve kapanışta yeniden denenir', async t => {
+  const { oge, durum } = await arayuzAc(t, [{ id: 'txt', title: 'Not', body: 'JSON içinde korunmuş', updated: 1000 }], { bekleyenKayit: true, dosyalar: { txt: 'Not.txt' } });
+  assert.ok(oge('hataMetni').textContent.includes('henüz yazılamamış'));
+  durum.hata = true; await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, false);
+  durum.hata = false; await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, true);
 });

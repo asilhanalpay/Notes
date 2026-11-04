@@ -172,3 +172,18 @@ test('Bağlantı kaydı yazılamazsa başarı dönmez; tekrar denemede disk kayd
   const yeniden = new NotDosyalari(ayarlar); not.body = 'Tekrar denemeden sonra'; yeniden.kaydet(notlar);
   assert.equal(fs.readFileSync(hedef, 'utf8'), not.body);
 });
+
+test('Başarısız TXT kaydı yeniden başlatmada bekleyen kayıt olarak bildirilir; dış değişiklikle yeniden açma uyarılır', async t => {
+  const { islem, not, notlar, hedef, ayarlar } = await ac(t);
+  fs.writeFileSync(hedef, 'Dış düzenleme');
+  const sonuc = await islem.dosyaAc();
+  assert.equal(sonuc.not.id, not.id);
+  assert.ok(sonuc.uyari.includes('dışarıda değişmiş'));
+  not.body = 'Yerel korunmuş metin';
+  assert.throws(() => islem.kaydet(notlar));
+  const yeniden = new NotDosyalari(ayarlar);
+  assert.equal(yeniden.oku().bekleyenKayit, true);
+  assert.equal(yeniden.oku().notlar[0].body, 'Yerel korunmuş metin');
+  assert.throws(() => yeniden.kaydet(notlar));
+  assert.equal(fs.readFileSync(hedef, 'utf8'), 'Dış düzenleme');
+});

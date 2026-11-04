@@ -41,9 +41,7 @@ function denetimleriAyarla() {
   oge('title').disabled = kilitli;
   oge('body').disabled = kilitli;
   oge('search').disabled = kilitli;
-  for (const kimlik of ['farkliKaydet']) {
-    oge(kimlik).disabled = kilitli || !notlar.some(not => not.id === seciliKimlik);
-  }
+  oge('farkliKaydet').disabled = kilitli || !notlar.some(not => not.id === seciliKimlik);
 }
 
 function kelimeleriSay() {
@@ -226,6 +224,7 @@ oge('dosyaAc').addEventListener('click', () => dosyaIslemi(async () => {
   ekraniCiz();
   if (!(await kaydet())) return;
   oge('status').textContent = `${sonuc.veri.ad} açıldı; değişiklikler aynı dosyaya kaydedilecek`;
+  if (sonuc.veri.uyari) hataGoster(sonuc.veri.uyari);
 }));
 
 document.addEventListener('keydown', olay => {
@@ -265,6 +264,10 @@ async function baslat() {
     oge('status').textContent = 'Notların hazır';
     if (sonuc.veri.kurtarildi) {
       hataGoster('Not dosyası okunamadığı için son sağlam yedek açıldı. Notlarını kontrol edip bir yedek al.');
+    }
+    if (sonuc.veri.bekleyenKayit) {
+      degisti();
+      hataGoster('Notes içinde korunmuş bazı değişiklikler TXT dosyasına henüz yazılamamış. Yeniden dene veya Farklı kaydet ile yeni bir hedef seç.');
     }
     ekraniCiz();
   } catch (hata) {
