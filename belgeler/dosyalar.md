@@ -19,12 +19,12 @@ Bu depo, Notes’un kaynak kodlarını ve açıklamalarını içerir. Dosyalar, 
 | `README.md` | Depoyu açınca gördüğün **Beni Oku** sayfası. |
 | `arayüz/pencere.html` | Pencerenin içindeki bölümler ve yazılar. |
 | `arayüz/görünüm.css` | Renkler, yazı biçimleri ve yerleşim. |
-| `arayüz/notlar.js` | Not yazma, arama, silme ve yedekleme düğmelerinin davranışı. |
+| `arayüz/notlar.js` | Not yazma, arama, silme ve TXT açma/kaydetme düğmelerinin davranışı. |
 | `arayüz/tema.js` | Tema seçimi ve bu seçimin hatırlanması. |
 | `arayüz/sürüm-bildirimi.js` | Yeni sürüm bildirimlerinin ekranda gösterilmesi. |
 | `masaüstü/ana.cjs` | Uygulamanın başlaması ve pencerenin yönetilmesi. |
 | `masaüstü/depolama.cjs` | Notların dosyaya kaydedilmesi ve korunması. |
-| `masaüstü/not-dosyaları.cjs` | Açık notun TXT olarak seçilen konuma veya uygulamanın kayıt klasörüne yazılması. |
+| `masaüstü/not-dosyaları.cjs` | TXT seçicileri, dosya bağlantıları, kodlama ve çakışma kontrollü kayıt. |
 | `masaüstü/köprü.cjs` | Görünen düğmeler ile masaüstü işlemleri arasındaki sınırlı bağlantı. |
 | `masaüstü/sürüm-bildirimi.cjs` | GitHub’dan sürüm bilgisinin alınması ve erişim anahtarının korunması. |
 | `masaüstü/güncelleme.cjs` | Doğrulanan kurulumun özel depodan indirilmesi ve güncelleme yardımcısının hazırlanması. |

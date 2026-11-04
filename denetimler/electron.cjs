@@ -104,57 +104,62 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   assert.ok(Math.abs(menuKonumu.x - dugmeKonumu.x) <= 1);
   assert.ok(menuKonumu.y >= 0 && menuKonumu.y + menuKonumu.height <= dugmeKonumu.y);
   await sayfa.keyboard.press('Tab');
-  await expect(sayfa.locator('#klasor')).toBeFocused();
-  await expect(sayfa.locator('#yedekle')).not.toBeVisible();
-  await sayfa.locator('#yedekIslemleri summary').focus();
-  await sayfa.keyboard.press('Enter');
-  await expect(sayfa.locator('#yedekle')).toBeVisible();
+  await expect(sayfa.locator('#farkliKaydet')).toBeFocused();
   await sayfa.keyboard.press('Tab');
-  await expect(sayfa.locator('#yedekle')).toBeFocused();
+  await expect(sayfa.locator('#dosyaAc')).toBeFocused();
+  assert.equal(await sayfa.locator('#dosyaMenusu button').count(), 2);
   await sayfa.keyboard.press('Escape');
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
   await expect(sayfa.locator('#digerIslemler')).toBeFocused();
   await sayfa.locator('#digerIslemler').click();
   await expect(sayfa.locator('#dosyaMenusu')).toBeVisible();
-  await expect(sayfa.locator('#yedekle')).not.toBeVisible();
   await sayfa.locator('#body').click();
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
 
-  // Gerçek UI → IPC → disk: yalnız yerel dosya seçici/Explorer çağrısı taklit
-  // edilir. Ürüne test kapısı eklenmez; kişisel profil kullanılmaz.
+  // Gerçek UI → IPC → disk; yalnız yerel dosya seçicileri sentetik yollar döndürür.
   const txtHedef = path.join(gecici, 'farklı.txt');
-  const txtKlasoru = path.join(profil, 'Not Defterim', 'Kaydedilen notlar');
-  await uygulama.evaluate(({ dialog, shell }, hedef) => {
-    globalThis.__notesDosyaTesti = { save: dialog.showSaveDialog, open: shell.openPath, acilan: null };
-    dialog.showSaveDialog = async () => ({ canceled: false, filePath: hedef });
-    shell.openPath = async p => { globalThis.__notesDosyaTesti.acilan = p; return ''; };
-  }, txtHedef);
+  const acilanTxt = path.join(gecici, 'açılan.txt');
+  const kurtarilanTxt = path.join(gecici, 'kurtarılan.txt');
+  fs.writeFileSync(acilanTxt, 'Dosyadaki bütün metin\r\nİğdır\r\n');
+  await uygulama.evaluate(({ dialog }, hedefler) => {
+    globalThis.__notesDosyaTesti = { save: dialog.showSaveDialog, open: dialog.showOpenDialog, hedef: hedefler.hedef };
+    dialog.showSaveDialog = async () => ({ canceled: false, filePath: globalThis.__notesDosyaTesti.hedef });
+    dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [hedefler.acilan] });
+  }, { hedef: txtHedef, acilan: acilanTxt });
   try {
-    await sayfa.locator('#digerIslemler').click();
-    await sayfa.locator('#klasor').click();
-    await expect.poll(() => uygulama.evaluate(() => globalThis.__notesDosyaTesti.acilan)).toBe(path.join(profil, 'Not Defterim'));
-    await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
     await sayfa.locator('#body').fill('Farklı kaydet için son metin\nİğdır');
     await sayfa.locator('#digerIslemler').click();
     await sayfa.locator('#farkliKaydet').click();
     await expect(sayfa.locator('#status')).toHaveText('farklı.txt kaydedildi');
-    assert.equal(fs.readFileSync(txtHedef, 'utf8'), '<img src=x onerror=alert(1)>\r\n\r\nFarklı kaydet için son metin\r\nİğdır');
-    await sayfa.locator('#body').fill('Uygulama klasörü için son metin');
+    assert.equal(fs.readFileSync(txtHedef, 'utf8'), 'Farklı kaydet için son metin\r\nİğdır');
     await sayfa.locator('#digerIslemler').click();
-    await sayfa.locator('#uygulamayaKaydet').click();
-    await expect.poll(() => uygulama.evaluate(() => globalThis.__notesDosyaTesti.acilan)).toBe(txtKlasoru);
-    const dosyalar = fs.readdirSync(txtKlasoru);
-    assert.equal(dosyalar.length, 1);
-    assert.ok(dosyalar[0].endsWith('.txt'));
-    assert.equal(fs.readFileSync(path.join(txtKlasoru, dosyalar[0]), 'utf8'), '<img src=x onerror=alert(1)>\r\n\r\nUygulama klasörü için son metin');
-    assert.equal(JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0].body, 'Uygulama klasörü için son metin');
+    await sayfa.locator('#dosyaAc').click();
+    await expect(sayfa.locator('#body')).toHaveValue('Dosyadaki bütün metin\nİğdır\n');
+    await expect(sayfa.locator('#status')).toContainText('açılan.txt açıldı');
+    await sayfa.locator('#body').fill('Aynı dosyaya son metin\nİğdır');
+    await sayfa.keyboard.press('Control+s');
+    await expect.poll(() => fs.readFileSync(acilanTxt, 'utf8')).toBe('Aynı dosyaya son metin\r\nİğdır');
+    // Dış düzenleme ezilmez, yerel kopya saklanır ve kapanış engellenir.
+    fs.writeFileSync(acilanTxt, 'Dışarıdaki düzenleme');
+    await sayfa.locator('#body').fill('Notes içindeki kurtarılacak metin');
+    await sayfa.keyboard.press('Control+s');
+    await expect(sayfa.locator('#status')).toHaveText('Kaydedilemedi');
+    assert.equal(fs.readFileSync(acilanTxt, 'utf8'), 'Dışarıdaki düzenleme');
+    assert.equal(JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0].body, 'Notes içindeki kurtarılacak metin');
+    await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+    await expect(sayfa.locator('#body')).toBeEnabled();
+    await uygulama.evaluate((_, hedef) => { globalThis.__notesDosyaTesti.hedef = hedef; }, kurtarilanTxt);
+    await sayfa.locator('#digerIslemler').click();
+    await sayfa.locator('#farkliKaydet').click();
+    await expect(sayfa.locator('#status')).toHaveText('kurtarılan.txt kaydedildi');
+    assert.equal(fs.readFileSync(kurtarilanTxt, 'utf8'), 'Notes içindeki kurtarılacak metin');
     await sayfa.locator('#body').fill('Türkçe gerçek Electron notu');
     await sayfa.keyboard.press('Control+s');
-    await expect.poll(() => JSON.parse(fs.readFileSync(notDosyasi, 'utf8')).notlar[0].body).toBe('Türkçe gerçek Electron notu');
+    await expect.poll(() => fs.readFileSync(kurtarilanTxt, 'utf8')).toBe('Türkçe gerçek Electron notu');
   } finally {
-    await uygulama.evaluate(({ dialog, shell }) => {
+    await uygulama.evaluate(({ dialog }) => {
       dialog.showSaveDialog = globalThis.__notesDosyaTesti.save;
-      shell.openPath = globalThis.__notesDosyaTesti.open;
+      dialog.showOpenDialog = globalThis.__notesDosyaTesti.open;
       delete globalThis.__notesDosyaTesti;
     });
   }
@@ -165,7 +170,7 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
     const saldirgan = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, contextIsolation: false, sandbox: false } });
     try {
       await saldirgan.loadURL('about:blank');
-      return await saldirgan.webContents.executeJavaScript("Promise.all([require('electron').ipcRenderer.invoke('notlar:kaydet', []),require('electron').ipcRenderer.invoke('notlar:farkli-kaydet','bir'),require('electron').ipcRenderer.invoke('notlar:uygulamaya-kaydet','bir')])");
+      return await saldirgan.webContents.executeJavaScript("Promise.all([require('electron').ipcRenderer.invoke('notlar:kaydet', []),require('electron').ipcRenderer.invoke('notlar:farkli-kaydet','bir'),require('electron').ipcRenderer.invoke('notlar:dosya-ac')])");
     } finally { saldirgan.destroy(); }
   });
   for (const sonuc of yetkisiz) {
@@ -227,6 +232,13 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   sayfa = await ac();
   await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
   await expect(sayfa.locator('#tema')).toHaveValue('karanlik');
+  await expect(sayfa.locator('#date')).toContainText('kurtarılan.txt');
+  await sayfa.locator('#body').fill('Yeniden açılışta bağlı TXT');
+  await sayfa.keyboard.press('Control+s');
+  await expect.poll(() => fs.readFileSync(kurtarilanTxt, 'utf8')).toBe('Yeniden açılışta bağlı TXT');
+  await sayfa.locator('#body').fill('Kapanışta beklemeden saklanan son metin');
+  await sayfa.keyboard.press('Control+s');
+  await expect.poll(() => fs.readFileSync(kurtarilanTxt, 'utf8')).toBe('Kapanışta beklemeden saklanan son metin');
 
   // Yüksek yakınlaştırmada düzenleyiciye kaydırılarak ulaşılabilir; not değişmez.
   await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));

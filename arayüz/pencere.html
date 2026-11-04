@@ -16,23 +16,15 @@
   <div class="dosya-islemleri">
     <button id="digerIslemler" popovertarget="dosyaMenusu" data-islem aria-label="Dosyalar" title="Dosyalar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div id="dosyaMenusu" popover="auto" role="group" aria-label="Dosya işlemleri">
-      <button id="klasor" class="not-klasoru" data-islem title="Notların ve otomatik kurtarma kopyasının saklandığı klasörü aç">Notların klasörünü aç</button>
-      <hr>
       <button id="farkliKaydet" data-islem>Farklı kaydet…</button>
-      <button id="uygulamayaKaydet" data-islem title="Uygulamanın Kaydedilen notlar klasörüne kaydet">Kaydet ve klasörü aç</button>
-      <hr>
-      <details id="yedekIslemleri">
-        <summary>Yedekleme</summary>
-        <button id="yedekle" data-islem>Yedek al</button>
-        <button id="iceAktar" data-islem>Yedekten ekle</button>
-      </details>
+      <button id="dosyaAc" data-islem>Dosya aç…</button>
     </div>
   </div>
 </aside>
 <section class="editor" aria-label="Not düzenleyici"><div class="toolbar"><span id="status" role="status">Yazmaya hazır</span><button id="delete" class="delete" data-islem title="Notu sil" aria-label="Notu sil"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg><span>Sil</span></button></div><div id="writing" class="writing"><label class="sr-only" for="title">Not başlığı</label><input id="title" class="title" placeholder="Başlıksız not" autocomplete="off" maxlength="500"><div id="date" class="date"></div><label class="sr-only" for="body">Not içeriği</label><textarea id="body" placeholder="Aklından geçenleri yaz…" spellcheck="false" maxlength="1000000"></textarea></div><div id="empty" class="empty" hidden><h2>Henüz not yok</h2><button id="first" class="primary" data-islem>+ İlk notunu yaz</button></div><footer class="editor-footer"><span id="words">0 kelime</span></footer></section>
 </main>
 <div id="toast" class="toast" role="status" hidden>Not silindi. <button id="undo" data-islem>Geri al</button></div>
-<dialog id="confirm"><h2>Bu not silinsin mi?</h2><p>Silinen notu 10 saniye içinde geri alabilirsin. Not, otomatik kurtarma kopyasında ve daha önce aldığın yedeklerde kalabilir. Silmek, tüm kopyaların güvenli biçimde imha edildiği anlamına gelmez.</p><div><button id="cancel" class="secondary">Vazgeç</button><button id="confirmDelete" class="danger">Notu sil</button></div></dialog>
+<dialog id="confirm"><h2>Bu not silinsin mi?</h2><p>Silinen notu 10 saniye içinde geri alabilirsin. Açılmış TXT dosyası diskten silinmez. Not, otomatik kurtarma kopyasında ve daha önce aldığın yedeklerde kalabilir. Silmek, tüm kopyaların güvenli biçimde imha edildiği anlamına gelmez.</p><div><button id="cancel" class="secondary">Vazgeç</button><button id="confirmDelete" class="danger">Notu sil</button></div></dialog>
 <dialog id="surumPenceresi" aria-labelledby="surumBasligi">
   <h2 id="surumBasligi">Yeni sürümler</h2>
   <p id="kuruluSurum"></p>
