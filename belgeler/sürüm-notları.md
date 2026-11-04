@@ -1,4 +1,9 @@
-# 0.0.10 adayı
+# 0.1.0 adayı
+
+- Uygulama sürümü 0.1.0 olarak düzenlendi. Bundan sonra son hane 9’u aşınca önceki haneye taşınır: 0.1.9 → 0.2.0; 0.9.9 → 1.0.0.
+- 0.0.10’daki TXT düzenleme, sade menü ve iletişim bilgisi korunur. Veri biçimi ve bağımlılıklar değişmedi.
+
+# 0.0.10
 
 - Dosyalar menüsünde yalnız Farklı kaydet ve Dosya aç bulunur. Varsayılan tür TXT’dir.
 - Açılan ve farklı kaydedilen TXT dosyaları yerinde düzenlenir; bağlantı yeniden açılışta korunur.
