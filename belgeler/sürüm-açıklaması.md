@@ -1,9 +1,7 @@
 ## Bu sürümde
 
-Notes artık herkese açık deposundan **erişim anahtarı veya hesap bağlantısı istemeden** yeni sürümleri denetler ve indirir. Açılışta ve yaklaşık 15 dakikada bir kontrol edilir. Yeni sürümü denetle düğmesiyle elle kontrol edebilirsin; GitHub istek kotasına ulaşıldıysa beklenir.
+Sol alttaki **Dosyalar (☰)** menüsü sadeleştirildi. En üstteki **Notların klasörünü aç**, notların ve kurtarma kopyasının bulunduğu klasöre doğrudan ulaşır.
 
-**Güncelle** düğmesi kurulumu doğrular, son değişikliklerini kaydeder ve mevcut kişisel kurulum klasörüne sessizce kurar. Notes yeniden açılır. İndirme iptal edilebilir; yazarken kendiliğinden kurulum başlatılmaz.
+**Farklı kaydet…** ve **Kaydet ve klasörü aç** seçenekleri korunur. Daha seyrek kullanılan **Yedek al** ve **Yedekten ekle**, **Yedekleme** bölümündedir.
 
-Eski sürümlerin özel depo bağlantısı nedeniyle bu sürüme ilk geçişte Notes.exe dosyasını bir kez elle çalıştırmak gerekebilir. Not klasörünü silme. Eski yerel anahtar kaydı kullanılmaz veya değiştirilmez; GitHub hesabından iptal edebilirsin.
-
-Notlar ve yedekler şifrelenmez. Paket yayıncı imzalı değildir. Tüm kullanıcılar için kurulum bu güncelleme akışının kapsamı değildir.
+Notların konumu ve dosya biçimi değişmedi. Yeni bir depolama alanı oluşturulmadı; mevcut notlar taşınmadı veya silinmedi.

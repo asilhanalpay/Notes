@@ -14,14 +14,18 @@
   <label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="Notlarda ara…" aria-label="Notlarda ara"></label>
   <div id="list" class="note-list"></div>
   <div class="dosya-islemleri">
-    <button id="digerIslemler" popovertarget="dosyaMenusu" data-islem aria-label="Diğer işlemler" title="Diğer işlemler">⋯</button>
+    <button id="digerIslemler" popovertarget="dosyaMenusu" data-islem aria-label="Dosyalar" title="Dosyalar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div id="dosyaMenusu" popover="auto" role="group" aria-label="Dosya işlemleri">
+      <button id="klasor" class="not-klasoru" data-islem title="Notların ve otomatik kurtarma kopyasının saklandığı klasörü aç">Notların klasörünü aç</button>
+      <hr>
       <button id="farkliKaydet" data-islem>Farklı kaydet…</button>
       <button id="uygulamayaKaydet" data-islem title="Uygulamanın Kaydedilen notlar klasörüne kaydet">Kaydet ve klasörü aç</button>
       <hr>
-      <button id="yedekle" data-islem>Yedek al</button>
-      <button id="iceAktar" data-islem>Yedekten ekle</button>
-      <button id="klasor" data-islem>Not klasörünü aç</button>
+      <details id="yedekIslemleri">
+        <summary>Yedekleme</summary>
+        <button id="yedekle" data-islem>Yedek al</button>
+        <button id="iceAktar" data-islem>Yedekten ekle</button>
+      </details>
     </div>
   </div>
 </aside>

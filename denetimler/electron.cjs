@@ -104,12 +104,19 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   assert.ok(Math.abs(menuKonumu.x - dugmeKonumu.x) <= 1);
   assert.ok(menuKonumu.y >= 0 && menuKonumu.y + menuKonumu.height <= dugmeKonumu.y);
   await sayfa.keyboard.press('Tab');
-  await expect(sayfa.locator('#farkliKaydet')).toBeFocused();
+  await expect(sayfa.locator('#klasor')).toBeFocused();
+  await expect(sayfa.locator('#yedekle')).not.toBeVisible();
+  await sayfa.locator('#yedekIslemleri summary').focus();
+  await sayfa.keyboard.press('Enter');
+  await expect(sayfa.locator('#yedekle')).toBeVisible();
+  await sayfa.keyboard.press('Tab');
+  await expect(sayfa.locator('#yedekle')).toBeFocused();
   await sayfa.keyboard.press('Escape');
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
   await expect(sayfa.locator('#digerIslemler')).toBeFocused();
   await sayfa.locator('#digerIslemler').click();
   await expect(sayfa.locator('#dosyaMenusu')).toBeVisible();
+  await expect(sayfa.locator('#yedekle')).not.toBeVisible();
   await sayfa.locator('#body').click();
   await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
 
@@ -123,6 +130,10 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
     shell.openPath = async p => { globalThis.__notesDosyaTesti.acilan = p; return ''; };
   }, txtHedef);
   try {
+    await sayfa.locator('#digerIslemler').click();
+    await sayfa.locator('#klasor').click();
+    await expect.poll(() => uygulama.evaluate(() => globalThis.__notesDosyaTesti.acilan)).toBe(path.join(profil, 'Not Defterim'));
+    await expect(sayfa.locator('#dosyaMenusu')).not.toBeVisible();
     await sayfa.locator('#body').fill('Farklı kaydet için son metin\nİğdır');
     await sayfa.locator('#digerIslemler').click();
     await sayfa.locator('#farkliKaydet').click();

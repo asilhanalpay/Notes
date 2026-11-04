@@ -13,9 +13,10 @@ Windows 10/11 (64 bit). Yayıncı imzası olmadığı için Windows uyarı göst
 
 - **+** ile not oluştur, arama kutusuyla bul. Yazmaya kısa süre ara verdiğinde kaydedilir. **Ctrl+S** ile beklemeden kaydedebilirsin.
 - **Tema** bölümünden açık veya karanlık görünümü seç. Siyah pencere kenarı ve belirgin çizgiler iki görünümde de korunur; karanlık temanın iç ayırıcıları görünür gri tonundadır.
-- Sol alttaki **⋯** menüsünde **Farklı kaydet…**, açık notu başlık ve içeriğiyle .txt dosyası olarak seçtiğin konuma kaydeder.
+- Sol alttaki **Dosyalar (☰)** menüsünde **Farklı kaydet…**, açık notu başlık ve içeriğiyle .txt dosyası olarak seçtiğin konuma kaydeder.
 - **Kaydet ve klasörü aç**, açık notun .txt kopyasını uygulamanın **Kaydedilen notlar** klasörüne yazar ve klasörü otomatik açar. Aynı adlı eski dosyalar ezilmez; yeni dosyaya numara eklenir. Bu klasör kullanıcı verileri içindedir; uygulamanın kurulum klasörü değildir.
-- Aynı menüde **Yedek al**, **Yedekten ekle** ve **Not klasörünü aç** da bulunur. JSON yedekleri bütün notlar içindir; .txt dosyaları tek notun okunabilir kopyasıdır.
+- Menüde en üstteki **Notların klasörünü aç**, notların ve kurtarma kopyasının saklandığı kullanıcı veri klasörünü doğrudan açar. Bu işlem yeni not oluşturmaz veya mevcut notları değiştirmez.
+- **Yedek al** ve **Yedekten ekle**, aynı menüdeki kapalı **Yedekleme** bölümündedir. JSON yedekleri bütün notlar içindir; .txt dosyaları tek notun okunabilir kopyasıdır.
 - Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** ile kurtar.
 
 ## Gizlilik
