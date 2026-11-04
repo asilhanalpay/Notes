@@ -10,7 +10,7 @@ async function ac(t, ilkDurum) {
   t.after(() => dom.window.close());
   dom.window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   dom.window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); this.dispatchEvent(new dom.window.Event('close')); };
-  const durum = { indirmeler: 0, denetimler: 0, anahtar: null, dinle: null };
+  const durum = { indirmeler: 0, denetimler: 0, iptaller: 0, dinle: null };
   dom.window.notDefterim = {
     surumDurumu: async () => ({ basarili: true, veri: ilkDurum }),
     surumDinle: islem => { durum.dinle = islem; },
@@ -19,7 +19,7 @@ async function ac(t, ilkDurum) {
       durum.denetimler++;
       return { basarili: true, veri: { ...ilkDurum, durum: 'yeni-surum', aciklama: 'Yeni sürüm hazır', yeniSurum: '0.0.3' } };
     },
-    surumBagla: async anahtar => { durum.anahtar = anahtar; return { basarili: true }; }
+    surumIptal: async () => { durum.iptaller++; return { basarili: true, veri: { durum: 'bekliyor', aciklama: 'İptal edildi', surum: '0.0.8' } }; }
   };
   dom.window.eval(fs.readFileSync(path.join(__dirname, '../arayüz/sürüm-bildirimi.js'), 'utf8'));
   await bekle();
@@ -34,21 +34,19 @@ test('Yeni sürüm uygulama içinde gösterilir; kullanıcı basmadan indirme is
   oge('surumIndir').click(); await bekle();
   assert.equal(durum.indirmeler, 1);
 });
-test('Erişim anahtarı gönderildikten sonra alandan silinir ve metin olarak gösterilmez', async t => {
-  const { dom, oge, durum } = await ac(t, { durum: 'baglanti-gerekli', aciklama: 'Bağlan', surum: '0.2.3' });
-  const anahtar = 'github_pat_'+'a'.repeat(30);
-  oge('erisimAnahtari').value = anahtar;
-  oge('erisimFormu').dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
-  await bekle();
-  assert.equal(durum.anahtar, anahtar);
-  assert.equal(oge('erisimAnahtari').value, '');
-  assert.equal(dom.window.document.body.textContent.includes(anahtar), false);
+test('Güncelleme penceresinde anahtar veya hesap bağlantısı istenmez', async t => {
+  const { oge, dom } = await ac(t, { durum: 'bekliyor', aciklama: 'Anahtarsız denetim', surum: '0.0.8' });
+  for (const id of ['erisimFormu', 'erisimAnahtari', 'izinSayfasi', 'surumAyir']) assert.equal(oge(id), null);
+  assert.equal(oge('surumDenetle').disabled, false);
+  assert.equal(dom.window.document.body.textContent.includes('Contents → Read-only'), false);
 });
-
-test('Bağlantı süresi dolsa bile yerel erişim kaydını kaldırma seçeneği görünür', async t => {
-  const { oge } = await ac(t, { durum: 'baglanti-gerekli', aciklama: 'Bağlantıyı yenile', surum: '0.2.3', bagli: true });
-  assert.equal(oge('surumAyir').hidden, false);
-  assert.equal(oge('erisimFormu').hidden, false);
+test('İndirme iptal düğmesi yalnız indirme sırasında görünür ve iptal isteği gönderir', async t => {
+  const { oge, durum } = await ac(t, { durum: 'guncel', aciklama: 'Güncel', surum: '0.0.8' });
+  assert.equal(oge('surumIptal').hidden, true);
+  durum.dinle({ durum: 'indiriliyor', aciklama: 'İndiriliyor', surum: '0.0.8' });
+  assert.equal(oge('surumIptal').hidden, false);
+  oge('surumIptal').click(); await bekle();
+  assert.equal(durum.iptaller, 1); assert.equal(oge('surumIptal').hidden, true);
 });
 
 test('Elle denetim düğmesi hemen istek gönderir ve sonucu indirme düğmesiyle gösterir', async t => {

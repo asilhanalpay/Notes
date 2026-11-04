@@ -6,11 +6,14 @@ const { atomikYaz } = require('./depolama.cjs');
 
 const DEPO = 'asilhanalpay/Notes';
 const DEPO_KIMLIGI = '1427086629';
-const ARALIK = 60 * 1000;
+const ARALIK = 15 * 60 * 1000;
 const BEKLEME = 45 * 1000;
-const IZIN_SAYFASI = 'https://github.com/settings/personal-access-tokens/new?name=Notes%20Surum%20Bildirimi&target_name=asilhanalpay&contents=read&expires_in=90';
+
 
 class ErisimHatasi extends Error {}
+class BeklemeHatasi extends Error {
+  constructor(bekleyeKadar) { super('GitHub istek sınırına ulaşıldı. Daha sonra otomatik denetlenecek.'); this.bekleyeKadar = bekleyeKadar; }
+}
 
 function surumuCoz(metin) {
   if (typeof metin !== 'string' || !/^(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})$/.test(metin)) {
@@ -24,6 +27,7 @@ function dahaYeniMi(yeni, kurulu) {
   return false;
 }
 
+// Eski şifreli kayıt uyumu için korunur; açık depo güncelleyicisi bu kasayı okumaz.
 class ErisimKasasi {
   constructor(dosya, sifreleme) { this.dosya = dosya; this.sifreleme = sifreleme; this.kusak = 0; }
   async uygunMu() {
@@ -65,21 +69,28 @@ class ErisimKasasi {
   sil() { this.kusak++; fs.rmSync(this.dosya, { force: true }); }
 }
 
-function githubOku(yol, anahtar, signal, istemci = https) {
+function githubOku(yol, signal, istemci = https) {
   if (![ `/repos/${DEPO}`, `/repos/${DEPO}/releases/latest` ].includes(yol)) {
     return Promise.reject(new Error('Bu GitHub isteğine izin verilmiyor.'));
   }
   return new Promise((resolve, reject) => {
     const istek = istemci.get({
       hostname: 'api.github.com', port: 443, path: yol, signal,
-      headers: { Authorization: `Bearer ${anahtar}`, Accept: 'application/vnd.github+json',
+      headers: { Accept: 'application/vnd.github+json',
         'User-Agent': 'Notes', 'X-GitHub-Api-Version': '2022-11-28', 'Cache-Control': 'no-cache' }
     }, yanit => {
       if (yanit.statusCode !== 200) {
         yanit.resume();
-        reject([401, 403, 404].includes(yanit.statusCode)
-          ? new ErisimHatasi('Özel depoya erişim doğrulanamadı. Bağlantıyı yenile.')
-          : new Error('GitHub yanıtı alınamadı. Daha sonra yeniden dene.'));
+        if (yanit.statusCode === 429 || yanit.statusCode === 403) {
+          const simdi = Date.now();
+          const sonra = Number(yanit.headers?.['retry-after']);
+          const sifirlama = Number(yanit.headers?.['x-ratelimit-reset']);
+          const aday = sonra > 0 ? simdi + sonra * 1000 : sifirlama > 0 ? sifirlama * 1000 : simdi + ARALIK;
+          const bekle = Number.isFinite(aday) ? Math.min(simdi + 86400000, Math.max(simdi + 60000, aday)) : simdi + ARALIK;
+          reject(new BeklemeHatasi(bekle));
+        } else {
+          reject(new Error('Açık güncelleme yayınına erişilemiyor. Daha sonra yeniden dene.'));
+        }
         return;
       }
       let toplam = 0;
@@ -106,8 +117,8 @@ function githubOku(yol, anahtar, signal, istemci = https) {
 }
 
 function depoyuDogrula(veri) {
-  if (!veri || String(veri.id) !== DEPO_KIMLIGI || veri.full_name !== DEPO || veri.private !== true) {
-    throw new ErisimHatasi('Özel güncelleme deposunun kimliği doğrulanamadı.');
+  if (!veri || String(veri.id) !== DEPO_KIMLIGI || veri.full_name !== DEPO || veri.private !== false) {
+    throw new ErisimHatasi('Herkese açık güncelleme deposunun kimliği doğrulanamadı.');
   }
 }
 function yayiniDogrula(veri) {
@@ -128,15 +139,16 @@ function yayiniDogrula(veri) {
 }
 
 class SurumBildirimi extends EventEmitter {
-  constructor({ surum, kasa, paketli, platform, oku = githubOku, simdi = Date.now, zamanlayici = globalThis }) {
+  constructor({ surum, paketli, platform, oku = githubOku, simdi = Date.now, zamanlayici = globalThis }) {
     super();
     surumuCoz(surum);
-    Object.assign(this, { surum, kasa, paketli, platform, oku, simdi, zamanlayici });
+    Object.assign(this, { surum, paketli, platform, oku, simdi, zamanlayici });
     this.kusak = 0;
     this.sonDeneme = -Infinity;
-    this.bilgi = { durum: 'baglanti-gerekli', aciklama: 'Özel sürüm bildirimleri için GitHub bağlantısı kur.', surum };
+    this.geriCekilme = 0;
+    this.bilgi = { durum: 'bekliyor', aciklama: 'Yeni sürümler anahtar gerektirmeden otomatik denetlenir.', surum };
   }
-  gorunum() { return { ...this.bilgi, bagli: Boolean(this.anahtar) }; }
+  gorunum() { return { ...this.bilgi }; }
   bildir(durum, aciklama, ek = {}) {
     this.bilgi = { durum, aciklama, surum: this.surum, ...ek };
     this.emit('durum', this.gorunum());
@@ -144,24 +156,14 @@ class SurumBildirimi extends EventEmitter {
   }
   async engel() {
     if (!this.paketli || this.platform !== 'win32') return 'Sürüm bildirimleri kurulu Windows uygulamasında kullanılabilir.';
-    if (!await this.kasa.uygunMu()) return 'Windows güvenli depolaması kullanılamıyor. Notlarını kullanmaya devam edebilirsin.';
     return null;
   }
   async baslat() {
     const kusak = this.kusak;
-    this.mesgul = true;
-    try {
-      const engel = await this.engel();
-      if (kusak !== this.kusak) return this.gorunum();
-      if (engel) return this.bildir('kullanilamiyor', engel);
-      const anahtar = await this.kasa.oku();
-      if (kusak !== this.kusak) return this.gorunum();
-      this.anahtar = anahtar;
-    } catch {
-      if (kusak !== this.kusak) return this.gorunum();
-      this.bildir('baglanti-gerekli', 'GitHub bağlantısı okunamadı. Bağlantıyı yeniden kur.');
-    } finally { this.mesgul = false; }
-    if (this.anahtar) this.bildir('bekliyor', 'Yeni sürümler açılışta ve yaklaşık dakikada bir denetlenir.');
+    const engel = await this.engel();
+    if (kusak !== this.kusak || this.baslatildi) return this.gorunum();
+    if (engel) return this.bildir('kullanilamiyor', engel);
+    this.baslatildi = true;
     this.ilkSayac = this.zamanlayici.setTimeout(() => { void this.denetle(); }, 10000);
     this.sayac = this.zamanlayici.setInterval(() => { void this.denetle(); }, ARALIK);
     this.ilkSayac?.unref?.(); this.sayac?.unref?.();
@@ -173,52 +175,27 @@ class SurumBildirimi extends EventEmitter {
     this.zamanlayici.clearInterval(this.sayac);
     this.iptal?.abort();
   }
-  async bagla(anahtar) {
-    const kusak = this.kusak;
-    const engel = await this.engel();
-    if (kusak !== this.kusak) throw new Error('Bağlantı isteği iptal edildi.');
-    if (engel) throw new Error(engel);
-    if (this.mesgul) throw new Error('Devam eden denetimin bitmesini bekle.');
-    this.kasa.dogrula(anahtar);
-    this.mesgul = true;
-    this.iptal = new AbortController();
-    try {
-      depoyuDogrula(await this.oku(`/repos/${DEPO}`, anahtar, this.iptal.signal));
-      if (kusak !== this.kusak) throw new Error('Bağlantı isteği iptal edildi.');
-      await this.kasa.kaydet(anahtar, () => kusak === this.kusak);
-      if (kusak !== this.kusak) throw new Error('Bağlantı isteği iptal edildi.');
-      this.anahtar = anahtar;
-      this.sonDeneme = -Infinity;
-    } catch { throw new Error('Özel depoya bağlantı kurulamadı. Yalnızca bu depoyu okuma iznini ve anahtarın süresini kontrol et.'); }
-    finally { this.mesgul = false; }
-    return this.denetle();
-  }
-  ayir() {
+  iptalEt() {
+    if (this.bilgi.durum !== 'indiriliyor') throw new Error('İptal edilebilecek bir indirme yok.');
     this.kusak++;
     this.iptal?.abort();
-    this.anahtar = null;
     this.yayin = null;
-    this.kasa.sil();
-    return this.bildir('baglanti-gerekli', 'Bu bilgisayardaki GitHub bağlantısı kaldırıldı. Anahtarı tamamen iptal etmek için GitHub ayarlarını kullan.');
+    return this.bildir('bekliyor', 'İndirme iptal edildi. Notlarını kullanmaya devam edebilirsin.');
   }
   async denetle({ elle = false } = {}) {
     const kusak = this.kusak;
     const engel = await this.engel();
     if (kusak !== this.kusak) return this.gorunum();
     if (engel) return this.bildir('kullanilamiyor', engel);
-    if (!this.anahtar) return this.bildir('baglanti-gerekli', 'Özel sürüm bildirimleri için GitHub bağlantısı kur.');
-    // Kullanıcının düğmeye basması her zaman yeni bir istek başlatır.
-    // Arka plan denetimlerinin sınırı ve eşzamanlı istek kilidi korunur.
-    if (this.mesgul || (!elle && this.simdi() - this.sonDeneme < BEKLEME)) return this.gorunum();
+    if (this.mesgul || this.simdi() < this.geriCekilme || (!elle && this.simdi() - this.sonDeneme < BEKLEME)) return this.gorunum();
     this.mesgul = true;
     this.sonDeneme = this.simdi();
-    const anahtar = this.anahtar;
     this.iptal = new AbortController();
     this.bildir('denetleniyor', 'Yeni sürüm denetleniyor…');
     try {
-      depoyuDogrula(await this.oku(`/repos/${DEPO}`, anahtar, this.iptal.signal));
+      depoyuDogrula(await this.oku(`/repos/${DEPO}`, this.iptal.signal));
       if (kusak !== this.kusak) return this.gorunum();
-      const yayin = yayiniDogrula(await this.oku(`/repos/${DEPO}/releases/latest`, anahtar, this.iptal.signal));
+      const yayin = yayiniDogrula(await this.oku(`/repos/${DEPO}/releases/latest`, this.iptal.signal));
       if (kusak !== this.kusak) return this.gorunum();
       this.yayin = null;
       if (!dahaYeniMi(yayin.surum, this.surum)) return this.bildir('guncel', 'En güncel sürümü kullanıyorsun.');
@@ -226,11 +203,12 @@ class SurumBildirimi extends EventEmitter {
       return this.bildir('yeni-surum', 'Yeni sürüm hazır. Güncelle düğmesi indirir, notlarını kaydeder ve mevcut klasöre kurar.', { yeniSurum: yayin.surum });
     } catch (hata) {
       if (kusak !== this.kusak) return this.gorunum();
-      if (hata instanceof ErisimHatasi) {
+      if (hata instanceof BeklemeHatasi) {
         this.yayin = null;
-        return this.bildir('baglanti-gerekli', 'Özel depoya erişim doğrulanamadı. GitHub bağlantısını yenile.');
+        this.geriCekilme = Math.max(this.simdi() + 60000, hata.bekleyeKadar);
+        return this.bildir('hata', 'GitHub istek sınırına ulaşıldı. Daha sonra otomatik denetlenecek.');
       }
-      // Son doğrulanan bağlantı korunur; çevrimdışıyken notlar kullanılabilir.
+      if (hata instanceof ErisimHatasi) this.yayin = null;
       return this.bildir(this.yayin ? 'yeni-surum' : 'hata',
         'Şu anda yeni sürüm denetlenemedi. İnternet bağlantını kontrol et; sonraki denetim otomatik yapılacak.',
         this.yayin ? { yeniSurum: this.yayin.surum } : {});
@@ -246,7 +224,7 @@ class SurumBildirimi extends EventEmitter {
     this.bildir('indiriliyor', 'Güncelleme indiriliyor…', { yeniSurum: yayin.surum });
     let paket;
     try {
-      paket = await hazirla({ yayin, anahtar: this.anahtar, signal: this.iptal.signal,
+      paket = await hazirla({ yayin, signal: this.iptal.signal,
         ilerle: yuzde => { if (kusak === this.kusak) this.bildir('indiriliyor', `Güncelleme indiriliyor: %${yuzde}`, { yeniSurum: yayin.surum }); } });
       if (kusak !== this.kusak) { paket.temizle(); throw new Error('Güncelleme iptal edildi.'); }
       this.bildir('kuruluyor', 'İndirme doğrulandı. Notların kaydedilip uygulama yeniden başlatılıyor…', { yeniSurum: yayin.surum });
@@ -260,11 +238,11 @@ class SurumBildirimi extends EventEmitter {
     }
   }
   indirmeAdresi() {
-    if (!this.anahtar || !this.yayin || this.bilgi.durum !== 'yeni-surum') {
+    if (!this.yayin || this.bilgi.durum !== 'yeni-surum') {
       throw new Error('Doğrulanmış bir yeni sürüm bulunmuyor.');
     }
     return this.yayin.adres;
   }
 }
 module.exports = { SurumBildirimi, ErisimKasasi, githubOku, depoyuDogrula, yayiniDogrula,
-  dahaYeniMi, ErisimHatasi, ARALIK, BEKLEME, IZIN_SAYFASI };
+  dahaYeniMi, ErisimHatasi, BeklemeHatasi, ARALIK, BEKLEME };

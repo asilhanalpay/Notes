@@ -34,22 +34,12 @@
   <p id="kuruluSurum"></p>
   <p id="surumMetni" role="status">Sürüm bilgisi alınıyor…</p>
   <p id="surumHatasi" role="alert" hidden></p>
-  <form id="erisimFormu" hidden>
-    <p>Güncelleme dosyaların özel. Bu bilgisayarın yeni sürümleri görebilmesi için GitHub’da yalnızca bu depoya okuma izni ver.</p>
-    <button id="izinSayfasi" type="button" data-surum>GitHub’da erişim izni oluştur</button>
-    <p>Açılan sayfada yalnızca <strong>Notes</strong> deposunu seç ve <strong>Contents → Read-only</strong> izni ver. Diğer izinleri açma. Uygulama, anahtarın diğer izinlerini denetleyemez.</p>
-    <label for="erisimAnahtari">GitHub erişim anahtarı</label>
-    <input id="erisimAnahtari" type="password" autocomplete="off" spellcheck="false" maxlength="260" required>
-    <p>GitHub parolanı kullanma. Bu anahtar Windows tarafından şifrelenerek bu bilgisayarda saklanır. Süresi dolarsa bağlantıyı yenileyebilirsin.</p>
-    <button type="submit" data-surum>Bildirimleri etkinleştir</button>
-  </form>
-  <p class="surum-aciklamasi">Yayımlanmış yeni sürümler uygulama açıkken yaklaşık dakikada bir denetlenir. Güncelle düğmesi kurulumu indirip doğrular, notlarını kaydeder ve Notes'u kapatarak mevcut klasöre sessizce kurar. Ardından uygulama yeniden açılır. Kaydetme başarısızsa kurulum başlamaz. İndirme sırasında notlarını kullanabilirsin.</p>
+  <p class="surum-aciklamasi">Yayımlanmış yeni sürümler anahtar veya hesap bağlantısı gerektirmeden açılışta ve yaklaşık 15 dakikada bir denetlenir. Güncelle düğmesi kurulumu indirip doğrular, notlarını kaydeder ve Notes'u kapatarak mevcut klasöre sessizce kurar. Ardından uygulama yeniden açılır. Kaydetme başarısızsa kurulum başlamaz. İndirme sırasında notlarını kullanabilirsin.</p>
   <div class="surum-islemleri">
-    <button id="surumAyir" hidden>Bağlantıyı kaldır</button>
+    <button id="surumIptal" hidden>İndirmeyi iptal et</button>
     <button id="surumDenetle" data-surum>Yeni sürümü denetle</button>
     <button id="surumIndir" class="primary" data-surum hidden>Güncelle</button>
     <button id="surumKapat">Kapat</button>
   </div>
-  <p class="surum-aciklamasi">Bağlantıyı kaldırmak yalnızca bu bilgisayardaki kaydı siler. Anahtarı tamamen iptal etmek için GitHub ayarlarını kullan.</p>
 </dialog>
 </body></html>

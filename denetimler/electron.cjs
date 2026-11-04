@@ -41,6 +41,11 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
     return sayfa;
   };
   let sayfa = await ac();
+  await sayfa.locator('#surumler').click();
+  assert.equal(await sayfa.locator('#erisimFormu').count(), 0);
+  assert.equal(await sayfa.locator('#erisimAnahtari').count(), 0);
+  assert.equal(await sayfa.evaluate(() => typeof window.notDefterim.surumBagla), 'undefined');
+  await sayfa.locator('#surumKapat').click();
   // Gerçek Windows sağlayıcısı: eski şifreli kayıt yeni API ile okunmalı.
   // Yalnızca geçici profildeki sentetik anahtar kullanılır; GitHub'a bağlanılmaz.
   const sentetikAnahtar = 'github_pat_' + 't'.repeat(30);

@@ -31,7 +31,7 @@ function istemci(yanitlar, istekler = []) {
     return istek;
   } };
 }
-test('Özel varlık API indirmesi özeti ve boyutu doğrular; anahtar veri sunucusuna gitmez', async t => {
+test('Açık varlık indirmesi özeti ve boyutu doğrular; hiçbir sunucuya anahtar gönderilmez', async t => {
   const dosya = yer(t), istekler = [], yuzdeler = [];
   await indir({ yayin, anahtar: 'sentetik-gizli', dosya, ilerle: n => yuzdeler.push(n), istemci: istemci([
     { durum: 302, headers: { location: 'https://release-assets.githubusercontent.com/a?imza=sentetik' } },
@@ -39,7 +39,7 @@ test('Özel varlık API indirmesi özeti ve boyutu doğrular; anahtar veri sunuc
   ], istekler) });
   assert.deepEqual(fs.readFileSync(dosya), govde);
   assert.equal(istekler[0].url, 'https://api.github.com/repos/asilhanalpay/Notes/releases/assets/42');
-  assert.equal(istekler[0].headers.Authorization, 'Bearer sentetik-gizli');
+  assert.equal(istekler[0].headers.Authorization, undefined);
   assert.equal(istekler[1].headers.Authorization, undefined);
   assert.equal(yuzdeler.at(-1), 100);
 });
@@ -81,7 +81,7 @@ test('Yardımcı hedefi düz metin olarak alır; sessiz kurulum ve süreç bekle
 });
 function yonetici() {
   const s = new SurumBildirimi({ surum: '0.0.4', paketli: true, platform: 'win32', kasa: {} });
-  s.anahtar = 'gizli'; s.yayin = { ...yayin, adres: 'https://github.com/asilhanalpay/Notes/releases/download/v0.0.5/Notes.exe' };
+  s.yayin = { ...yayin, adres: 'https://github.com/asilhanalpay/Notes/releases/download/v0.0.5/Notes.exe' };
   s.bildir('yeni-surum', 'Hazır', { yeniSurum: '0.0.5' });
   return s;
 }
@@ -94,14 +94,14 @@ test('Güncelleme çift tıklamayı engeller; bitmeden kurulum durumu gösterilm
   bitir(paket); assert.equal(await istek, paket);
   assert.equal(s.gorunum().durum, 'kuruluyor');
 });
-test('İndirme hatasında yeniden denenebilir; bağlantı kaldırıldıktan sonra paket kurulamaz', async () => {
+test('İndirme hatasında yeniden denenebilir; iptal edildikten sonra paket kurulamaz', async () => {
   const s = yonetici();
   await assert.rejects(s.guncelle(async () => { throw new Error('Sentetik hata'); }));
   assert.equal(s.gorunum().durum, 'yeni-surum'); assert.equal(s.mesgul, false);
   let bitir, silindi = false;
   const istek = s.guncelle(() => new Promise(r => { bitir = r; }));
-  s.kasa.sil = () => {}; s.ayir();
+  s.iptalEt();
   bitir({ temizle() { silindi = true; } });
   await assert.rejects(istek);
-  assert.equal(silindi, true); assert.equal(s.gorunum().durum, 'baglanti-gerekli');
+  assert.equal(silindi, true); assert.equal(s.gorunum().durum, 'bekliyor');
 });

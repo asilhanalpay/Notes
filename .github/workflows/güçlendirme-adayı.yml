@@ -50,10 +50,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEPO: ${{ github.repository }}
-      - name: Özel yayından gerçek güncelleme indirmesi
+      - name: Herkese açık yayından anahtarsız indirme
         run: node denetimler/windows-indirme.cjs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Standart yetkiyle kurulum yaşam döngüsü ve izinler
         shell: pwsh
         run: ./denetimler/windows-standart-kullanıcı.ps1

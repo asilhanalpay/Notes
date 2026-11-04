@@ -14,13 +14,12 @@
       ? yeni.aciklama : `Yeni sürüm hazır: ${yeni.yeniSurum ?? ''}`;
     oge('surumIndir').hidden = yeni.durum !== 'yeni-surum';
     oge('surumHizliGuncelle').hidden = yeni.durum !== 'yeni-surum';
-    oge('erisimFormu').hidden = yeni.durum !== 'baglanti-gerekli';
-    oge('surumAyir').hidden = !yeni.bagli;
+    oge('surumIptal').hidden = yeni.durum !== 'indiriliyor';
     const mesgul = istekSuruyor || ['denetleniyor', 'indiriliyor', 'kuruluyor'].includes(yeni.durum);
     for (const dugme of oge('surumPenceresi').querySelectorAll('button[data-surum]')) dugme.disabled = mesgul;
     oge('surumHizliGuncelle').disabled = mesgul;
-    oge('surumAyir').disabled = false;
-    oge('surumDenetle').disabled = mesgul || ['baglanti-gerekli', 'kullanilamiyor'].includes(yeni.durum);
+    oge('surumIptal').disabled = false;
+    oge('surumDenetle').disabled = mesgul || yeni.durum === 'kullanilamiyor';
   }
   async function istek(islem) {
     if (istekSuruyor) return;
@@ -43,29 +42,20 @@
   oge('surumler').addEventListener('click', ac);
   oge('surumBildirimAc').addEventListener('click', ac);
   oge('surumKapat').addEventListener('click', () => {
-    oge('erisimAnahtari').value = '';
     oge('surumPenceresi').close();
   });
-  oge('surumPenceresi').addEventListener('close', () => { oge('erisimAnahtari').value = ''; });
   oge('surumDenetle').addEventListener('click', () => istek(() => api.surumDenetle()));
   oge('surumIndir').addEventListener('click', () => istek(() => api.surumIndir()));
   oge('surumHizliGuncelle').addEventListener('click', () => istek(() => api.surumIndir()));
-  oge('surumAyir').addEventListener('click', async () => {
+  oge('surumIptal').addEventListener('click', async () => {
     try {
-      const sonuc = await api.surumAyir();
+      const sonuc = await api.surumIptal();
       if (!sonuc.basarili) throw new Error(sonuc.hata);
       if (sonuc.veri) goster(sonuc.veri);
     } catch {
-      oge('surumHatasi').textContent = 'Bağlantı kaldırılamadı. Yeniden dene.';
+      oge('surumHatasi').textContent = 'İndirme iptal edilemedi. Yeniden dene.';
       oge('surumHatasi').hidden = false;
     }
-  });
-  oge('izinSayfasi').addEventListener('click', () => istek(() => api.surumIzinSayfasi()));
-  oge('erisimFormu').addEventListener('submit', olay => {
-    olay.preventDefault();
-    const anahtar = oge('erisimAnahtari').value.trim();
-    oge('erisimAnahtari').value = '';
-    void istek(() => api.surumBagla(anahtar));
   });
   api.surumDinle(yeni => goster(yeni));
   void istek(() => api.surumDurumu());

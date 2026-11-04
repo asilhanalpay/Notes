@@ -1,3 +1,10 @@
+# 0.0.8 adayı — 4 Kasım 2026
+
+- Herkese açık Notes deposundan anahtarsız sürüm denetimi ve kurulum indirmesi.
+- Erişim anahtarı formu ve hesap bağlama işlemleri kaldırıldı; eski yerel kayıt kullanılmaz veya değiştirilmez.
+- Açılışta ve 15 dakikada bir denetim; GitHub istek kotasında bekleme.
+- Güncelle ile mevcut klasöre sessiz kurulum ve indirmeyi iptal etme. SHA-256, boyut, adres ve kayıt güvenliği kontrolleri korunur.
+
 # 0.0.7 — 2 Kasım 2026
 
 - Windows güncelleme yardımcısının hazır olmadan kapanmasına neden olan başlatma biçimi düzeltildi. Asıl yardımcı Windows Start-Process ile gizli açılır; hazır işareti olmadan Notes kapanmaz.

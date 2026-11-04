@@ -6,10 +6,8 @@ contextBridge.exposeInMainWorld('notDefterim', Object.freeze({
   temaSec: tema => ipcRenderer.invoke('tema:sec', tema),
   surumDurumu: () => ipcRenderer.invoke('surum:durum'),
   surumDenetle: () => ipcRenderer.invoke('surum:denetle'),
-  surumBagla: anahtar => ipcRenderer.invoke('surum:bagla', anahtar),
-  surumAyir: () => ipcRenderer.invoke('surum:ayir'),
+  surumIptal: () => ipcRenderer.invoke('surum:iptal'),
   surumIndir: () => ipcRenderer.invoke('surum:indir'),
-  surumIzinSayfasi: () => ipcRenderer.invoke('surum:izin'),
   surumDinle: islem => {
     const dinleyici = (_olay, bilgi) => islem(bilgi);
     ipcRenderer.on('surum:durum', dinleyici);

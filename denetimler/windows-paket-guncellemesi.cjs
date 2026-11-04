@@ -23,7 +23,7 @@ async function denetle() {
   let istekSayisi = 0;
   https.get = (adres, secenekler, cevapla) => {
     if (adres.href !== 'https://api.github.com/repos/asilhanalpay/Notes/releases/assets/42' ||
-        secenekler.headers.Authorization !== 'Bearer sentetik-yerel-kurulum' || ++istekSayisi !== 1) {
+        secenekler.headers.Authorization !== undefined || ++istekSayisi !== 1) {
       throw new Error('Yerel test dışında ağ isteği yasak.');
     }
     const istek = new EventEmitter();
@@ -38,7 +38,7 @@ async function denetle() {
   };
   try {
     const hazirlik = await kurulumHazirla({
-      kok: ayar.kok, exe: ayar.exe, pid: ayar.pid, anahtar: 'sentetik-yerel-kurulum',
+      kok: ayar.kok, exe: ayar.exe, pid: ayar.pid,
       yayin: { kimlik: 42, boyut, ozet: `sha256:${ozet}` }
     });
     await hazirlik.baslat();

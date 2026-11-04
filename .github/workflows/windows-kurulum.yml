@@ -43,6 +43,8 @@ jobs:
           path: denetim-çıktıları/*.png
           if-no-files-found: ignore
           retention-days: 14
+      - name: Herkese açık yayını anahtarsız indir ve doğrula
+        run: node denetimler/windows-indirme.cjs
       - name: Kurulum dosyasını oluştur
         run: npm run paketle:windows
         env:
