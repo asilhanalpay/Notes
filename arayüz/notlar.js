@@ -4,6 +4,7 @@ const oge = kimlik => document.getElementById(kimlik);
 const masaustu = window.notDefterim;
 let notlar = [];
 let seciliKimlik = null;
+let dosyalar = {};
 let silinen = null;
 let bildirimSayaci;
 let yuklendi = false;
@@ -40,10 +41,7 @@ function denetimleriAyarla() {
   oge('title').disabled = kilitli;
   oge('body').disabled = kilitli;
   oge('search').disabled = kilitli;
-  oge('klasor').disabled = !masaustu || mesgul;
-  for (const kimlik of ['farkliKaydet', 'uygulamayaKaydet']) {
-    oge(kimlik).disabled = kilitli || !notlar.some(not => not.id === seciliKimlik);
-  }
+  oge('farkliKaydet').disabled = kilitli || !notlar.some(not => not.id === seciliKimlik);
 }
 
 function kelimeleriSay() {
@@ -85,7 +83,7 @@ function ekraniCiz() {
   oge('delete').hidden = !not;
   oge('title').value = not?.title ?? '';
   oge('body').value = not?.body ?? '';
-  oge('date').textContent = not ? tarih(not.updated) : '';
+  oge('date').textContent = not ? `${tarih(not.updated)}${dosyalar[not.id] ? ` · ${dosyalar[not.id]} — değişiklikler bu dosyaya kaydedilir` : ''}` : '';
   kelimeleriSay();
   denetimleriAyarla();
 }
@@ -112,10 +110,10 @@ function kaydet() {
       oge('status').dataset.durum = 'tamam';
       oge('hata').hidden = true;
       return true;
-    } catch {
+    } catch (hata) {
       oge('status').textContent = 'Kaydedilemedi';
       oge('status').dataset.durum = 'hata';
-      hataGoster('Son değişiklikler kaydedilemedi. Uygulamayı açık tut ve yeniden dene. Diskte boş alan olduğundan emin ol.');
+      hataGoster(hata.message || 'Son değişiklikler kaydedilemedi. Uygulamayı açık tut ve yeniden dene.');
       return false;
     } finally {
       kayitIslemi = null;
@@ -143,7 +141,7 @@ function duzenle() {
   not.body = oge('body').value;
   not.updated = Date.now();
   listeyiCiz();
-  oge('date').textContent = tarih(not.updated);
+  oge('date').textContent = `${tarih(not.updated)}${dosyalar[not.id] ? ` · ${dosyalar[not.id]} — değişiklikler bu dosyaya kaydedilir` : ''}`;
   kelimeleriSay();
   degisti();
   kaydiPlanla();
@@ -151,20 +149,15 @@ function duzenle() {
 
 function dosyaMenusunuKapat() {
   const menu = oge('dosyaMenusu');
-  oge('yedekIslemleri').open = false;
   if (menu.hidePopover && menu.matches(':popover-open')) menu.hidePopover();
 }
-oge('dosyaMenusu').addEventListener('toggle', olay => {
-  if (olay.newState === 'closed') oge('yedekIslemleri').open = false;
-});
-
-async function dosyaIslemi(islem) {
+async function dosyaIslemi(islem, kurtarmaKopyasi = false) {
   if (!yuklendi || mesgul) return;
   dosyaMenusunuKapat();
   mesgul = true;
   denetimleriAyarla();
   try {
-    if (!(await kaydet())) return;
+    if (!(await kaydet()) && !kurtarmaKopyasi) return;
     await islem();
   } catch (hata) {
     hataGoster(hata.message || 'Dosya işlemi tamamlanamadı.');
@@ -208,46 +201,31 @@ oge('undo').addEventListener('click', () => {
   degisti();
   void kaydet();
 });
-oge('yedekle').addEventListener('click', () => dosyaIslemi(async () => {
-  const sonuc = await masaustu.yedekle();
-  if (!sonuc.basarili) throw new Error(sonuc.hata);
-  if (!sonuc.veri.iptal) oge('status').textContent = 'Yedek dosyası kaydedildi';
-}));
 oge('farkliKaydet').addEventListener('click', () => dosyaIslemi(async () => {
-  const sonuc = await masaustu.farkliKaydet(seciliKimlik);
-  if (!sonuc.basarili) throw new Error(sonuc.hata);
-  if (!sonuc.veri.iptal) oge('status').textContent = `${sonuc.veri.ad} kaydedildi`;
-}));
-oge('uygulamayaKaydet').addEventListener('click', () => dosyaIslemi(async () => {
-  const sonuc = await masaustu.uygulamayaKaydet(seciliKimlik);
-  if (!sonuc.basarili) throw new Error(sonuc.hata);
-  oge('status').textContent = `${sonuc.veri.ad} kaydedildi`;
-  if (!sonuc.veri.klasorAcildi) hataGoster('Not kaydedildi ancak klasör açılamadı. Dosyan Kaydedilen notlar klasöründe.');
-}));
-oge('iceAktar').addEventListener('click', () => dosyaIslemi(async () => {
-  const sonuc = await masaustu.iceAktar();
+  const not = notlar.find(n => n.id === seciliKimlik);
+  const sonuc = await masaustu.farkliKaydet(seciliKimlik, { ...not });
   if (!sonuc.basarili) throw new Error(sonuc.hata);
   if (sonuc.veri.iptal) return;
-  const onceki = notlar;
-  // İçe aktarılan notlar yeni kimliklerle eklenir; mevcut notlara dokunulmaz.
-  const eklenen = sonuc.veri.notlar.map(not => ({ ...not, id: crypto.randomUUID() }));
-  notlar = [...eklenen, ...notlar];
-  degisti();
-  if (!(await kaydet())) { notlar = onceki; degisti(); ekraniCiz(); return; }
-  seciliKimlik = eklenen[0]?.id ?? seciliKimlik;
+  dosyalar[seciliKimlik] = sonuc.veri.ad;
+  ekraniCiz();
+  // Yeni hedefe bağlandıktan sonra başarısız kaydın yeniden denenmesi kapanışa izin verir.
+  if (!(await kaydet())) return;
+  oge('status').textContent = `${sonuc.veri.ad} kaydedildi`;
+}, true));
+oge('dosyaAc').addEventListener('click', () => dosyaIslemi(async () => {
+  const sonuc = await masaustu.dosyaAc();
+  if (!sonuc.basarili) throw new Error(sonuc.hata);
+  if (sonuc.veri.iptal) return;
+  const not = sonuc.veri.not;
+  if (!notlar.some(n => n.id === not.id)) { notlar.unshift(not); degisti(); }
+  dosyalar[not.id] = sonuc.veri.ad;
+  seciliKimlik = not.id;
   oge('search').value = '';
   ekraniCiz();
-  oge('status').textContent = `${eklenen.length} not yedekten eklendi`;
+  if (!(await kaydet())) return;
+  oge('status').textContent = `${sonuc.veri.ad} açıldı; değişiklikler aynı dosyaya kaydedilecek`;
+  if (sonuc.veri.uyari) hataGoster(sonuc.veri.uyari);
 }));
-oge('klasor').addEventListener('click', async () => {
-  dosyaMenusunuKapat();
-  try {
-    const sonuc = await masaustu.klasoruAc();
-    if (!sonuc.basarili) hataGoster(sonuc.hata);
-  } catch {
-    hataGoster('Notların klasörü açılamadı. Yeniden dene.');
-  }
-});
 
 document.addEventListener('keydown', olay => {
   if (!(olay.ctrlKey || olay.metaKey) || oge('confirm').open) return;
@@ -280,11 +258,16 @@ async function baslat() {
     const sonuc = await masaustu.oku();
     if (!sonuc.basarili) throw new Error(sonuc.hata);
     notlar = sonuc.veri.notlar;
+    dosyalar = sonuc.veri.dosyalar ?? {};
     seciliKimlik = notlar[0]?.id ?? null;
     yuklendi = true;
     oge('status').textContent = 'Notların hazır';
     if (sonuc.veri.kurtarildi) {
       hataGoster('Not dosyası okunamadığı için son sağlam yedek açıldı. Notlarını kontrol edip bir yedek al.');
+    }
+    if (sonuc.veri.bekleyenKayit) {
+      degisti();
+      hataGoster('Notes içinde korunmuş bazı değişiklikler TXT dosyasına henüz yazılamamış. Yeniden dene veya Farklı kaydet ile yeni bir hedef seç.');
     }
     ekraniCiz();
   } catch (hata) {

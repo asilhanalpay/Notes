@@ -1,7 +1,7 @@
 ## Bu sürümde
 
-Sol alttaki **Dosyalar (☰)** menüsü sadeleştirildi. En üstteki **Notların klasörünü aç**, notların ve kurtarma kopyasının bulunduğu klasöre doğrudan ulaşır.
-
-**Farklı kaydet…** ve **Kaydet ve klasörü aç** seçenekleri korunur. Daha seyrek kullanılan **Yedek al** ve **Yedekten ekle**, **Yedekleme** bölümündedir.
-
-Notların konumu ve dosya biçimi değişmedi. Yeni bir depolama alanı oluşturulmadı; mevcut notlar taşınmadı veya silinmedi.
+- Sol alttaki Dosyalar menüsünde yalnız **Farklı kaydet…** ve **Dosya aç…** var.
+- Farklı kaydet varsayılan olarak UTF-8 TXT kullanır; başlık dosya adı olarak önerilir, dosyaya yalnız içerik yazılır.
+- Açılan veya farklı kaydedilen TXT üzerindeki düzenlemeler aynı dosyaya otomatik yazılır. Dosya bağlantısı yeniden açılışta da korunur.
+- Mevcut JSON notları ve kurtarma kaydı korunur. TXT dışarıda değiştirilirse veya yazılamazsa hata gösterilir; Farklı kaydet ile yeni bir hedef seçilebilir.
+- İletişim adresi **Yardım → Notes Hakkında** penceresinde görünür: **asilhan.alpay@agentmail.to**. Menü çubuğu gizliyse Alt ile açılır.

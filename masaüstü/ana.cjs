@@ -1,12 +1,12 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, powerMonitor, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session, powerMonitor, nativeTheme } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
 const { SurumBildirimi } = require('./sürüm-bildirimi.cjs');
 const { kurulumHazirla } = require('./güncelleme.cjs');
 const { NotDosyalari } = require('./not-dosyaları.cjs');
-const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
+const { NotDeposu } = require('./depolama.cjs');
 
 app.setName('Notes');
 // Görünen ad değişse de önceki notlar ve şifreli sürüm bağlantısı aynı yerde kalır.
@@ -90,7 +90,7 @@ else {
   app.whenReady().then(() => {
     app.setAppUserModelId('com.asilhanalpay.notdefterim');
     depo = new NotDeposu(app.getPath('userData'));
-    const notDosyalari = new NotDosyalari({ depo, veriKlasoru: app.getPath('userData'), dialog, shell, pencere: () => pencere });
+    const notDosyalari = new NotDosyalari({ depo, veriKlasoru: app.getPath('userData'), dialog, pencere: () => pencere });
     surumBildirimleri = new SurumBildirimi({
       surum: app.getVersion(), paketli: app.isPackaged, platform: process.platform
     });
@@ -118,7 +118,7 @@ else {
       { label: 'Yardım', submenu: [
         { label: 'Notes Hakkında', click: () => dialog.showMessageBox(pencere, {
           type: 'info', title: 'Notes', message: 'Notes',
-          detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.`, buttons: ['Tamam']
+          detail: `Sürüm: ${app.getVersion()}\nTürkçe ve çevrimdışı not defteri.\n\nİletişim: asilhan.alpay@agentmail.to`, buttons: ['Tamam']
         }) }
       ] }
     ]));
@@ -141,33 +141,10 @@ else {
       nativeTheme.themeSource = tema === 'karanlik' ? 'dark' : 'light';
       pencere.setBackgroundColor(tema === 'karanlik' ? '#090909' : '#ffffff');
     });
-    islemTanimla('notlar:oku', () => depo.oku());
-    islemTanimla('notlar:kaydet', notlar => depo.kaydet(notlar));
-    islemTanimla('notlar:farkli-kaydet', kimlik => notDosyalari.farkliKaydet(kimlik));
-    islemTanimla('notlar:uygulamaya-kaydet', kimlik => notDosyalari.uygulamayaKaydet(kimlik));
-    islemTanimla('notlar:yedekle', async () => {
-      const sonuc = await dialog.showSaveDialog(pencere, {
-        title: 'Notlarını yedekle', buttonLabel: 'Yedeği kaydet',
-        defaultPath: `Notes-Yedek-${new Date().toISOString().slice(0, 10)}.json`,
-        filters: [{ name: 'Notes yedeği', extensions: ['json'] }]
-      });
-      if (sonuc.canceled || !sonuc.filePath) return { iptal: true };
-      const { notlar } = depo.oku();
-      atomikYaz(sonuc.filePath, kodla(notlar));
-      return { iptal: false };
-    });
-    islemTanimla('notlar:ice-aktar', async () => {
-      const sonuc = await dialog.showOpenDialog(pencere, {
-        title: 'Yedekten not ekle', buttonLabel: 'Yedeği aç', properties: ['openFile'],
-        filters: [{ name: 'Notes yedeği', extensions: ['json'] }]
-      });
-      if (sonuc.canceled || !sonuc.filePaths[0]) return { iptal: true };
-      return { iptal: false, notlar: coz(dosyaOku(sonuc.filePaths[0])) };
-    });
-    islemTanimla('notlar:klasor', async () => {
-      const hata = await shell.openPath(app.getPath('userData'));
-      if (hata) throw new Error('Not klasörü açılamadı.');
-    });
+    islemTanimla('notlar:oku', () => notDosyalari.oku());
+    islemTanimla('notlar:kaydet', notlar => notDosyalari.kaydet(notlar));
+    islemTanimla('notlar:farkli-kaydet', (kimlik, not) => notDosyalari.farkliKaydet(kimlik, not));
+    islemTanimla('notlar:dosya-ac', () => notDosyalari.dosyaAc());
     islemTanimla('uygulama:kapat', async () => {
       if (bekleyenGuncelleme) {
         if (guncellemeKapanisi) throw new Error('Güncelleme hazırlanıyor.');

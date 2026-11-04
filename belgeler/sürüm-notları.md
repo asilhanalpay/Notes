@@ -1,3 +1,11 @@
+# 0.0.10 adayı
+
+- Dosyalar menüsünde yalnız Farklı kaydet ve Dosya aç bulunur. Varsayılan tür TXT’dir.
+- Açılan ve farklı kaydedilen TXT dosyaları yerinde düzenlenir; bağlantı yeniden açılışta korunur.
+- Otomatik JSON/kurtarma kaydı korunur; dış değişiklikte sessiz üzerine yazma yerine hata ve Farklı kaydet ile kurtarma sağlanır.
+
+- Yardım → Notes Hakkında penceresine iletişim adresi eklendi: asilhan.alpay@agentmail.to.
+
 # 0.0.9 adayı
 
 - Sol alttaki Dosyalar menüsü sadeleştirildi; Notların klasörünü aç ilk sıraya alındı.

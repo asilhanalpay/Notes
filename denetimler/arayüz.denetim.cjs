@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(__dirname, '../arayüz/pencere.html'), 'u
 const kod = fs.readFileSync(path.join(__dirname, '../arayüz/notlar.js'), 'utf8');
 const bekle = async () => { for (let i = 0; i < 12; i++) await new Promise(resolve => setImmediate(resolve)); };
 
-async function arayuzAc(t, ilkNotlar = []) {
+async function arayuzAc(t, ilkNotlar = [], okumaEkleri = {}) {
   const kayitlar = [];
   const durum = { hata: false, kapandi: false, kapatmaIstegi: null };
   const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'file:///uygulama/arayüz/pencere.html' });
@@ -27,7 +27,7 @@ async function arayuzAc(t, ilkNotlar = []) {
     await bekle();
   };
   dom.window.notDefterim = {
-    oku: async () => ({ basarili: true, veri: { notlar: ilkNotlar, kurtarildi: false } }),
+    oku: async () => ({ basarili: true, veri: { notlar: ilkNotlar, kurtarildi: false, ...okumaEkleri } }),
     kaydet: async notlar => {
       if (durum.kayitKancasi) await durum.kayitKancasi();
       if (durum.hata) return { basarili: false, hata: 'Disk dolu' };
@@ -36,8 +36,7 @@ async function arayuzAc(t, ilkNotlar = []) {
     },
     kapatmaIsteginiDinle: islem => { durum.kapatmaIstegi = islem; },
     kapat: async () => { durum.kapandi = true; },
-    iceAktar: async () => ({ basarili: true, veri: { iptal: false, notlar: [{ id: 'eski', title: 'Yedek', body: 'Yedek içerik', updated: 1000 }] } }),
-    yedekle: async () => ({ basarili: true, veri: { iptal: false } })
+    dosyaAc: async () => ({ basarili: true, veri: { iptal: true } })
   };
   dom.window.eval(kod);
   await bekle();
@@ -87,15 +86,6 @@ test('Kayıt hatasında kapanış engellenir; yeniden deneme son değişikliği 
   await durum.kapatmaIstegi();
   assert.equal(durum.kapandi, true);
 });
-test('Yedekten ekleme mevcut notları silmez ve yeni kimlik üretir', async t => {
-  const { oge, kayitlar } = await arayuzAc(t, [{ id: 'eski', title: 'Mevcut', body: 'Kalacak', updated: 1000 }]);
-  oge('iceAktar').click(); await bekle();
-  const sonuc = kayitlar.at(-1);
-  assert.equal(sonuc.length, 2);
-  assert.equal(sonuc[1].body, 'Kalacak');
-  assert.notEqual(sonuc[0].id, sonuc[1].id);
-});
-
 test('Hızlı yazma 650 ms sessizlikten sonra tek kayıtta birleşir; değişmeyen not yeniden yazılmaz', async t => {
   const { dom, yaz, ilerle, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: '', updated: 1000 }]);
   for (let i = 1; i <= 100; i++) yaz('body', `Son metin ${i}`);
@@ -165,16 +155,6 @@ test('Devam eden kayıt sırasındaki değişiklikler eski kopyanın arkasında 
   assert.equal(kayitlar[1][0].body, 'Yeni kopya 99');
 });
 
-test('Yedek alınmadan önce bekleyen metin diske yazılır', async t => {
-  const { dom, oge, yaz, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: '', updated: 1000 }]);
-  let yedek;
-  dom.window.notDefterim.yedekle = async () => { yedek = kayitlar.at(-1); return { basarili: true, veri: { iptal: false } }; };
-  yaz('body', 'Yedeğe girecek son metin');
-  oge('yedekle').click();
-  await bekle();
-  assert.equal(yedek[0].body, 'Yedeğe girecek son metin');
-});
-
 test('Köprü eşzamanlı hata verse de yeniden kayıt denenebilir', async t => {
   const { dom, yaz, oge, ilerle, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: '', updated: 1000 }]);
   const kaydet = dom.window.notDefterim.kaydet;
@@ -205,65 +185,73 @@ test('Farklı kaydet açık notun son değişikliğini önce saklar ve yalnız s
   assert.equal(oge('status').textContent, 'Birinci.txt kaydedildi');
   assert.equal(oge('body').disabled, false);
 });
-test('TXT seçenekleri not yokken devre dışıdır; kayıt hatasında dışa aktarma başlamaz', async t => {
-  const { dom, oge, yaz, durum } = await arayuzAc(t);
+test('Menü yalnız iki seçenek içerir; not yokken dosya açılabilir', async t => {
+  const { dom, oge, kayitlar } = await arayuzAc(t);
+  assert.deepEqual([...oge('dosyaMenusu').querySelectorAll('button')].map(b => b.id), ['farkliKaydet', 'dosyaAc']);
   assert.equal(oge('farkliKaydet').disabled, true);
-  assert.equal(oge('uygulamayaKaydet').disabled, true);
-  oge('add').click(); await bekle();
-  durum.hata = true; yaz('body', 'Henüz saklanmadı');
+  assert.equal(oge('dosyaAc').disabled, false);
+  dom.window.notDefterim.dosyaAc = async () => ({ basarili: true, veri: { iptal: false, ad: 'İlk.txt', not: { id: 'txt', title: 'İlk', body: 'Bütün metin', updated: 1000 } } });
+  oge('dosyaAc').click(); await bekle();
+  assert.equal(oge('body').value, 'Bütün metin');
+  assert.equal(kayitlar.at(-1)[0].id, 'txt');
+  assert.ok(oge('date').textContent.includes('İlk.txt'));
+});
+test('Dosya açmadan önce bekleyen kayıt tamamlanır; hatada yeni dosya açılmaz', async t => {
+  const { dom, oge, yaz, kayitlar, durum } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Eski', updated: 1000 }]);
   let sayi = 0;
-  dom.window.notDefterim.uygulamayaKaydet = async () => { sayi++; };
-  oge('uygulamayaKaydet').click(); await bekle();
-  assert.equal(sayi, 0);
-  assert.equal(oge('status').textContent, 'Kaydedilemedi');
-  assert.equal(oge('body').value, 'Henüz saklanmadı');
-  assert.equal(oge('body').disabled, false);
-});
-test('Klasör açma hatası, kaydedilmiş dosyayı başarısız kayıt gibi göstermez', async t => {
-  const { dom, oge } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Metin', updated: 1000 }]);
-  dom.window.notDefterim.uygulamayaKaydet = async id => {
-    assert.equal(id, 'bir');
-    return { basarili: true, veri: { ad: 'Not.txt', klasorAcildi: false } };
+  dom.window.notDefterim.dosyaAc = async () => {
+    sayi++;
+    assert.equal(kayitlar.at(-1)[0].body, 'Son düzenleme');
+    return { basarili: true, veri: { iptal: true } };
   };
-  oge('uygulamayaKaydet').click(); await bekle();
-  assert.equal(oge('status').textContent, 'Not.txt kaydedildi');
-  assert.equal(oge('hata').hidden, false);
-  assert.ok(oge('hataMetni').textContent.includes('Not kaydedildi ancak klasör açılamadı'));
+  yaz('body', 'Son düzenleme'); oge('dosyaAc').click(); await bekle();
+  assert.equal(sayi, 1);
+  durum.hata = true; yaz('body', 'Kaydedilemeyen düzenleme');
+  oge('dosyaAc').click(); await bekle(); assert.equal(sayi, 1);
+  assert.equal(oge('body').value, 'Kaydedilemeyen düzenleme');
 });
-test('İptal edilen farklı kaydet başarı mesajı vermez ve aynı anda ikinci dosya işlemi başlamaz', async t => {
+test('İptal ve dosya açma hatası mevcut notu değiştirmez; aynı dosya yeniden açılınca çoğalmaz', async t => {
+  const mevcut = { id: 'bir', title: 'Not', body: 'Korunacak', updated: 1000 };
+  const { dom, oge, kayitlar } = await arayuzAc(t, [mevcut]);
+  dom.window.notDefterim.dosyaAc = async () => ({ basarili: true, veri: { iptal: true } });
+  oge('dosyaAc').click(); await bekle(); assert.equal(kayitlar.length, 0);
+  dom.window.notDefterim.dosyaAc = async () => ({ basarili: false, hata: 'TXT okunamadı' });
+  oge('dosyaAc').click(); await bekle(); assert.equal(oge('hataMetni').textContent, 'TXT okunamadı');
+  assert.equal(oge('body').value, mevcut.body);
+  dom.window.notDefterim.dosyaAc = async () => ({ basarili: true, veri: { iptal: false, ad: 'Not.txt', not: mevcut } });
+  oge('dosyaAc').click(); await bekle();
+  assert.equal(oge('list').querySelectorAll('.note').length, 1);
+});
+test('İptal edilen farklı kaydet başarı göstermez; ikinci dosya işlemi eşzamanlı başlayamaz', async t => {
   const { dom, oge } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Metin', updated: 1000 }]);
   let bitir, sayi = 0;
   dom.window.notDefterim.farkliKaydet = () => { sayi++; return new Promise(r => { bitir = r; }); };
   oge('farkliKaydet').click(); await bekle();
-  oge('farkliKaydet').click(); oge('uygulamayaKaydet').click();
-  assert.equal(sayi, 1);
-  assert.equal(oge('body').disabled, true);
+  oge('farkliKaydet').click(); oge('dosyaAc').click();
+  assert.equal(sayi, 1); assert.equal(oge('body').disabled, true);
   bitir({ basarili: true, veri: { iptal: true } }); await bekle();
   assert.equal(oge('status').textContent, 'Notların hazır');
   assert.equal(oge('body').disabled, false);
 });
-test('Not klasörü boş listede de açılır; not oluşturmaz veya kaydetme istemez', async t => {
-  const { dom, oge, kayitlar } = await arayuzAc(t);
-  let acildi = 0;
-  dom.window.notDefterim.klasoruAc = async (...args) => {
-    assert.equal(args.length, 0);
-    acildi++;
-    return { basarili: true };
+test('Dış TXT kaydı başarısızken Farklı kaydet son metinle kurtarma sağlar', async t => {
+  const { dom, oge, yaz, durum, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Eski', updated: 1000 }]);
+  durum.hata = true; yaz('body', 'Kurtarılacak son metin');
+  dom.window.notDefterim.farkliKaydet = async (id, not) => {
+    assert.equal(id, 'bir'); assert.equal(not.body, 'Kurtarılacak son metin');
+    durum.hata = false;
+    return { basarili: true, veri: { iptal: false, ad: 'Kurtarılan.txt' } };
   };
-  assert.equal(oge('klasor').disabled, false);
-  oge('yedekIslemleri').open = true;
-  oge('klasor').click(); await bekle();
-  assert.equal(acildi, 1);
-  assert.equal(oge('yedekIslemleri').open, false);
-  assert.equal(kayitlar.length, 0);
-  assert.equal(dom.window.document.querySelectorAll('.note').length, 0);
+  oge('farkliKaydet').click(); await bekle();
+  assert.equal(kayitlar.at(-1)[0].body, 'Kurtarılacak son metin');
+  assert.equal(oge('status').textContent, 'Kurtarılan.txt kaydedildi');
+  assert.equal(oge('hata').hidden, true);
 });
-test('Klasör açma bağlantı hatası kullanıcıya gösterilir; mevcut notlar korunur', async t => {
-  const { dom, oge, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Korunacak içerik', updated: 1000 }]);
-  dom.window.notDefterim.klasoruAc = async () => { throw new Error('IPC bağlantısı kapalı'); };
-  oge('klasor').click(); await bekle();
-  assert.equal(oge('hata').hidden, false);
-  assert.equal(oge('hataMetni').textContent, 'Notların klasörü açılamadı. Yeniden dene.');
-  assert.equal(oge('body').value, 'Korunacak içerik');
-  assert.equal(kayitlar.length, 0);
+
+test('Önceki oturumdan kalan başarısız TXT kaydı yeniden açılışta uyarılır ve kapanışta yeniden denenir', async t => {
+  const { oge, durum } = await arayuzAc(t, [{ id: 'txt', title: 'Not', body: 'JSON içinde korunmuş', updated: 1000 }], { bekleyenKayit: true, dosyalar: { txt: 'Not.txt' } });
+  assert.ok(oge('hataMetni').textContent.includes('henüz yazılamamış'));
+  durum.hata = true; await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, false);
+  durum.hata = false; await durum.kapatmaIstegi();
+  assert.equal(durum.kapandi, true);
 });

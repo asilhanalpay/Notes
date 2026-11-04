@@ -15,11 +15,8 @@ contextBridge.exposeInMainWorld('notDefterim', Object.freeze({
   },
   oku: () => ipcRenderer.invoke('notlar:oku'),
   kaydet: notlar => ipcRenderer.invoke('notlar:kaydet', notlar),
-  farkliKaydet: kimlik => ipcRenderer.invoke('notlar:farkli-kaydet', kimlik),
-  uygulamayaKaydet: kimlik => ipcRenderer.invoke('notlar:uygulamaya-kaydet', kimlik),
-  yedekle: () => ipcRenderer.invoke('notlar:yedekle'),
-  iceAktar: () => ipcRenderer.invoke('notlar:ice-aktar'),
-  klasoruAc: () => ipcRenderer.invoke('notlar:klasor'),
+  farkliKaydet: (kimlik, not) => ipcRenderer.invoke('notlar:farkli-kaydet', kimlik, not),
+  dosyaAc: () => ipcRenderer.invoke('notlar:dosya-ac'),
   kapat: () => ipcRenderer.invoke('uygulama:kapat'),
   kapatmaIsteginiDinle: islem => {
     ipcRenderer.on('uygulama:kapatma-istegi', () => islem());

@@ -106,13 +106,6 @@ textarea { flex: 1; min-height: 100px; width: 100%; padding: 0; resize: none; bo
 #dosyaMenusu:popover-open { display: grid; gap: 2px; }
 #dosyaMenusu button { display: block; width: 100%; padding: 10px; border: 0; border-radius: 1px; background: transparent; color: inherit; text-align: left; font-size: 12px; }
 #dosyaMenusu button:hover { background: var(--secili); }
-#dosyaMenusu .not-klasoru { font-weight: 600; }
-#dosyaMenusu summary { display: flex; align-items: center; justify-content: space-between; padding: 10px; list-style: none; cursor: pointer; font-size: 12px; }
-#dosyaMenusu summary::after { content: '›'; font-size: 16px; line-height: 1; }
-#dosyaMenusu details[open] > summary::after { transform: rotate(90deg); }
-#dosyaMenusu summary:hover { background: var(--secili); }
-#dosyaMenusu summary:focus-visible { outline: 2px solid var(--odak); outline-offset: -2px; }
-#dosyaMenusu hr { width: 100%; margin: 3px 0; border: 0; border-top: 1px solid var(--cizgi); }
 
 /* Bildirimler ve onay pencereleri */
 .hata, .surum-bildirimi { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 20px 0; padding: 10px 14px; border: 1px solid var(--cizgi); border-radius: 2px; font-size: 12px; }

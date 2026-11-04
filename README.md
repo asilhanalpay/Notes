@@ -13,10 +13,10 @@ Windows 10/11 (64 bit). Yayıncı imzası olmadığı için Windows uyarı göst
 
 - **+** ile not oluştur, arama kutusuyla bul. Yazmaya kısa süre ara verdiğinde kaydedilir. **Ctrl+S** ile beklemeden kaydedebilirsin.
 - **Tema** bölümünden açık veya karanlık görünümü seç. Siyah pencere kenarı ve belirgin çizgiler iki görünümde de korunur; karanlık temanın iç ayırıcıları görünür gri tonundadır.
-- Sol alttaki **Dosyalar (☰)** menüsünde **Farklı kaydet…**, açık notu başlık ve içeriğiyle .txt dosyası olarak seçtiğin konuma kaydeder.
-- **Kaydet ve klasörü aç**, açık notun .txt kopyasını uygulamanın **Kaydedilen notlar** klasörüne yazar ve klasörü otomatik açar. Aynı adlı eski dosyalar ezilmez; yeni dosyaya numara eklenir. Bu klasör kullanıcı verileri içindedir; uygulamanın kurulum klasörü değildir.
-- Menüde en üstteki **Notların klasörünü aç**, notların ve kurtarma kopyasının saklandığı kullanıcı veri klasörünü doğrudan açar. Bu işlem yeni not oluşturmaz veya mevcut notları değiştirmez.
-- **Yedek al** ve **Yedekten ekle**, aynı menüdeki kapalı **Yedekleme** bölümündedir. JSON yedekleri bütün notlar içindir; .txt dosyaları tek notun okunabilir kopyasıdır.
+- Sol alttaki **Dosyalar (☰)** menüsünde yalnız **Farklı kaydet…** ve **Dosya aç…** bulunur.
+- **Farklı kaydet…**, seçtiğin notun içeriğini varsayılan olarak UTF-8 `.txt` dosyasına kaydeder. Başlık dosya adı olarak önerilir. Bundan sonraki düzenlemeler seçtiğin dosyaya yazılır.
+- **Dosya aç…**, seçtiğin TXT'nin tüm içeriğini düzenleyicide açar. Değişiklikler aynı dosyaya otomatik kaydedilir; dosya bağlantısı yeniden açılışta da korunur. Başlığı değiştirmek dış dosyanın adını değiştirmez.
+- Notes'un otomatik JSON kaydı ve kurtarma kopyası korunur. TXT dışarıda değiştirilmiş, silinmiş veya yazılamıyorsa hata gösterilir ve düzenleme Notes içinde saklanır. **Farklı kaydet…** ile başka bir ad seçerek kurtarabilirsin. Notu Notes'tan silmek dış TXT'yi silmez.
 - Yanlışlıkla sildiğin notu 10 saniye içinde **Geri al** ile kurtar.
 
 ## Gizlilik
