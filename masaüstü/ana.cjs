@@ -1,9 +1,9 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, safeStorage, powerMonitor, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session, shell, powerMonitor, nativeTheme } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { pathToFileURL } = require('node:url');
-const { SurumBildirimi, ErisimKasasi, IZIN_SAYFASI } = require('./sürüm-bildirimi.cjs');
+const { SurumBildirimi } = require('./sürüm-bildirimi.cjs');
 const { kurulumHazirla } = require('./güncelleme.cjs');
 const { NotDosyalari } = require('./not-dosyaları.cjs');
 const { NotDeposu, kodla, coz, atomikYaz, dosyaOku } = require('./depolama.cjs');
@@ -92,12 +92,11 @@ else {
     depo = new NotDeposu(app.getPath('userData'));
     const notDosyalari = new NotDosyalari({ depo, veriKlasoru: app.getPath('userData'), dialog, shell, pencere: () => pencere });
     surumBildirimleri = new SurumBildirimi({
-      surum: app.getVersion(), paketli: app.isPackaged, platform: process.platform,
-      kasa: new ErisimKasasi(path.join(app.getPath('userData'), 'surum-erisim.bin'), safeStorage)
+      surum: app.getVersion(), paketli: app.isPackaged, platform: process.platform
     });
     surumBildirimleri.on('durum', bilgi => pencere?.webContents.send('surum:durum', bilgi));
     // Yazı alanının ağ erişimi kapalı kalır. Yalnızca ana işlem,
-    // izin verilmiş özel depodan sürüm bilgisi okuyabilir.
+    // sabit herkese açık depodan sürüm bilgisi okuyabilir.
     session.defaultSession.webRequest.onBeforeRequest((ayrinti, yanit) => {
       yanit({ cancel: !ayrinti.url.startsWith('file://') });
     });
@@ -125,11 +124,9 @@ else {
     ]));
     islemTanimla('surum:durum', () => surumBildirimleri.gorunum());
     islemTanimla('surum:denetle', () => surumBildirimleri.denetle({ elle: true }));
-    islemTanimla('surum:bagla', anahtar => surumBildirimleri.bagla(anahtar));
-    islemTanimla('surum:ayir', () => {
+    islemTanimla('surum:iptal', () => {
       if (guncellemeKapanisi) throw new Error('Güncelleme hazırlanıyor. Uygulamanın kapanmasını bekle.');
-      bekleyenGuncelleme?.temizle(); bekleyenGuncelleme = null;
-      return surumBildirimleri.ayir();
+      return surumBildirimleri.iptalEt();
     });
     islemTanimla('surum:indir', async () => {
       bekleyenGuncelleme = await surumBildirimleri.guncelle(ayar => kurulumHazirla({
@@ -139,7 +136,6 @@ else {
       setImmediate(() => pencere?.close());
       return surumBildirimleri.gorunum();
     });
-    islemTanimla('surum:izin', () => shell.openExternal(IZIN_SAYFASI));
     islemTanimla('tema:sec', tema => {
       if (!['acik', 'karanlik'].includes(tema)) throw new Error('Tema seçimi geçersiz.');
       nativeTheme.themeSource = tema === 'karanlik' ? 'dark' : 'light';

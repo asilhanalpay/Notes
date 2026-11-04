@@ -28,13 +28,13 @@ function yanitAl(adres, headers, signal, istemci) {
     istek.on('error', reject);
   });
 }
-async function indir({ yayin, anahtar, dosya, signal, ilerle = () => {}, istemci = https }) {
+async function indir({ yayin, dosya, signal, ilerle = () => {}, istemci = https }) {
   paketiDogrula(yayin);
   signal = AbortSignal.any([AbortSignal.timeout(5 * 60 * 1000), ...(signal ? [signal] : [])]);
   let yanit;
   let tutacak;
   try {
-    const headers = { Authorization: `Bearer ${anahtar}`, Accept: 'application/octet-stream',
+    const headers = { Accept: 'application/octet-stream',
       'User-Agent': 'Notes', 'X-GitHub-Api-Version': '2022-11-28', 'Accept-Encoding': 'identity' };
     yanit = await yanitAl(new URL(`https://api.github.com/repos/${DEPO}/releases/assets/${yayin.kimlik}`), headers, signal, istemci);
     for (let sayi = 0; [301, 302, 303, 307, 308].includes(yanit.statusCode); sayi++) {
@@ -42,7 +42,6 @@ async function indir({ yayin, anahtar, dosya, signal, ilerle = () => {}, istemci
       yanit.destroy();
       if (sayi >= 2) throw new Error('Çok sayıda yönlendirme.');
       const adres = veriAdresi(sonraki);
-      // Özel depo anahtarı yalnız api.github.com'a gönderilir.
       yanit = await yanitAl(adres, { 'User-Agent': 'Notes', 'Accept-Encoding': 'identity' }, signal, istemci);
     }
     if (yanit.statusCode !== 200 || (yanit.headers['content-length'] && Number(yanit.headers['content-length']) !== yayin.boyut)) {
@@ -84,7 +83,7 @@ function yardimciMetni({ dosya, hedef, ozet, pid, sonuc, hazir }) {
   return `$Kurulum = ${psMetni(dosya)}\n$Hedef = ${psMetni(hedef)}\n$Ozet = ${psMetni(ozet)}\n$NotesPid = ${pid}\n$Sonuc = ${psMetni(sonuc)}\n$Hazir = ${psMetni(hazir)}\n` +
     fs.readFileSync(path.join(__dirname, 'güncelleme-yardımcısı.ps1'), 'utf8');
 }
-async function kurulumHazirla({ kok, yayin, anahtar, signal, ilerle, exe = process.execPath, pid = process.pid }) {
+async function kurulumHazirla({ kok, yayin, signal, ilerle, exe = process.execPath, pid = process.pid }) {
   paketiDogrula(yayin);
   fs.mkdirSync(kok, { recursive: true });
   const klasor = fs.mkdtempSync(path.join(kok, 'paket-'));
@@ -92,7 +91,7 @@ async function kurulumHazirla({ kok, yayin, anahtar, signal, ilerle, exe = proce
   const sonuc = path.join(kok, 'sonuc.json');
   const hazir = path.join(klasor, 'hazir');
   const temizle = () => fs.rmSync(klasor, { recursive: true, force: true });
-  try { await indir({ yayin, anahtar, dosya, signal, ilerle }); }
+  try { await indir({ yayin, dosya, signal, ilerle }); }
   catch (hata) { temizle(); throw hata; }
   return {
     temizle,

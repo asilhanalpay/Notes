@@ -6,142 +6,144 @@ const path = require('node:path');
 const os = require('node:os');
 const { EventEmitter } = require('node:events');
 const { SurumBildirimi, ErisimKasasi, githubOku, yayiniDogrula, depoyuDogrula,
-  dahaYeniMi, ARALIK, ErisimHatasi } = require('../masaüstü/sürüm-bildirimi.cjs');
+  dahaYeniMi, ARALIK, BeklemeHatasi } = require('../masaüstü/sürüm-bildirimi.cjs');
 const ANAHTAR = 'github_pat_' + 'a'.repeat(30);
-const DEPO = { id: 1427086629, full_name: 'asilhanalpay/Notes', private: true };
-function yayin(surum = '0.2.4') {
+const DEPO = { id: 1427086629, full_name: 'asilhanalpay/Notes', private: false };
+function yayin(surum = '0.0.9') {
   return { tag_name: `v${surum}`, draft: false, prerelease: false, assets: [{
     name: 'Notes.exe', state: 'uploaded', size: 100,
     browser_download_url: `https://github.com/asilhanalpay/Notes/releases/download/v${surum}/Notes.exe`
   }] };
 }
 function kur(secenekler = {}) {
-  const durum = { istekler: [], araliklar: [] };
-  const kasa = { anahtar: ANAHTAR, uygunMu: () => true, dogrula() {},
-    oku() { return this.anahtar; }, kaydet(anahtar) { this.anahtar = anahtar; }, sil() { this.anahtar = null; } };
+  const durum = { istekler: [], araliklar: [], ilkler: [] };
   const yonetici = new SurumBildirimi({
-    surum: '0.2.3', paketli: true, platform: 'win32', kasa,
-    oku: async (yol, anahtar) => { durum.istekler.push({ yol, anahtar }); return yol.endsWith('/latest') ? yayin() : DEPO; },
-    zamanlayici: { setTimeout: () => 1, clearTimeout() {}, setInterval: (_f, a) => { durum.araliklar.push(a); return 2; }, clearInterval() {} },
+    surum: '0.0.8', paketli: true, platform: 'win32',
+    oku: async (yol, signal) => { durum.istekler.push({ yol, signal }); return yol.endsWith('/latest') ? yayin() : DEPO; },
+    zamanlayici: { setTimeout: (f, a) => { durum.ilkler.push({ f, a }); return 1; }, clearTimeout() {},
+      setInterval: (f, a) => { durum.araliklar.push({ f, a }); return 2; }, clearInterval() {} },
     ...secenekler
   });
-  return { yonetici, kasa, durum };
+  return { yonetici, durum };
 }
-
-test('Kullanıcı bağlantı kurmadan ağ isteği yapılmaz', async () => {
-  const { yonetici, kasa, durum } = kur(); kasa.anahtar = null;
-  await yonetici.baslat(); await yonetici.denetle();
-  assert.equal(durum.istekler.length, 0);
-  assert.equal(yonetici.gorunum().durum, 'baglanti-gerekli');
-});
-test('Dakikalık denetim yalnızca yeni sürüm bildirir; anahtar arayüze dönmez', async () => {
-  const { yonetici, durum } = kur(); await yonetici.baslat();
-  const sonuc = await yonetici.denetle();
-  assert.deepEqual(durum.araliklar, [ARALIK]);
-  assert.equal(ARALIK, 60000);
-  assert.equal(sonuc.durum, 'yeni-surum');
-  assert.equal(sonuc.yeniSurum, '0.2.4');
+test('Anahtar veya Windows şifreleme kasası olmadan açılış denetimi zamanlanır', async () => {
+  const kasa = new Proxy({}, { get() { assert.fail('Eski kasa okunamaz veya silinemez.'); } });
+  const { yonetici, durum } = kur({ kasa });
+  await yonetici.baslat();
+  assert.equal(durum.ilkler[0].a, 10000);
+  assert.equal(durum.araliklar[0].a, 15 * 60 * 1000);
+  assert.equal(ARALIK, 900000);
+  durum.ilkler[0].f(); await new Promise(setImmediate);
   assert.equal(durum.istekler.length, 2);
-  assert.equal(JSON.stringify(sonuc).includes(ANAHTAR), false);
-  assert.equal(yonetici.indirmeAdresi(), yayin().assets[0].browser_download_url);
+  assert.ok(durum.istekler.every(x => x.signal instanceof AbortSignal));
+  assert.equal(yonetici.gorunum().durum, 'yeni-surum');
+  assert.equal(yonetici.gorunum().yeniSurum, '0.0.9');
+  assert.equal(JSON.stringify(yonetici.gorunum()).includes('anahtar'), false);
 });
-test('Eski ve eşit sürümler için güncelleme bildirimi gösterilmez', async () => {
-  for (const surum of ['0.2.2', '0.2.3']) {
-    const { yonetici } = kur({ oku: async yol => yol.endsWith('/latest') ? yayin(surum) : DEPO });
-    await yonetici.baslat(); assert.equal((await yonetici.denetle()).durum, 'guncel');
-    assert.throws(() => yonetici.indirmeAdresi());
+test('Yinelenen açılış sayaçları çoğaltmaz; kapanış gecikmiş açılışı engeller', async () => {
+  const { yonetici, durum } = kur(); await Promise.all([yonetici.baslat(), yonetici.baslat()]);
+  assert.equal(durum.araliklar.length, 1);
+  const ikinci = kur(); const acilis = ikinci.yonetici.baslat(); ikinci.yonetici.durdur(); await acilis;
+  assert.equal(ikinci.durum.araliklar.length, 0);
+});
+test('Geliştirme ve Windows dışı ortamda güncelleme çalışmaz', async () => {
+  for (const secenek of [{ paketli: false }, { platform: 'linux' }]) {
+    const { yonetici, durum } = kur(secenek);
+    assert.equal((await yonetici.baslat()).durum, 'kullanilamiyor');
+    await yonetici.denetle(); assert.equal(durum.istekler.length, 0);
   }
+});
+test('Eski/eşit sürümler bildirilmez; daha yüksek sürüm ve doğrulanmış adres bildirilir', async () => {
+  for (const surum of ['0.0.7', '0.0.8']) {
+    const { yonetici } = kur({ oku: async yol => yol.endsWith('/latest') ? yayin(surum) : DEPO });
+    assert.equal((await yonetici.denetle()).durum, 'guncel'); assert.throws(() => yonetici.indirmeAdresi());
+  }
+  const { yonetici } = kur(); await yonetici.denetle();
+  assert.equal(yonetici.indirmeAdresi(), yayin().assets[0].browser_download_url);
   assert.equal(dahaYeniMi('0.10.0', '0.2.3'), true);
 });
-test('0.0.1 başlangıcından sonraki sürüm bildirilir; eski 0.2.4 kurulumu için sıfırlama bildirilmez', async () => {
-  const yeni = kur({ surum: '0.0.1', oku: async yol => yol.endsWith('/latest') ? yayin('0.0.2') : DEPO });
-  await yeni.yonetici.baslat();
-  const sonuc = await yeni.yonetici.denetle();
-  assert.equal(sonuc.durum, 'yeni-surum');
-  assert.equal(sonuc.yeniSurum, '0.0.2');
-  const eski = kur({ surum: '0.2.4', oku: async yol => yol.endsWith('/latest') ? yayin('0.0.1') : DEPO });
-  await eski.yonetici.baslat();
-  assert.equal((await eski.yonetici.denetle()).durum, 'guncel');
-  assert.throws(() => eski.yonetici.indirmeAdresi());
-});
-test('Eşzamanlı ve sık denetimler çoğaltılmaz', async () => {
-  const { yonetici, durum } = kur(); await yonetici.baslat();
+test('Eşzamanlı/sık arka plan denetimleri çoğaltılmaz; elle denetim beklemez', async () => {
+  const { yonetici, durum } = kur({ simdi: () => 1000 });
   await Promise.all([yonetici.denetle(), yonetici.denetle(), yonetici.denetle()]);
   await yonetici.denetle(); assert.equal(durum.istekler.length, 2);
+  await yonetici.denetle({ elle: true }); assert.equal(durum.istekler.length, 4);
 });
-test('Elle denetim bekleme süresini atlar ve yeni yayımlanan sürümü hemen görür', async () => {
-  let sonSurum = '0.0.2';
-  let istekSayisi = 0;
-  const { yonetici } = kur({ surum: '0.0.2', simdi: () => 1000,
-    oku: async yol => { istekSayisi++; return yol.endsWith('/latest') ? yayin(sonSurum) : DEPO; } });
-  await yonetici.baslat();
-  assert.equal((await yonetici.denetle()).durum, 'guncel');
-  sonSurum = '0.0.3';
-  await yonetici.denetle();
-  assert.equal(istekSayisi, 2);
-  const yeni = await yonetici.denetle({ elle: true });
-  assert.equal(istekSayisi, 4);
-  assert.equal(yeni.durum, 'yeni-surum');
-  assert.equal(yeni.yeniSurum, '0.0.3');
-  assert.equal(yonetici.indirmeAdresi(), yayin('0.0.3').assets[0].browser_download_url);
-  await yonetici.denetle({ elle: true });
-  assert.equal(istekSayisi, 6);
+test('Kimliği veya adı farklı, özel ve eksik gizlilik bilgili depo reddedilir', () => {
+  depoyuDogrula(DEPO);
+  for (const v of [{ ...DEPO, id: 1 }, { ...DEPO, full_name: 'baska/Notes' },
+    { ...DEPO, private: true }, { ...DEPO, private: undefined }]) assert.throws(() => depoyuDogrula(v));
 });
-test('Elle denetim de eşzamanlı istekleri çoğaltmaz ve bağlantı gereksinimini atlayamaz', async () => {
-  let tamamla;
-  let istekSayisi = 0;
-  const { yonetici } = kur({ oku: async yol => {
-    istekSayisi++;
-    return yol.endsWith('/latest') ? yayin() : await new Promise(resolve => { tamamla = resolve; });
-  } });
-  await yonetici.baslat();
-  const ilk = yonetici.denetle({ elle: true });
-  await yonetici.denetle({ elle: true });
-  assert.equal(istekSayisi, 1);
-  tamamla(DEPO); await ilk;
-  assert.equal(istekSayisi, 2);
-  yonetici.ayir();
-  assert.equal((await yonetici.denetle({ elle: true })).durum, 'baglanti-gerekli');
-  assert.equal(istekSayisi, 2);
-});
-test('Farklı veya herkese açık depoya geçiş reddedilir', () => {
-  assert.throws(() => depoyuDogrula({ ...DEPO, id: 1 }));
-  assert.throws(() => depoyuDogrula({ ...DEPO, private: false }));
-});
-test('Harici adres, ön sürüm, taslak ve eksik kurulum dosyası reddedilir', () => {
-  for (const degistir of [
-    v => { v.draft = true; }, v => { v.prerelease = true; },
+test('Harici adres, ön sürüm, taslak ve eksik kurulum reddedilir', () => {
+  for (const degistir of [v => { v.draft = true; }, v => { v.prerelease = true; },
     v => { v.assets[0].browser_download_url = 'https://example.com/kurulum.exe'; },
-    v => { v.assets[0].state = 'new'; }, v => { v.assets[0].size = 0; },
-    v => { v.tag_name = 'v../../a'; }
-  ]) { const veri = yayin(); degistir(veri); assert.throws(() => yayiniDogrula(veri)); }
+    v => { v.assets[0].state = 'new'; }, v => { v.assets[0].size = 0; }, v => { v.tag_name = 'v../../a'; }]) {
+    const veri = yayin(); degistir(veri); assert.throws(() => yayiniDogrula(veri));
+  }
 });
-test('Çevrimdışı ağ hataları gizli ayrıntıları arayüze sızdırmaz', async () => {
-  const { yonetici } = kur({ oku: async () => { throw Error('Authorization '+ANAHTAR); } });
-  await yonetici.baslat(); const sonuc = await yonetici.denetle();
-  assert.equal(sonuc.durum, 'hata');
-  assert.equal(JSON.stringify(sonuc).includes(ANAHTAR), false);
+test('Çevrimdışı hata anahtar istemez, ham hata sızdırmaz ve sonra yeniden denetlenir', async () => {
+  let kapali = true;
+  const { yonetici } = kur({ oku: async yol => {
+    if (kapali) throw Error('Authorization ' + ANAHTAR);
+    return yol.endsWith('/latest') ? yayin() : DEPO;
+  } });
+  const sonuc = await yonetici.denetle();
+  assert.equal(sonuc.durum, 'hata'); assert.equal(JSON.stringify(sonuc).includes(ANAHTAR), false);
+  kapali = false; assert.equal((await yonetici.denetle({ elle: true })).durum, 'yeni-surum');
 });
-test('Bağlantıyı kaldırdıktan sonra gecikmiş denetim bildirimi geri getiremez', async () => {
-  let tamamla;
-  const { yonetici, kasa } = kur({ oku: () => new Promise(resolve => { tamamla = resolve; }) });
-  await yonetici.baslat(); const istek = yonetici.denetle();
-  await new Promise(setImmediate); yonetici.ayir(); tamamla(DEPO); await istek;
-  assert.equal(yonetici.gorunum().durum, 'baglanti-gerekli');
-  assert.equal(kasa.anahtar, null); assert.throws(() => yonetici.indirmeAdresi());
+test('Kapanıştan sonra geciken ağ yanıtı yeni sürümü geri getiremez', async () => {
+  let tamamla, sayi = 0;
+  const { yonetici } = kur({ oku: () => { sayi++; return new Promise(resolve => { tamamla = resolve; }); } });
+  const istek = yonetici.denetle(); await new Promise(setImmediate);
+  yonetici.durdur(); tamamla(DEPO); await istek;
+  assert.equal(yonetici.yayin, undefined); assert.equal(sayi, 1);
 });
-test('Bağlantıyı kaldırdıktan sonra gecikmiş yetkilendirme anahtarı yeniden kaydedemez', async () => {
-  let tamamla;
-  const { yonetici, kasa } = kur({ oku: () => new Promise(resolve => { tamamla = resolve; }) });
-  const istek = yonetici.bagla(ANAHTAR); await new Promise(setImmediate); yonetici.ayir(); tamamla(DEPO);
-  await assert.rejects(() => istek); assert.equal(kasa.anahtar, null);
+test('GitHub kota beklemesi elle denetimle de aşılamaz; süre sonunda yeniden denenir', async () => {
+  let simdi = 1000, sayi = 0;
+  const { yonetici } = kur({ simdi: () => simdi, oku: async yol => {
+    sayi++; if (sayi === 1) throw new BeklemeHatasi(200000);
+    return yol.endsWith('/latest') ? yayin() : DEPO;
+  } });
+  assert.equal((await yonetici.denetle()).durum, 'hata');
+  await yonetici.denetle({ elle: true }); assert.equal(sayi, 1);
+  simdi = 200001; assert.equal((await yonetici.denetle({ elle: true })).durum, 'yeni-surum'); assert.equal(sayi, 3);
 });
-test('Windows şifrelemesi yoksa bağlantı kurulamaz', async () => {
-  const { yonetici, kasa, durum } = kur(); kasa.uygunMu = () => false;
-  assert.equal((await yonetici.baslat()).durum, 'kullanilamiyor');
-  await assert.rejects(() => yonetici.bagla(ANAHTAR));
-  assert.equal(durum.istekler.length, 0);
+function hataIstemcisi(kod, headers = {}, al = () => {}) {
+  return { get(secenekler, yanitla) {
+    al(secenekler);
+    const istek = new EventEmitter(); istek.setTimeout = () => {}; istek.destroy = () => {};
+    queueMicrotask(() => { const y = new EventEmitter(); y.statusCode = kod; y.headers = headers; y.resume = () => {}; yanitla(y); });
+    return istek;
+  } };
+}
+test('GitHub isteği anahtar/cookie göndermez; sabit HTTPS dışında istek ve yönlendirme reddedilir', async () => {
+  let ayar;
+  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', undefined, hataIstemcisi(302, {}, s => { ayar = s; })));
+  assert.equal(ayar.hostname, 'api.github.com'); assert.equal(ayar.port, 443);
+  assert.equal(ayar.headers.Authorization, undefined); assert.equal(ayar.headers.Cookie, undefined);
+  assert.equal(ayar.headers['Cache-Control'], 'no-cache');
+  await assert.rejects(() => githubOku('/users/asilhanalpay', undefined, hataIstemcisi(200)));
 });
+test('403/429 ve bozuk bekleme başlıkları sınırlı beklemeye dönüştürülür', async () => {
+  for (const [kod, headers] of [[429, { 'retry-after': '90' }], [403, { 'x-ratelimit-reset': '1' }], [429, { 'retry-after': 'Infinity' }]]) {
+    const once = Date.now();
+    await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', undefined, hataIstemcisi(kod, headers)), e =>
+      e instanceof BeklemeHatasi && e.bekleyeKadar >= once + 60000 && e.bekleyeKadar <= Date.now() + 86400000);
+  }
+});
+test('Zaman aşımı isteği sonlandırır; ham ağ hatası döndürülmez', async () => {
+  const istemci = { get() {
+    const istek = new EventEmitter(); istek.setTimeout = (_s, f) => queueMicrotask(f);
+    istek.destroy = hata => istek.emit('error', hata); return istek;
+  } };
+  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', undefined, istemci), /güvenli bağlantı/);
+});
+test('Geçmiş kurulum adı desteklenir; yeni ad tercih edilir', () => {
+  const eski = yayin(); eski.assets[0].name = 'Windows.Masaustu.Uygulamasi.exe';
+  eski.assets[0].browser_download_url = eski.assets[0].browser_download_url.replace('Notes.exe', eski.assets[0].name);
+  assert.equal(yayiniDogrula(eski).adres, eski.assets[0].browser_download_url);
+  eski.assets.push(yayin().assets[0]); assert.equal(yayiniDogrula(eski).adres, yayin().assets[0].browser_download_url);
+});
+
 test('Kasa asenkron şifreleme kullanır ve geçersiz anahtarları saklamaz', async t => {
   const klasor = fs.mkdtempSync(path.join(os.tmpdir(), 'surum-kasa-'));
   t.after(() => fs.rmSync(klasor, { recursive: true, force: true }));
@@ -156,45 +158,6 @@ test('Kasa asenkron şifreleme kullanır ve geçersiz anahtarları saklamaz', as
   sifreleme.isAsyncEncryptionAvailable = async () => false;
   await assert.rejects(() => kasa.kaydet(ANAHTAR));
   await assert.rejects(() => kasa.oku());
-});
-test('GitHub isteği yalnızca sabit HTTPS kaynağını kullanır; yönlendirme takip edilmez', async () => {
-  let ayarlar;
-  const istemci = { get(secenekler, yanitla) {
-    ayarlar = secenekler;
-    const istek = new EventEmitter(); istek.setTimeout = () => {}; istek.destroy = () => {};
-    queueMicrotask(() => { const yanit = new EventEmitter(); yanit.statusCode = 302; yanit.resume = () => {}; yanitla(yanit); });
-    return istek;
-  } };
-  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', ANAHTAR, undefined, istemci));
-  assert.equal(ayarlar.hostname, 'api.github.com'); assert.equal(ayarlar.port, 443);
-  assert.equal(ayarlar.headers['Cache-Control'], 'no-cache');
-  await assert.rejects(() => githubOku('/users/asilhanalpay', ANAHTAR, undefined, istemci));
-});
-
-test('Süresi dolan bağlantı yeniden kurulabilir veya kaldırılabilir; indirme adresi verilmez', async () => {
-  const { yonetici } = kur({ oku: async () => { throw new ErisimHatasi('Yetki yok'); } });
-  await yonetici.baslat(); const sonuc = await yonetici.denetle();
-  assert.equal(sonuc.durum, 'baglanti-gerekli'); assert.equal(sonuc.bagli, true);
-  assert.throws(() => yonetici.indirmeAdresi());
-  assert.equal(yonetici.ayir().bagli, false);
-});
-test('Zaman aşımı isteği kesin olarak sonlandırır; ham ağ hatası döndürülmez', async () => {
-  const istemci = { get() {
-    const istek = new EventEmitter();
-    istek.setTimeout = (_sure, islem) => { queueMicrotask(islem); };
-    istek.destroy = hata => { istek.emit('error', hata); };
-    return istek;
-  } };
-  await assert.rejects(() => githubOku('/repos/asilhanalpay/Notes', ANAHTAR, undefined, istemci), /güvenli bağlantı/);
-});
-
-test('Geçmiş sürümün eski kurulum adı desteklenir; yeni ad tercih edilir', () => {
-  const eski = yayin();
-  eski.assets[0].name = 'Windows.Masaustu.Uygulamasi.exe';
-  eski.assets[0].browser_download_url = eski.assets[0].browser_download_url.replace('Notes.exe', eski.assets[0].name);
-  assert.equal(yayiniDogrula(eski).adres, eski.assets[0].browser_download_url);
-  eski.assets.push(yayin().assets[0]);
-  assert.equal(yayiniDogrula(eski).adres, yayin().assets[0].browser_download_url);
 });
 
 test('Eski şifreli kayıt okununca yeniden şifreleme önerilse bile baytları korunur', async t => {
@@ -213,62 +176,6 @@ test('Eski şifreli kayıt okununca yeniden şifreleme önerilse bile baytları 
   });
   assert.equal(await kasa.oku(), ANAHTAR);
   assert.deepEqual(fs.readFileSync(dosya), eski);
-});
-
-test('Şifreleme sürerken bağlantıyı kaldırmak gecikmiş dosya yazımını engeller', async t => {
-  const klasor = fs.mkdtempSync(path.join(os.tmpdir(), 'surum-gec-kasa-'));
-  t.after(() => fs.rmSync(klasor, { recursive: true, force: true }));
-  const dosya = path.join(klasor, 'erisim.bin');
-  let tamamla, basladi;
-  const hazir = new Promise(resolve => { basladi = resolve; });
-  const kasa = new ErisimKasasi(dosya, {
-    isAsyncEncryptionAvailable: async () => true,
-    encryptStringAsync: () => new Promise(resolve => { tamamla = resolve; basladi(); })
-  });
-  const { yonetici } = kur({ kasa });
-  const istek = yonetici.bagla(ANAHTAR);
-  await hazir;
-  yonetici.ayir();
-  tamamla(Buffer.from('sentetik-sifreli-kayit'));
-  await assert.rejects(istek);
-  assert.equal(fs.existsSync(dosya), false);
-  assert.equal(yonetici.gorunum().bagli, false);
-});
-
-test('Kapanış şifreleme sonucunun mevcut kaydın üzerine yazmasını engeller', async t => {
-  const klasor = fs.mkdtempSync(path.join(os.tmpdir(), 'surum-kapanis-kasa-'));
-  t.after(() => fs.rmSync(klasor, { recursive: true, force: true }));
-  const dosya = path.join(klasor, 'erisim.bin');
-  const eski = Buffer.from('sentetik-eski-kayit');
-  fs.writeFileSync(dosya, eski);
-  let tamamla, basladi;
-  const hazir = new Promise(resolve => { basladi = resolve; });
-  const kasa = new ErisimKasasi(dosya, {
-    isAsyncEncryptionAvailable: async () => true,
-    encryptStringAsync: () => new Promise(resolve => { tamamla = resolve; basladi(); })
-  });
-  const { yonetici } = kur({ kasa });
-  const istek = yonetici.bagla(ANAHTAR);
-  await hazir;
-  yonetici.durdur();
-  tamamla(Buffer.from('yeni-sentetik-kayit'));
-  await assert.rejects(istek);
-  assert.deepEqual(fs.readFileSync(dosya), eski);
-});
-
-test('Açılışta geciken kasa okuması kaldırılan bağlantıyı ve sayaçları geri getirmez', async () => {
-  const { yonetici, kasa, durum } = kur();
-  let tamamla, basladi;
-  const hazir = new Promise(resolve => { basladi = resolve; });
-  kasa.oku = () => new Promise(resolve => { tamamla = resolve; basladi(); });
-  const istek = yonetici.baslat();
-  await hazir;
-  yonetici.ayir();
-  tamamla(ANAHTAR);
-  await istek;
-  assert.equal(yonetici.gorunum().bagli, false);
-  assert.deepEqual(durum.araliklar, []);
-  assert.equal(durum.istekler.length, 0);
 });
 
 test('Güvensiz veya başarısız şifreleme sağlayıcısında açık metne geçilmez', async t => {

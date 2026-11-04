@@ -35,7 +35,7 @@ async function main() {
   };
   try {
     const hazirlik = await require(path.join(aday, 'güncelleme.cjs')).kurulumHazirla({
-      kok: ayar.kok, yayin, exe: ayar.exe, pid: ayar.pid, anahtar: process.env.GH_TOKEN
+      kok: ayar.kok, yayin, exe: ayar.exe, pid: ayar.pid
     });
     await hazirlik.baslat();
   } catch (hata) {
