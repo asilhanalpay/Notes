@@ -151,8 +151,12 @@ function duzenle() {
 
 function dosyaMenusunuKapat() {
   const menu = oge('dosyaMenusu');
+  oge('yedekIslemleri').open = false;
   if (menu.hidePopover && menu.matches(':popover-open')) menu.hidePopover();
 }
+oge('dosyaMenusu').addEventListener('toggle', olay => {
+  if (olay.newState === 'closed') oge('yedekIslemleri').open = false;
+});
 
 async function dosyaIslemi(islem) {
   if (!yuklendi || mesgul) return;
@@ -237,8 +241,12 @@ oge('iceAktar').addEventListener('click', () => dosyaIslemi(async () => {
 }));
 oge('klasor').addEventListener('click', async () => {
   dosyaMenusunuKapat();
-  const sonuc = await masaustu.klasoruAc();
-  if (!sonuc.basarili) hataGoster(sonuc.hata);
+  try {
+    const sonuc = await masaustu.klasoruAc();
+    if (!sonuc.basarili) hataGoster(sonuc.hata);
+  } catch {
+    hataGoster('Notların klasörü açılamadı. Yeniden dene.');
+  }
 });
 
 document.addEventListener('keydown', olay => {

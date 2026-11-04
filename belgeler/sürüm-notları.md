@@ -1,3 +1,9 @@
+# 0.0.9 adayı
+
+- Sol alttaki Dosyalar menüsü sadeleştirildi; Notların klasörünü aç ilk sıraya alındı.
+- Farklı kaydet ve Kaydet ve klasörü aç seçenekleri korundu. Yedekleme işlemleri kapalı bir alt bölümde toplandı.
+- Kısayol gerçek kullanıcı veri klasörünü açar; kurulum ve not konumu değişmez.
+
 # 0.0.8 adayı — 4 Kasım 2026
 
 - Herkese açık Notes deposundan anahtarsız sürüm denetimi ve kurulum indirmesi.

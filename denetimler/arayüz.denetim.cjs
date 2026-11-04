@@ -242,3 +242,28 @@ test('İptal edilen farklı kaydet başarı mesajı vermez ve aynı anda ikinci 
   assert.equal(oge('status').textContent, 'Notların hazır');
   assert.equal(oge('body').disabled, false);
 });
+test('Not klasörü boş listede de açılır; not oluşturmaz veya kaydetme istemez', async t => {
+  const { dom, oge, kayitlar } = await arayuzAc(t);
+  let acildi = 0;
+  dom.window.notDefterim.klasoruAc = async (...args) => {
+    assert.equal(args.length, 0);
+    acildi++;
+    return { basarili: true };
+  };
+  assert.equal(oge('klasor').disabled, false);
+  oge('yedekIslemleri').open = true;
+  oge('klasor').click(); await bekle();
+  assert.equal(acildi, 1);
+  assert.equal(oge('yedekIslemleri').open, false);
+  assert.equal(kayitlar.length, 0);
+  assert.equal(dom.window.document.querySelectorAll('.note').length, 0);
+});
+test('Klasör açma bağlantı hatası kullanıcıya gösterilir; mevcut notlar korunur', async t => {
+  const { dom, oge, kayitlar } = await arayuzAc(t, [{ id: 'bir', title: 'Not', body: 'Korunacak içerik', updated: 1000 }]);
+  dom.window.notDefterim.klasoruAc = async () => { throw new Error('IPC bağlantısı kapalı'); };
+  oge('klasor').click(); await bekle();
+  assert.equal(oge('hata').hidden, false);
+  assert.equal(oge('hataMetni').textContent, 'Notların klasörü açılamadı. Yeniden dene.');
+  assert.equal(oge('body').value, 'Korunacak içerik');
+  assert.equal(kayitlar.length, 0);
+});
