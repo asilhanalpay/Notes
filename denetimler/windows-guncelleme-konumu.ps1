@@ -125,6 +125,7 @@ try {
         $gecici = Join-Path $env:RUNNER_TEMP ('notes-konum-' + [guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $gecici | Out-Null
         $kok = Join-Path $veri 'guncellemeler'
+        New-Item -ItemType Directory -Path $kok -Force | Out-Null
         @{ exe = $uygulama.Path; pid = $uygulama.Id; kok = $kok; dosya = (Resolve-Path -LiteralPath $eski).Path } |
             ConvertTo-Json | Set-Content -LiteralPath (Join-Path $gecici 'ayar.json') -Encoding utf8
         $s.asama = 'gercek-indirme-ve-yardimci'

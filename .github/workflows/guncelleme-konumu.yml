@@ -1,4 +1,4 @@
-name: Yayımlanmış güncelleme — aynı kurulum konumu
+name: Güncel paket — aynı kurulum konumu
 on:
   workflow_dispatch:
   push:
