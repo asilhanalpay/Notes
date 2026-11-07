@@ -30,9 +30,9 @@ test('Anahtar veya Windows şifreleme kasası olmadan açılış denetimi zamanl
   const kasa = new Proxy({}, { get() { assert.fail('Eski kasa okunamaz veya silinemez.'); } });
   const { yonetici, durum } = kur({ kasa });
   await yonetici.baslat();
-  assert.equal(durum.ilkler[0].a, 10000);
-  assert.equal(durum.araliklar[0].a, 15 * 60 * 1000);
-  assert.equal(ARALIK, 900000);
+  assert.equal(durum.ilkler[0].a, 1000);
+  assert.equal(durum.araliklar[0].a, 3 * 60 * 1000);
+  assert.equal(ARALIK, 180000);
   durum.ilkler[0].f(); await new Promise(setImmediate);
   assert.equal(durum.istekler.length, 2);
   assert.ok(durum.istekler.every(x => x.signal instanceof AbortSignal));
@@ -193,4 +193,17 @@ test('Güvensiz veya başarısız şifreleme sağlayıcısında açık metne ge�
   assert.equal(await kasa.uygunMu(), false);
   await assert.rejects(() => kasa.kaydet(ANAHTAR));
   assert.equal(fs.existsSync(dosya), false);
+});
+
+test('Arka plan yeniden denetlerken bilinen yeni sürüm bilgisi korunur; eşzamanlı odak istekleri birleşir', async () => {
+  let simdi = 1000;
+  const { yonetici, durum } = kur({ simdi: () => simdi });
+  await yonetici.denetle();
+  const olaylar = []; yonetici.on('durum', veri => olaylar.push(veri));
+  simdi += 46000;
+  await Promise.all([yonetici.denetle(), yonetici.denetle(), yonetici.denetle()]);
+  assert.equal(durum.istekler.length, 4);
+  assert.equal(olaylar[0].durum, 'denetleniyor');
+  assert.equal(olaylar[0].yeniSurum, '0.0.9');
+  assert.equal(olaylar.at(-1).durum, 'yeni-surum');
 });

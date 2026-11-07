@@ -74,8 +74,8 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   });
   assert.equal(tercihler.userData, path.join(profil, 'Not Defterim'));
   assert.deepEqual([tercihler.sandbox, tercihler.contextIsolation, tercihler.nodeIntegration], [true, true, false]);
-  assert.match(String(tercihler.kenar).replace(/^#/, ''), /^000000(?:ff)?$/i);
-  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(0, 0, 0)');
+  assert.match(String(tercihler.kenar).replace(/^#/, ''), /^d0d0d0(?:ff)?$/i);
+  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(208, 208, 208)');
   assert.equal(await sayfa.locator('.workspace').evaluate(e => getComputedStyle(e).boxShadow), 'none');
   assert.deepEqual(await sayfa.evaluate(() => [typeof require, typeof process, typeof Buffer, typeof window.notDefterim.oku]), ['undefined', 'undefined', 'undefined', 'function']);
   assert.equal(await sayfa.evaluate(() => 'ipcRenderer' in window.notDefterim), false);
@@ -205,16 +205,18 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
     return { alt: alan.bottom + parseFloat(stil.outlineWidth) + parseFloat(stil.outlineOffset), sinir: kapsayici.bottom };
   });
   assert.ok(odakSiniri.alt <= odakSiniri.sinir + 1, 'Yazı alanının odak çizgisi kırpılmamalı.');
-  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(0, 0, 0)');
+  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(32, 32, 32)');
   const karanlikKenar = await uygulama.evaluate(({ BrowserWindow, systemPreferences }) => {
     const kenar = BrowserWindow.getAllWindows()[0].getAccentColor();
     return kenar === true ? systemPreferences.getAccentColor() : kenar;
   });
-  assert.match(String(karanlikKenar).replace(/^#/, ''), /^000000(?:ff)?$/i);
+  assert.match(String(karanlikKenar).replace(/^#/, ''), /^202020(?:ff)?$/i);
   await sayfa.screenshot({ path: 'denetim-çıktıları/karanlık.png', animations: 'disabled' });
   await sayfa.locator('#tema').selectOption('acik');
   await expect.poll(() => uygulama.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(false);
   assert.equal(await sayfa.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
+  await expect.poll(() => uygulama.evaluate(({ BrowserWindow }) => String(BrowserWindow.getAllWindows()[0].getAccentColor()).replace(/^#/, '').toLowerCase())).toMatch(/^d0d0d0(?:ff)?$/);
+  assert.equal(await sayfa.evaluate(() => getComputedStyle(document.body).borderTopColor), 'rgb(208, 208, 208)');
   await sayfa.screenshot({ path: 'denetim-çıktıları/açık.png', animations: 'disabled' });
   await sayfa.locator('#digerIslemler').click();
   await sayfa.screenshot({ path: 'denetim-çıktıları/menü.png', animations: 'disabled' });
@@ -232,6 +234,7 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
   sayfa = await ac();
   await expect(sayfa.locator('#body')).toHaveValue('Kapanışta beklemeden saklanan son metin');
   await expect(sayfa.locator('#tema')).toHaveValue('karanlik');
+  await expect.poll(() => uygulama.evaluate(({ BrowserWindow }) => String(BrowserWindow.getAllWindows()[0].getAccentColor()).replace(/^#/, '').toLowerCase())).toMatch(/^202020(?:ff)?$/);
   await expect(sayfa.locator('#date')).toContainText('kurtarılan.txt');
   await sayfa.locator('#body').fill('Yeniden açılışta bağlı TXT');
   await sayfa.keyboard.press('Control+s');
@@ -268,4 +271,66 @@ test('Gerçek Windows/Electron: yalıtım, yetkisiz iletişim, ağ engeli, temal
 
 
 
+});
+
+test('Windows/Electron: açılış, odak ve Yeni sürümler üzerinden bildirim; kurulum kendiliğinden başlamaz', {
+  skip: process.platform !== 'win32' ? 'Gerçek Windows oturumu gerekir.' : false,
+  timeout: 60000
+}, async t => {
+  const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'notes-bildirim-'));
+  const proje = path.resolve(__dirname, '..');
+  const ayarDosyasi = path.join(gecici, 'ag-fiksturu.json');
+  const istekDosyasi = path.join(gecici, 'istekler.jsonl');
+  const profil = path.join(gecici, 'profil'); fs.mkdirSync(profil);
+  fs.writeFileSync(ayarDosyasi, JSON.stringify({ simdi: 100000 }));
+  const baslatma = path.join(gecici, 'baslat.cjs');
+  // Yalnız test sürecinde paket kapısı ve ağ/saat fikstürü. Ürün dosyasına test
+  // IPC'si veya yetki eklenmez; gerçek ana işlem, köprü ve renderer kullanılır.
+  fs.writeFileSync(baslatma, `
+    const { app }=require('electron'),fs=require('node:fs'),https=require('node:https');
+    const {EventEmitter}=require('node:events'),{Readable}=require('node:stream');
+    const ayarDosyasi=${JSON.stringify(ayarDosyasi)},istekDosyasi=${JSON.stringify(istekDosyasi)};
+    const ilk=JSON.parse(fs.readFileSync(ayarDosyasi));ilk.kurulu=app.getVersion();fs.writeFileSync(ayarDosyasi,JSON.stringify(ilk));
+    app.setPath('appData',${JSON.stringify(profil)});
+    Object.defineProperty(app,'isPackaged',{get:()=>true});
+    const modul=require(${JSON.stringify(path.join(proje, 'masaüstü/sürüm-bildirimi.cjs'))});
+    const Asil=modul.SurumBildirimi;modul.SurumBildirimi=class extends Asil{constructor(o){super({...o,simdi:()=>JSON.parse(fs.readFileSync(ayarDosyasi)).simdi});}};
+    https.get=(o,cb)=>{
+      if(o.hostname!=='api.github.com'||o.headers.Authorization||o.headers.Cookie)throw Error('Beklenmeyen ağ isteği');
+      const ayar=JSON.parse(fs.readFileSync(ayarDosyasi));let veri;
+      if(o.path==='/repos/asilhanalpay/Notes')veri={id:1427086629,full_name:'asilhanalpay/Notes',private:false};
+      else if(o.path==='/repos/asilhanalpay/Notes/releases/latest'){
+        const surum=ayar.yeni||ayar.kurulu;
+        veri={tag_name:'v'+surum,draft:false,prerelease:false,assets:[{id:42,name:'Notes.exe',state:'uploaded',size:100,
+          digest:'sha256:'+'a'.repeat(64),browser_download_url:'https://github.com/asilhanalpay/Notes/releases/download/v'+surum+'/Notes.exe'}]};
+      }else throw Error('Beklenmeyen URL');
+      fs.appendFileSync(istekDosyasi,JSON.stringify({yol:o.path})+'\\n');
+      const istek=new EventEmitter();istek.setTimeout=()=>istek;istek.destroy=e=>{if(e)istek.emit('error',e);};
+      queueMicrotask(()=>{const r=Readable.from([Buffer.from(JSON.stringify(veri))]);r.statusCode=200;r.headers={};cb(r);});return istek;
+    };
+    require(${JSON.stringify(path.join(proje, 'masaüstü/ana.cjs'))});
+  `);
+  let uygulama;
+  t.after(async () => { if (uygulama) await uygulama.close(); fs.rmSync(gecici, { recursive: true, force: true }); });
+  const ortam = { ...process.env }; delete ortam.ELECTRON_RUN_AS_NODE;
+  uygulama = await electron.launch({ args: [baslatma], cwd: proje, env: ortam });
+  const sayfa = await uygulama.firstWindow();
+  const istekler = () => fs.existsSync(istekDosyasi) ? fs.readFileSync(istekDosyasi, 'utf8').trim().split('\n').filter(Boolean).map(s => JSON.parse(s)) : [];
+  await expect.poll(() => istekler().length).toBe(2);
+  await expect(sayfa.locator('#surumBildirimi')).not.toBeVisible();
+  const ayar = JSON.parse(fs.readFileSync(ayarDosyasi));
+  const yeni = `${Number(ayar.kurulu.split('.')[0]) + 1}.0.0`;
+  fs.writeFileSync(ayarDosyasi, JSON.stringify({ ...ayar, simdi: ayar.simdi + 46000, yeni }));
+  await uygulama.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].emit('focus'));
+  await expect(sayfa.locator('#surumBildirimMetni')).toHaveText(`Yeni sürüm hazır: ${yeni}`);
+  await expect(sayfa.locator('#surumBildirimi')).toBeVisible();
+  assert.equal(istekler().length, 4);
+  const dahaYeni = `${Number(ayar.kurulu.split('.')[0]) + 2}.0.0`;
+  fs.writeFileSync(ayarDosyasi, JSON.stringify({ ...ayar, simdi: ayar.simdi + 46000, yeni: dahaYeni }));
+  await sayfa.locator('#surumler').click();
+  await expect(sayfa.locator('#surumBildirimMetni')).toHaveText(`Yeni sürüm hazır: ${dahaYeni}`);
+  assert.equal(istekler().length, 6);
+  await expect(sayfa.locator('#surumIndir')).toBeVisible();
+  assert.ok(istekler().every(r => !r.yol.includes('/assets/')));
+  assert.equal(fs.existsSync(path.join(profil, 'Not Defterim', 'guncellemeler')), false);
 });

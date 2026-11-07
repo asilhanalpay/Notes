@@ -47,7 +47,7 @@ function pencereOlustur() {
   pencere = new BrowserWindow({
     title: 'Notes', width: 1160, height: 800, minWidth: 800, minHeight: 600,
     backgroundColor: '#ffffff', show: false,
-    ...(process.platform === 'win32' ? { accentColor: '#000000' } : {}),
+    ...(process.platform === 'win32' ? { accentColor: nativeTheme.shouldUseDarkColors ? '#202020' : '#d0d0d0' } : {}),
     icon: path.join(__dirname, '..', 'arayüz', 'simge.png'),
     webPreferences: {
       preload: path.join(__dirname, 'köprü.cjs'), contextIsolation: true,
@@ -62,6 +62,7 @@ function pencereOlustur() {
     dialog.showErrorBox('Notes kapandı', 'Yazı alanı beklenmedik şekilde kapandı. Son kaydedilen notların korunuyor. Uygulamayı yeniden aç.');
     pencere.close();
   });
+  pencere.on('focus', () => { void surumBildirimleri?.denetle(); });
   pencere.once('ready-to-show', () => pencere.show());
   pencere.on('close', olay => {
     if (!kapanabilir) {
@@ -140,6 +141,7 @@ else {
       if (!['acik', 'karanlik'].includes(tema)) throw new Error('Tema seçimi geçersiz.');
       nativeTheme.themeSource = tema === 'karanlik' ? 'dark' : 'light';
       pencere.setBackgroundColor(tema === 'karanlik' ? '#090909' : '#ffffff');
+      if (process.platform === 'win32') pencere.setAccentColor(tema === 'karanlik' ? '#202020' : '#d0d0d0');
     });
     islemTanimla('notlar:oku', () => notDosyalari.oku());
     islemTanimla('notlar:kaydet', notlar => notDosyalari.kaydet(notlar));

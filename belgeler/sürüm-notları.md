@@ -1,4 +1,10 @@
-# 0.1.0 adayı
+# 0.1.1 adayı
+
+- Windows pencere kenarları ve arayüz dış çizgisi seçilen açık/karanlık temaya uyarlanır.
+- Sürüm denetimi açılışta bir saniye sonra, pencereye geri dönüldüğünde ve Yeni sürümler açıldığında çalışır; arka plan aralığı 3 dakikadır. Kota ve eşzamanlı istek korumaları korunur.
+- İlk kurulumun görünen NSIS ekranları ile varsayılan/özel klasörde aynı konuma sessiz güncelleme güncel aday paketle denetlenir.
+
+# 0.1.0
 
 - Uygulama sürümü 0.1.0 olarak düzenlendi. Bundan sonra son hane 9’u aşınca önceki haneye taşınır: 0.1.9 → 0.2.0; 0.9.9 → 1.0.0.
 - 0.0.10’daki TXT düzenleme, sade menü ve iletişim bilgisi korunur. Veri biçimi ve bağımlılıklar değişmedi.
