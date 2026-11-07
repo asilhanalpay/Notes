@@ -93,6 +93,8 @@ if ((Test-Path $veri) -or (Test-Path $varsayilan) -or (Test-Path $ozel) -or @(Ka
 $eski = Join-Path $KurulumKlasoru 'Notes.exe'
 if (-not (Test-Path $eski)) { throw 'Aday kurulum dosyası eksik.' }
 try {
+    . (Join-Path $PSScriptRoot 'windows-kurulum-arayuzu.ps1')
+    IlkKurulumEkranlariniDogrula $eski $varsayilan $cikti
     foreach ($hedef in @($varsayilan, $ozel)) {
         $exe = Join-Path $hedef 'Notes.exe'
         $s = @{ hedef = $hedef; basarili = $false; asama = 'ilk-kurulum' }
@@ -183,6 +185,14 @@ try {
         foreach ($dosya in $ozetler.Keys) {
             if ((Get-FileHash $dosya -Algorithm SHA256).Hash -ne $ozetler[$dosya]) { throw 'Kaldırma notları değiştirdi.' }
         }
+        # Yalnız bu testin sıfırdan oluşturduğu kurulum dizini; sıradaki
+        # temiz kurulum koruması gevşetilmez. Uninstaller dizini boş bırakabilir.
+        for ($i=0; $i -lt 20 -and (Test-Path $hedef); $i++) {
+            try { Remove-Item -LiteralPath $hedef -Recurse -Force -ErrorAction Stop }
+            catch { if ($i -eq 19) { throw }; Start-Sleep -Milliseconds 500 }
+        }
+        if (Test-Path $hedef) { throw 'Sentetik kurulum dizini temizlenemedi.' }
+        $s.testKlasoruTemizlendi = $true
         # Yalnız bu betiğin sıfırdan oluşturduğu sentetik profil.
         Remove-Item -LiteralPath $veri -Recurse -Force
         Remove-Item -LiteralPath $gecici -Recurse -Force
