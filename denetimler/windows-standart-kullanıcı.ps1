@@ -11,7 +11,7 @@ $proje = Split-Path $PSScriptRoot -Parent
 $cikti = Join-Path $proje 'denetim-çıktıları'
 New-Item -ItemType Directory -Path $cikti -Force | Out-Null
 $pwsh = (Get-Process -Id $PID).Path
-$sonuc = Join-Path $cikti 'windows-standart-sonuc.json'
+$sonuc = Join-Path $cikti $(if ($GuncellemeKonumu) { 'windows-standart-konum-sonuc.json' } else { 'windows-standart-sonuc.json' })
 if (Test-Path $sonuc) { throw 'Önceki denetim sonucu üzerine yazılmayacak.' }
 $altBetik = Join-Path $env:RUNNER_TEMP ('notes-standart-' + [guid]::NewGuid().ToString('N') + '.ps1')
 $surecKimligi = "$altBetik.pid"
@@ -42,7 +42,7 @@ if (-not $ok) { exit 1 }
 '@
 $yerler = @{
     '__PIDFILE__' = $surecKimligi
-    '__LOG__' = (Join-Path $cikti 'windows-standart.log')
+    '__LOG__' = (Join-Path $cikti $(if ($GuncellemeKonumu) { 'windows-standart-konum.log' } else { 'windows-standart.log' }))
     '__PROJECT__' = $proje
     '__SCRIPT__' = (Join-Path $PSScriptRoot $(if ($GuncellemeKonumu) { 'windows-guncelleme-konumu.ps1' } else { 'windows-kurulum.ps1' }))
     '__PACKAGE__' = (Resolve-Path -LiteralPath $KurulumKlasoru).Path

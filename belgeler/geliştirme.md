@@ -26,7 +26,7 @@ TXT açma mevcut notları silmez; dosya seçiciden gelen metni yeni bir notla il
 
 ## Dağıtım
 
-`main` dalına gönderim, değişiklik isteği veya elle başlatma, Windows sunucusunda denetim ve kurulum üretimini çalıştırır. Kurulum dosyası özel depoda çıktı olarak saklanır; herkese açık dağıtım yapılmaz. Derleme işlemi yalnızca depo okuma iznine sahiptir. Ana daldaki başarılı derlemenin ardından ayrı bir yayın işi, denetlenmiş `.exe` dosyasını GitHub Sürümler bölümüne ekler. Yalnızca bu iş depo içeriğine yazma izni alır ve GitHub'ın işleme özel erişim anahtarını kullanır; uygulamaya herhangi bir erişim anahtarı eklenmez.
+`main` dalına gönderim, değişiklik isteği veya elle başlatma, Windows sunucusunda denetim ve kurulum üretimini çalıştırır. PR denetiminde kurulum dosyası çıktı olarak saklanır; yayımlanmış kararlı sürümler herkese açıktır. Derleme işlemi yalnızca depo okuma iznine sahiptir. Ana daldaki başarılı derlemenin ardından ayrı bir yayın işi, denetlenmiş `.exe` dosyasını GitHub Sürümler bölümüne ekler. Yalnızca bu iş depo içeriğine yazma izni alır ve GitHub'ın işleme özel erişim anahtarını kullanır; uygulamaya herhangi bir erişim anahtarı eklenmez.
 
 Notes sürüm sırası her hanede 9'dan sonra bir önceki haneye taşar: `0.1.8 → 0.1.9 → 0.2.0`, `0.9.9 → 1.0.0`. Yayımlanmış `0.0.10` tarihsel kayıt olarak korunur; sonraki sürüm `0.1.0` olur. Bu kural uygulama sürümü içindir; bağımlılıkların sürümleri değiştirilmez.
 
@@ -36,13 +36,13 @@ Kurulum Türkçedir, yönetici yetkisi gerektirmeyen kullanıcı kurulumunu kull
 
 Genel kullanıma sunmadan önce Windows üzerinde ilk kurulum, güncelleme, kaldırma/yeniden kurma, yüksek ekran ölçeği, klavye kullanımı ve veri kurtarma elle doğrulanmalı; kod imzalama eklenmelidir.
 
-## Özel sürüm bildirimleri
+## Yeni sürüm bildirimleri
 
-`masaüstü/sürüm-bildirimi.cjs` yaklaşık dakikada bir kararlı sürüm denetler. `masaüstü/güncelleme.cjs`, kullanıcı Güncelle dediğinde doğrulanan varlık kimliğiyle indirme yapar; boyutu ve GitHub API SHA-256 özetini kontrol eder. Anahtar yalnız api.github.com üzerinde kullanılır. Yönlendirme HTTPS ile release-assets.githubusercontent.com veya objects.githubusercontent.com üzerinde olabilir; kullanıcı bilgisi, özel port ve farklı sunucu reddedilir. Eksik özetli yayın çalıştırılmaz.
+`masaüstü/sürüm-bildirimi.cjs` yaklaşık 3 dakikada bir kararlı sürüm denetler. `masaüstü/güncelleme.cjs`, kullanıcı Güncelle dediğinde doğrulanan varlık kimliğiyle indirme yapar; boyutu ve GitHub API SHA-256 özetini kontrol eder. İstekler erişim anahtarı veya Cookie göndermez. Yönlendirme HTTPS ile release-assets.githubusercontent.com veya objects.githubusercontent.com üzerinde olabilir; kullanıcı bilgisi, özel port ve farklı sunucu reddedilir. Eksik özetli yayın çalıştırılmaz.
 
-`güncelleme-yardımcısı.ps1`, ana işlemin normal kayıt/kapanışını bekler, özeti tekrar doğrular, `/S --updated /currentuser /D=<mevcut klasör>` ile kurar ve aynı EXE’yi yeniden açar. Hedef ve indirme yolu renderer tarafından alınmaz; komut dizgileri PowerShell sabiti olarak kodlanır. Kayıt hatası kapanışı ve kurulumu engeller. Yardımcı başlatılamazsa düzenleyici açık kalır. Sonraki açılış başarısız kurulum kaydını gösterir. Authenticode yayıncı doğrulaması henüz yoktur; TLS ve özel GitHub yayınının özeti bağımsız bir yayıncı imzası değildir.
+`güncelleme-yardımcısı.ps1`, ana işlemin normal kayıt/kapanışını bekler, özeti tekrar doğrular, `/S --updated /currentuser /D=<mevcut klasör>` ile kurar ve aynı EXE’yi yeniden açar. Hedef ve indirme yolu renderer tarafından alınmaz; komut dizgileri PowerShell sabiti olarak kodlanır. Kayıt hatası kapanışı ve kurulumu engeller. Yardımcı başlatılamazsa düzenleyici açık kalır. Sonraki açılış başarısız kurulum kaydını gösterir. Authenticode yayıncı doğrulaması henüz yoktur; TLS ve herkese açık GitHub yayınının özeti bağımsız bir yayıncı imzası değildir.
 
-Kullanıcı kendi ayrıntılı, yalnızca seçili depoya `Contents: read` izni olan anahtarını girer. Anahtar `safeStorage` ile Windows hesabına bağlı şifrelenir; şifreleme yoksa açık metinle devam edilmez. Depo kimliği ve gizlilik durumu doğrulanır. Anahtar arayüze geri verilmez ve ham ağ hataları günlüklere aktarılmaz. Meta veri isteklerinde HTTP yönlendirmeleri izlenmez. İndirme için sabit varlık API yolu kullanılır; izinli veri sunucularına yönlendirmede erişim anahtarı kaldırılır. Windows hesabını ele geçiren bir süreç aynı kullanıcının şifreli verilerine erişebilir; bu koruma işletim sistemi hesabının güvenliğine dayanır.
+Güncelleme için kullanıcı anahtarı veya hesap bağlantısı istenmez. Depo kimliği ve herkese açıklık her denetimde doğrulanır. Meta veri isteklerinde HTTP yönlendirmeleri izlenmez. İndirme için sabit varlık API yolu kullanılır; yalnız izinli veri sunucularına HTTPS yönlendirme izlenir. Eski safeStorage kasası yalnız geçmiş şifreli kayıt uyumu testleri için tutulur; açık depo güncelleyicisi bu kaydı okumaz, yeniden şifrelemez veya silmez. Not dosyaları şifreli değildir.
 
 Bağlantı kullanıcı tarafından kurulmadan ağ isteği yapılmaz. Arka plan denetimleri normalde dakikada bir yapılır; art arda istekler için en az 45 saniye sınırı vardır. Kullanıcının düğmeyle başlattığı denetim bu süreyi beklemeden GitHub’a yeniden istek gönderir; ana işlem elle denetim seçeneğini kendisi belirler. Eşzamanlı istek kilidi her iki yolda korunur. GitHub istekleri `Cache-Control: no-cache` ile yeniden doğrulama ister. Bağlantı kaldırıldığında devam eden istek iptal edilir; gecikmiş yanıt bağlantıyı yeniden açamaz. Uygulama içindeki bildirimler GitHub’ın izleme ve e-posta aboneliklerinden bağımsızdır ve bu hesap ayarlarını değiştirmez.
 
@@ -111,3 +111,14 @@ Minimatch 11.0.3 sabittir; eski dolaylı kopyalar aynı sürüme yönlendirilir.
 ## Pencere kenarı ve stil düzeni
 
 Windows penceresi resmi Electron accentColor ayarıyla siyah aktif kenar kullanır; yerel taşıma, büyütme/küçültme ve boyutlandırma korunur. İçerik alanının dış kenarı iki temada da siyahtır. Karanlık temadaki iç ayırıcılar okunurluk için nötr gridir. OS tarafından çizilen pasif pencere kenarı ve yüksek karşıtlık davranışı işletim sistemi tercihine bağlıdır. Görünüm tek CSS dosyasında, yinelenen sonradan ekleme blokları olmadan düzenlenir.
+
+
+## İlk kurulum, tema ve güncelleme kontrolleri
+
+0.1.1 adayında pencere kenarı açık temada #d0d0d0, karanlık temada #202020 olur. Windows yerel başlık çubuğu nativeTheme üzerinden, aktif kenar setAccentColor üzerinden temayı izler. Arayüzün dış çizgisi aynı renkleri kullanır; iç ayraç ve odak kontrastları korunur.
+
+Güncelleme denetimi açılışta 1 saniye sonra ve 3 dakikada bir çalışır. Odak dönüşü otomatik denetim ister; son otomatik istekten 45 saniye geçmediyse birleşir. Yeni sürümler penceresi açılınca elle denetim yapılır. GitHub'ın 403/429 bekleme süresi elle istekle de aşılamaz. Depo kimliği/herkese açıklık, sürüm/varlık adresi, boyut ve SHA-256 denetimleri korunur. Her normal periyotta iki metadata isteği yaklaşık saatte 40 istektir; ortak IP, ek elle/odak istekleri ve ağ gecikmesi bildirim süresini uzatabilir. Sunucu tarafından itilen anlık bildirim yoktur.
+
+Windows iş akışı NSIS sihirbazını standart yetkiyle kurulum başlamadan önce görüntüler; varsayılan kullanıcı klasörünü ve Kur düğmesine ulaşmayı denetler, ekran görüntülerini saklar. Kur düğmesine basmaz; gerçek dosya yerleştirme ayrı sessiz ilk kurulum/yeniden kurulum testinde sınanır. Varsayılan ve Türkçe/boşluk/tek tırnak içeren özel klasörde gerçek paket ASAR'ının güncelleme başlatıcısı, tek kayıt/kısayol/hedef, geçici EXE temizliği ve sentetik veriler kontrol edilir. Ağ yanıtı testte yerel kurulum dosyasıdır; canlı anahtarsız indirme ayrı testtir.
+
+Dijital yayıncı imzası ve SmartScreen itibarı bu değişiklikte sağlanmaz. Hosted Windows Server üzerinde geçen otomasyon fiziksel Windows 10/11 makinelerinde elle test yerine geçmez. Ayrıntı: kurulum-tema-guncelleme.md.

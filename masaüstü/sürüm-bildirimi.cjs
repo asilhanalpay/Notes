@@ -6,7 +6,7 @@ const { atomikYaz } = require('./depolama.cjs');
 
 const DEPO = 'asilhanalpay/Notes';
 const DEPO_KIMLIGI = '1427086629';
-const ARALIK = 15 * 60 * 1000;
+const ARALIK = 3 * 60 * 1000;
 const BEKLEME = 45 * 1000;
 
 
@@ -164,7 +164,7 @@ class SurumBildirimi extends EventEmitter {
     if (kusak !== this.kusak || this.baslatildi) return this.gorunum();
     if (engel) return this.bildir('kullanilamiyor', engel);
     this.baslatildi = true;
-    this.ilkSayac = this.zamanlayici.setTimeout(() => { void this.denetle(); }, 10000);
+    this.ilkSayac = this.zamanlayici.setTimeout(() => { void this.denetle(); }, 1000);
     this.sayac = this.zamanlayici.setInterval(() => { void this.denetle(); }, ARALIK);
     this.ilkSayac?.unref?.(); this.sayac?.unref?.();
     return this.gorunum();
@@ -191,7 +191,7 @@ class SurumBildirimi extends EventEmitter {
     this.mesgul = true;
     this.sonDeneme = this.simdi();
     this.iptal = new AbortController();
-    this.bildir('denetleniyor', 'Yeni sürüm denetleniyor…');
+    this.bildir('denetleniyor', 'Yeni sürüm denetleniyor…', this.yayin ? { yeniSurum: this.yayin.surum } : {});
     try {
       depoyuDogrula(await this.oku(`/repos/${DEPO}`, this.iptal.signal));
       if (kusak !== this.kusak) return this.gorunum();

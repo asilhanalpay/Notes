@@ -33,6 +33,14 @@ jobs:
         run: npm run denetle
       - name: Bileşen güvenliğini denetle
         run: npm audit --audit-level=moderate
+      - name: Windows denetim betiklerinin sözdizimini kontrol et
+        shell: pwsh
+        run: |
+          Get-ChildItem ./denetimler/*.ps1 | ForEach-Object {
+            $hatalar = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$hatalar) | Out-Null
+            if ($hatalar.Count) { throw ($hatalar | Out-String) }
+          }
       - name: Gerçek Electron ile güvenlik ve kayıt denetimleri
         run: npm run denetle:electron
       - name: Tema görüntülerini sakla
@@ -52,6 +60,9 @@ jobs:
       - name: Gerçek EXE ve ASAR bütünlük davranışını denetle
         shell: pwsh
         run: ./denetimler/windows-paket.ps1
+      - name: Varsayılan ve özel klasörde tek kurulumla sessiz güncelleme
+        shell: pwsh
+        run: ./denetimler/windows-standart-kullanıcı.ps1 -KurulumKlasoru ./kurulum -GuncellemeKonumu
       - name: Önceki yayımlanan sürümü indir
         run: gh release download v0.0.3 --repo "$env:DEPO" --pattern "*.exe" --dir onceki-kurulum
         env:
@@ -71,6 +82,7 @@ jobs:
           path: |
             denetim-çıktıları/windows-*.json
             denetim-çıktıları/windows-*.log
+            denetim-çıktıları/windows-*.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Kurulum dosyasını sakla

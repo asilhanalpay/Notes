@@ -1,11 +1,8 @@
-## Notes 0.1.0
+## Notes 0.1.1
 
-Sürüm numarası 0.1.0 olarak düzenlendi. Sonraki sürümler 0.1.1, …, 0.1.9, 0.2.0 sırasıyla ilerler. 0.0.10’da sunulan özellikler korunur; veri biçimi ve bağımlılıklar değişmedi.
+- Pencere kenarlıkları seçtiğin temayı izler: açık temada açık, karanlık temada koyu.
+- Yeni sürüm açılışta, pencereye döndüğünde ve Yeni sürümler penceresi açıldığında denetlenir. Arka planda yaklaşık 3 dakikada bir yeniden bakılır. İnternet ve GitHub istek sınırları nedeniyle yayımlandığı saniyede bildirim garanti edilmez.
+- Güncelle, doğrulanan kurulumu indirir; notlarını kaydeder, mevcut kurulum klasörüne sessizce kurar ve Notes'u yeniden açar. Konum seçimi istenmez.
+- İlk kurulum, paket bütünlüğü ve güncellemede kurulum konumunu/verileri koruma denetimleri genişletildi.
 
-## Bu sürümde
-
-- Sol alttaki Dosyalar menüsünde yalnız **Farklı kaydet…** ve **Dosya aç…** var.
-- Farklı kaydet varsayılan olarak UTF-8 TXT kullanır; başlık dosya adı olarak önerilir, dosyaya yalnız içerik yazılır.
-- Açılan veya farklı kaydedilen TXT üzerindeki düzenlemeler aynı dosyaya otomatik yazılır. Dosya bağlantısı yeniden açılışta da korunur.
-- Mevcut JSON notları ve kurtarma kaydı korunur. TXT dışarıda değiştirilirse veya yazılamazsa hata gösterilir; Farklı kaydet ile yeni bir hedef seçilebilir.
-- İletişim adresi **Yardım → Notes Hakkında** penceresinde görünür: **asilhan.alpay@agentmail.to**. Menü çubuğu gizliyse Alt ile açılır.
+TXT düzenleme, notların otomatik kaydı ve iletişim adresi korunur. Bu aday ayrıca yayın onayı gelmeden yayımlanmaz.

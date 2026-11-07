@@ -1,4 +1,5 @@
 param([string]$KurulumKlasoru, [switch]$StandartKullaniciGerekli)
+# Aday paketin aynı sürümle yerinde güncellemesi; kaynak sürümü sabitlenmez.
 # Sadece temiz, geçici hosted VM; önceden var olan kurulum/veriye dokunulmaz.
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') { throw 'Geçici hosted Windows gerekir.' }
@@ -6,12 +7,13 @@ $kimlik = [Security.Principal.WindowsIdentity]::GetCurrent()
 $yonetici = ([Security.Principal.WindowsPrincipal]::new($kimlik)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $StandartKullaniciGerekli -or $yonetici) { throw 'Standart yetkili test gerekir.' }
 $proje = Split-Path $PSScriptRoot -Parent
-$nodeBetik = Join-Path $PSScriptRoot 'windows-guncelleme-konumu.cjs'
+$nodeBetik = Join-Path $PSScriptRoot 'windows-paket-guncellemesi.cjs'
+$beklenen = (Get-Content (Join-Path $proje 'package.json') -Raw | ConvertFrom-Json).version
 $cikti = Join-Path $proje 'denetim-çıktıları'
 $varsayilan = Join-Path $env:LOCALAPPDATA 'Programs\Notes'
 $ozel = Join-Path $env:LOCALAPPDATA "Notes Güncelleme Denetimi\Özel klasör 'İğdır'\Notes"
 $veri = Join-Path $env:APPDATA 'Not Defterim'
-$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'calisma-dali-adayi-gercek-Electron'; kurulumlar = 'yayinlanmis-0.0.5-ve-0.0.6'; senaryolar = @() }
+$rapor = @{ basarili = $false; standartYetki = -not $yonetici; os = [Environment]::OSVersion.VersionString; baslatmaKaynagi = 'aday-paket-ASAR-gercek-Electron'; kurulumlar = $beklenen; yerelAgFiksturu = $true; senaryolar = @() }
 # WScript.Shell.TargetPath bazı karakterleri ANSI kod sayfasına çevirebilir.
 # Dosya yolunu Windows'un Unicode kısayol arayüzünden oku; aynı konum beklentisi korunur.
 Add-Type -TypeDefinition @'
@@ -65,7 +67,7 @@ function Durdur([string]$exe) {
     Start-Sleep -Seconds 1
 }
 function Surum([string]$hedef) {
-    $s = & node $nodeBetik surum (Join-Path $hedef 'resources/app.asar')
+    $s = & node -e "process.stdout.write(JSON.parse(require('@electron/asar').extractFile(process.argv[1],'package.json')).version)" (Join-Path $hedef 'resources/app.asar')
     if ($LASTEXITCODE -ne 0) { throw 'ASAR sürümü okunamadı.' }
     return $s.Trim()
 }
@@ -89,7 +91,7 @@ function Kisayollar([string]$exe) {
 New-Item -ItemType Directory -Path $cikti -Force | Out-Null
 if ((Test-Path $veri) -or (Test-Path $varsayilan) -or (Test-Path $ozel) -or @(Kayitlar).Count -ne 0) { throw 'Önceden var olan Notes/veri bulundu; dokunulmayacak.' }
 $eski = Join-Path $KurulumKlasoru 'Notes.exe'
-if (-not (Test-Path $eski)) { throw 'Yayımlanmış 0.0.5 kurucusu eksik.' }
+if (-not (Test-Path $eski)) { throw 'Aday kurulum dosyası eksik.' }
 try {
     foreach ($hedef in @($varsayilan, $ozel)) {
         $exe = Join-Path $hedef 'Notes.exe'
@@ -97,9 +99,9 @@ try {
         $rapor.senaryolar += $s
         $kurucu = Start-Process -FilePath $eski -ArgumentList "/S /currentuser /D=$hedef" -PassThru
         $null = $kurucu.Handle
-        if (-not $kurucu.WaitForExit(120000) -or $kurucu.ExitCode -notin @(0, 3010)) { throw '0.0.5 kurulamadı.' }
+        if (-not $kurucu.WaitForExit(120000) -or $kurucu.ExitCode -notin @(0, 3010)) { throw 'Aday kurulamadı.' }
         Durdur $exe
-        if ((Surum $hedef) -ne '0.0.5') { throw 'Başlangıç sürümü yanlış.' }
+        if ((Surum $hedef) -ne $beklenen) { throw 'Başlangıç sürümü yanlış.' }
         $once = @(Kayitlar)
         if ($once.Count -ne 1) { throw "Başlangıçta tek kurulum kaydı yok: $($once.Count)" }
         $s.oncekiKayit = $once[0]
@@ -123,19 +125,21 @@ try {
         $gecici = Join-Path $env:RUNNER_TEMP ('notes-konum-' + [guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $gecici | Out-Null
         $kok = Join-Path $veri 'guncellemeler'
-        @{ exe = $uygulama.Path; pid = $uygulama.Id; kok = $kok; gecici = $gecici; yayin = (Join-Path $KurulumKlasoru 'yayin.json') } |
+        @{ exe = $uygulama.Path; pid = $uygulama.Id; kok = $kok; dosya = (Resolve-Path -LiteralPath $eski).Path } |
             ConvertTo-Json | Set-Content -LiteralPath (Join-Path $gecici 'ayar.json') -Encoding utf8
         $s.asama = 'gercek-indirme-ve-yardimci'
+        # Yalnız ağ yanıtı aday kurulum dosyasıdır; paket ASAR'ındaki kod çalışır.
         # Start-Process -Wait kullanılmaz: tüm süreç ağacı yerine yalnız sürücü
         # beklenir; güncelleme yardımcısı Notes'un kapanışını beklemeye devam eder.
-        $surucu = Start-Process -FilePath (Join-Path $proje 'node_modules/electron/dist/electron.exe') -ArgumentList @(('"' + $nodeBetik + '"'), 'hazirla', ('"' + (Join-Path $gecici 'ayar.json') + '"')) -WorkingDirectory $proje -PassThru -RedirectStandardOutput (Join-Path $cikti 'windows-elektron-surucu.stdout.log') -RedirectStandardError (Join-Path $cikti 'windows-elektron-surucu.stderr.log')
+        $surucu = Start-Process -FilePath (Join-Path $proje 'node_modules/electron/dist/electron.exe') -ArgumentList @(('"' + $nodeBetik + '"'), ('"' + (Join-Path $gecici 'ayar.json') + '"')) -WorkingDirectory $proje -PassThru -RedirectStandardOutput (Join-Path $cikti 'windows-elektron-surucu.stdout.log') -RedirectStandardError (Join-Path $cikti 'windows-elektron-surucu.stderr.log')
         $null = $surucu.Handle
-        if (-not $surucu.WaitForExit(180000) -or $surucu.ExitCode -ne 0 -or -not (Test-Path (Join-Path $gecici 'hazir.json'))) { throw 'Yayımlanmış indirici/yardımcı hazırlanamadı.' }
-        $s.yayin = Get-Content (Join-Path $gecici 'hazir.json') -Raw | ConvertFrom-Json
+        if (-not $surucu.WaitForExit(180000) -or $surucu.ExitCode -ne 0 -or -not (Test-Path (Join-Path $kok 'surucu-hazir.json'))) { throw 'Aday paketin indirici/yardımcısı hazırlanamadı.' }
+        $s.yayin = Get-Content (Join-Path $kok 'surucu-hazir.json') -Raw | ConvertFrom-Json
+        if ($s.yayin.surum -ne $beklenen -or -not $s.yayin.basarili -or -not $s.yayin.yerelAgFiksturu) { throw 'Yanlış paketin güncelleme kodu sınandı.' }
         $sonuc = Join-Path $kok 'sonuc.json'
         Start-Sleep -Seconds 2
         $uygulama.Refresh()
-        if ($uygulama.HasExited -or (Test-Path $sonuc) -or (Surum $hedef) -ne '0.0.5') { throw 'Normal kapanış beklenmedi.' }
+        if ($uygulama.HasExited -or (Test-Path $sonuc) -or (Surum $hedef) -ne $beklenen) { throw 'Normal kapanış beklenmedi.' }
         $s.normalKapanisBeklendi = $true
         if (-not $uygulama.CloseMainWindow() -or -not $uygulama.WaitForExit(30000)) { throw 'Normal kapanış başarısız.' }
         $s.asama = 'sessiz-yukseltme'
@@ -152,9 +156,9 @@ try {
             if ($acik.Count -eq 1 -and @(Get-ChildItem -LiteralPath $kok -Filter Kurulum.exe -Recurse).Count -eq 0) { break }
             Start-Sleep -Milliseconds 500
         }
-        if ($acik.Count -ne 1 -or (Surum $hedef) -ne '0.0.6') { throw 'Yeni sürüm aynı konumda tek pencere olarak açılmadı.' }
+        if ($acik.Count -ne 1 -or (Surum $hedef) -ne $beklenen) { throw 'Yeni sürüm aynı konumda tek pencere olarak açılmadı.' }
         $sonra = @(Kayitlar)
-        if ($sonra.Count -ne 1 -or $sonra[0].kimlik -ne $once[0].kimlik -or $sonra[0].surum -ne '0.0.6' -or -not $sonra[0].kaldir.Contains($hedef)) { throw 'Kurulum kaydı tekliği/konumu korunmadı.' }
+        if ($sonra.Count -ne 1 -or $sonra[0].kimlik -ne $once[0].kimlik -or $sonra[0].surum -ne $beklenen -or -not $sonra[0].kaldir.Contains($hedef)) { throw 'Kurulum kaydı tekliği/konumu korunmadı.' }
         $s.sonrakiKayit = $sonra[0]
         $s.kisayollar = @(Kisayollar $exe)
         if ($hedef -eq $ozel -and (Test-Path (Join-Path $varsayilan 'Notes.exe'))) { throw 'Varsayılan konumda ikinci uygulama oluştu.' }

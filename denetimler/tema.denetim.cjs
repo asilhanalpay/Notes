@@ -62,3 +62,13 @@ test('Kayıt hatası görünür; yeniden başarılı seçimde uyarı kalkar', as
   assert.equal(arayuz.dom.window.document.getElementById('temaUyarisi').hidden, true);
   assert.equal(arayuz.dom.window.localStorage.getItem('notes-tema'), 'acik');
 });
+
+test('Kayıtlı tema ve sonraki seçim sınırlı masaüstü köprüsüyle yerel pencereye gönderilir', async t => {
+  const giden = [];
+  const { sec } = await ac(t, 'karanlik', pencere => {
+    pencere.notDefterim = { temaSec: async tema => { giden.push(tema); } };
+  });
+  assert.deepEqual(giden, ['karanlik']);
+  sec('acik');
+  assert.deepEqual(giden, ['karanlik', 'acik']);
+});

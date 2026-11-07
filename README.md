@@ -29,7 +29,7 @@ Bir notu silmek, bütün kopyalarını silmez. Önceki içerik otomatik kurtarma
 
 0.0.8 ile sürüm denetimi ve indirme herkese açık Notes deposundan, **erişim anahtarı olmadan** yapılır. Eski sürümler özel depo bağlantısı istediğinden bu sürüme ilk geçişte indirme sayfasından bir kez elle kurulum gerekebilir.
 
-Yeni sürümler uygulama açıldıktan kısa süre sonra ve uygulama açıkken yaklaşık **15 dakikada bir** denetlenir. **Yeni sürümü denetle** beklemeden kontrol eder; GitHub istek sınırı bildirdiyse bekleme süresine uyulur.
+Yeni sürümler uygulama açıldıktan kısa süre sonra ve uygulama açıkken yaklaşık **3 dakikada bir** denetlenir. **Yeni sürümler** açılınca da denetim başlar; pencereye geri dönmek son kontrol yeterince eskiyse yeni bir denetim ister. Yayımlandığı saniyede bildirim garanti edilmez. **Yeni sürümü denetle** beklemeden kontrol eder; GitHub istek sınırı bildirdiyse bekleme süresine uyulur.
 
 Bildirimdeki **Güncelle**, kurulumu indirip boyutunu ve SHA-256 özetini doğrular, notlarını kaydeder, Notes’u kapatır ve **mevcut kişisel kurulum klasörüne sessizce kurar**. Ardından Notes yeniden açılır; klasör seçmen veya eski sürümü kaldırman gerekmez. İndirme/doğrulama ya da kayıt başarısızsa kurulum başlamaz. İndirme iptal edilebilir; yazarken uygulama kendiliğinden kapatılıp güncellenmez.
 

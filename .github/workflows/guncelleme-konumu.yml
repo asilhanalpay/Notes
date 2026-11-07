@@ -21,22 +21,13 @@ jobs:
       - run: npm ci
       - name: Gerçek Electron çalıştırıcısını hazırla
         run: node -e "require('electron')"
-      - name: Yayımlanmış sürümleri hazırla
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory onceki-kurulum | Out-Null
-          gh release download v0.0.5 --repo "$env:GITHUB_REPOSITORY" --pattern Notes.exe --dir onceki-kurulum
-          if ($LASTEXITCODE -ne 0) { throw 'Eski yayın indirilemedi.' }
-          if ((Get-FileHash ./onceki-kurulum/Notes.exe -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'b07e9f52cc42c72fb2eb74b29a5c388d1845f779791a563feeff2320f21573ed') { throw 'Eski yayın özeti farklı.' }
-          gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/v0.0.6" | Set-Content ./onceki-kurulum/yayin.json -Encoding utf8
-          if ($LASTEXITCODE -ne 0) { throw 'Yeni yayın bilgisi alınamadı.' }
+      - name: Güncel aday kurulumunu oluştur
+        run: npm run paketle:windows
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Standart yetkiyle gerçek 0.0.5 → 0.0.6; varsayılan ve özel klasör
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Standart yetkiyle varsayılan ve özel klasörde aynı konuma güncelle
         shell: pwsh
-        run: ./denetimler/windows-standart-kullanıcı.ps1 -KurulumKlasoru ./onceki-kurulum -GuncellemeKonumu
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./denetimler/windows-standart-kullanıcı.ps1 -KurulumKlasoru ./kurulum -GuncellemeKonumu
       - name: Kanıtları sakla
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

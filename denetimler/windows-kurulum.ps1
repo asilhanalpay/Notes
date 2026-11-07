@@ -93,6 +93,8 @@ function Kaldir {
     VerileriDogrula
 }
 try {
+    . (Join-Path $PSScriptRoot 'windows-kurulum-arayuzu.ps1')
+    IlkKurulumEkranlariniDogrula $yeni.FullName $hedef $cikti
     # İlk kurulum, kaldırma ve yeniden kurma; yalnız sentetik profil verileri.
     Kur $yeni.FullName
     New-Item -ItemType Directory -Path $veriKlasoru -Force | Out-Null

@@ -9,7 +9,7 @@
     bilgi = yeni;
     oge('surumMetni').textContent = yeni.aciklama;
     oge('kuruluSurum').textContent = `Kurulu sürüm: ${yeni.surum}`;
-    oge('surumBildirimi').hidden = !['yeni-surum', 'indiriliyor', 'kuruluyor'].includes(yeni.durum);
+    oge('surumBildirimi').hidden = !(['yeni-surum', 'indiriliyor', 'kuruluyor'].includes(yeni.durum) || (yeni.durum === 'denetleniyor' && yeni.yeniSurum));
     oge('surumBildirimMetni').textContent = ['indiriliyor', 'kuruluyor'].includes(yeni.durum)
       ? yeni.aciklama : `Yeni sürüm hazır: ${yeni.yeniSurum ?? ''}`;
     oge('surumIndir').hidden = yeni.durum !== 'yeni-surum';
@@ -38,7 +38,10 @@
       if (bilgi) goster(bilgi);
     }
   }
-  function ac() { oge('surumPenceresi').showModal(); }
+  function ac() {
+    oge('surumPenceresi').showModal();
+    if (bilgi?.durum !== 'kullanilamiyor') void istek(() => api.surumDenetle());
+  }
   oge('surumler').addEventListener('click', ac);
   oge('surumBildirimAc').addEventListener('click', ac);
   oge('surumKapat').addEventListener('click', () => {
