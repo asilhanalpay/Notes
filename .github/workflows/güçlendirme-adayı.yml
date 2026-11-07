@@ -65,7 +65,7 @@ jobs:
           @{ commit = $env:GITHUB_SHA; os = [Environment]::OSVersion.VersionString; sha256 = (Get-FileHash $dosya.FullName -Algorithm SHA256).Hash; bayt = $dosya.Length; imza = "$(Get-AuthenticodeSignature $dosya.FullName | Select-Object -ExpandProperty Status)" } |
             ConvertTo-Json | Set-Content ./denetim-çıktıları/windows-kurulum-paket.json -Encoding utf8
       - name: Test edilen Windows kurulumunu kısa süre sakla
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Notes-Windows-test
           path: kurulum/Notes.exe
@@ -78,7 +78,7 @@ jobs:
         run: npm audit --audit-level=moderate
       - name: Denetim kanıtlarını sakla
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Guclendirme-adayi-denetimleri
           path: denetim-çıktıları/
