@@ -5,4 +5,4 @@
 - Güncelle, doğrulanan kurulumu indirir; notlarını kaydeder, mevcut kurulum klasörüne sessizce kurar ve Notes'u yeniden açar. Konum seçimi istenmez.
 - İlk kurulum, paket bütünlüğü ve güncellemede kurulum konumunu/verileri koruma denetimleri genişletildi.
 
-TXT düzenleme, notların otomatik kaydı ve iletişim adresi korunur. Bu aday ayrıca yayın onayı gelmeden yayımlanmaz.
+TXT düzenleme, notların otomatik kaydı ve iletişim adresi korunur.
